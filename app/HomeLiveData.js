@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 
 function dateLabel(value) {
@@ -84,7 +84,7 @@ function TeamCrest({ team, fallback }) {
   );
 }
 
-function ScoreMatchCard({ match }) {
+function ScoreMatchCard({ match, goalFlash }) {
   const isLive = LIVE_STATUSES.has(match.status);
   const isFinished = FINISHED_STATUSES.has(match.status);
   const home = teamName(match.home_team, "Home team");
@@ -110,12 +110,12 @@ function ScoreMatchCard({ match }) {
           <strong>{home}</strong>
         </div>
         <div className="score-centre">
-          <div className="score-numbers">
-            <b>{homeScore ?? "—"}</b>
+          <div className={`score-numbers ${goalFlash ? "goal-flash" : ""}`}>
+            <b className={goalFlash?.side === "home" ? "goal-scoring" : ""}>{homeScore ?? "—"}</b>
             <span>:</span>
-            <b>{awayScore ?? "—"}</b>
+            <b className={goalFlash?.side === "away" ? "goal-scoring" : ""}>{awayScore ?? "—"}</b>
           </div>
-          <small>{isLive ? (minute || "LIVE") : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>
+          <small>{isLive ? (minute || "LIVE") : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>\n          {goalFlash ? <div className="goal-alert" role="status"><span>⚽</span><strong>GOAL!</strong><small>{goalFlash.team} • {goalFlash.score}</small></div> : null}
         </div>
         <div className="score-side away">
           <strong>{away}</strong>
@@ -157,14 +157,46 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
         if (teams.error) throw teams.error;
         if (competitions.error) throw competitions.error;
         const officialIds = (verifications.data || []).map((x) => x.match_id);
-        const visible = deriveVisible(matches.data || [], officialIds, selectedDay, filter);
-        if (!cancelled) setState({
-          matches: visible.slice(0, 12),
+        const incoming = matches.data || [];
+        const previous = currentMatchesRef.current || [];
+        const previousById = new Map(previous.map((m) => [m.id, m]));
+        const visible = deriveVisible(incoming, officialIds, selectedDay, filter);
+
+        // Hold a score change for 8 seconds, then reveal it with the goal animation.
+        for (const next of visible) {
+          const prev = previousById.get(next.id);
+          if (!prev || pendingGoalsRef.current.has(next.id)) continue;
+          const homeChanged = Number(next.home_score ?? 0) !== Number(prev.home_score ?? 0);
+          const awayChanged = Number(next.away_score ?? 0) !== Number(prev.away_score ?? 0);
+          if (!homeChanged && !awayChanged) continue;
+          const side = Number(next.home_score ?? 0) > Number(prev.home_score ?? 0) ? "home" : Number(next.away_score ?? 0) > Number(prev.away_score ?? 0) ? "away" : null;
+          const team = side === "home" ? teamName(next.home_team, "Home team") : side === "away" ? teamName(next.away_team, "Away team") : "Match score";
+          const score = (next.home_score ?? 0) + ":" + (next.away_score ?? 0);
+          const timer = setTimeout(() => {
+            if (cancelled) return;
+            setState((current) => ({
+              ...current,
+              matches: current.matches.map((m) => m.id === next.id ? { ...m, home_score: next.home_score, away_score: next.away_score, status: next.status } : m),
+            }));
+            setGoalFlashes((current) => ({ ...current, [next.id]: { side, team, score } }));
+            setTimeout(() => setGoalFlashes((current) => { const copy = { ...current }; delete copy[next.id]; return copy; }), 2600);
+            pendingGoalsRef.current.delete(next.id);
+          }, 8000);
+          pendingGoalsRef.current.set(next.id, timer);
+        }
+
+        currentMatchesRef.current = incoming;
+        if (!cancelled) setState((current) => ({
+          ...current,
+          matches: visible.slice(0, 12).map((next) => {
+            if (!pendingGoalsRef.current.has(next.id)) return next;
+            return current.matches.find((m) => m.id === next.id) || next;
+          }),
           teams: teams.count || 0,
           competitions: competitions.count || 0,
           loading: false,
           error: "",
-        });
+        }));
       } catch (error) {
         if (!cancelled) setState((x) => ({ ...x, loading: false, error: error?.message || "Football data could not be loaded." }));
       }
@@ -199,7 +231,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
             <div className="empty-state">Refreshing football data…</div>
           ) : state.matches.length ? (
             <div className="score-match-list">
-              {state.matches.map((m) => <ScoreMatchCard key={m.id} match={m} />)}
+              {state.matches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} />)}
             </div>
           ) : (
             <div className="empty-state">
