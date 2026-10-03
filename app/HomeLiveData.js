@@ -35,7 +35,7 @@ function deriveVisible(all, officialIds, selectedDay, filter) {
     new Date(x.scheduled_at).getTime() >= now
   );
   const dayResults = dayMatches
-    .filter((x) => official.has(x.id) && FINISHED_STATUSES.has(x.status))
+    .filter((x) => FINISHED_STATUSES.has(x.status))
     .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
 
   if (filter === "LIVE") return live;
@@ -110,11 +110,17 @@ function ScoreMatchCard({ match, goalFlash }) {
           <strong>{home}</strong>
         </div>
         <div className="score-centre">
-          <div className={`score-numbers ${goalFlash ? "goal-flash" : ""}`}>
-            <b className={goalFlash?.side === "home" ? "goal-scoring" : ""}>{homeScore ?? "—"}</b>
-            <span>:</span>
-            <b className={goalFlash?.side === "away" ? "goal-scoring" : ""}>{awayScore ?? "—"}</b>
-          </div>
+          {isLive || isFinished ? (
+            <div className={`score-numbers ${goalFlash ? "goal-flash" : ""}`}>
+              <b className={goalFlash?.side === "home" ? "goal-scoring" : ""}>{homeScore ?? 0}</b>
+              <span>:</span>
+              <b className={goalFlash?.side === "away" ? "goal-scoring" : ""}>{awayScore ?? 0}</b>
+            </div>
+          ) : (
+            <div className="score-kickoff" aria-label={match.scheduled_at ? `Kick-off at ${dateLabel(match.scheduled_at)}` : "Kick-off time to be confirmed"}>
+              {match.scheduled_at ? new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(match.scheduled_at)) : "TBC"}
+            </div>
+          )}
           <small>{isLive ? (minute || "LIVE") : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>\n          {goalFlash ? <div className="goal-alert" role="status"><span>⚽</span><strong>GOAL!</strong><small>{goalFlash.team} • {goalFlash.score}</small></div> : null}
         </div>
         <div className="score-side away">
