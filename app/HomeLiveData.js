@@ -59,11 +59,24 @@ function initials(team, fallback) {
   return value.split(/\s+/).map((x) => x[0]).join("").slice(0, 3).toUpperCase();
 }
 
+function liveMinute(match) {
+  if (!match?.scheduled_at) return null;
+  if (match.status === "halftime") return "HT";
+  if (match.status === "paused") return "PAUSED";
+  if (!LIVE_STATUSES.has(match.status)) return null;
+  const started = new Date(match.scheduled_at).getTime();
+  const elapsed = Math.floor((Date.now() - started) / 60000);
+  if (!Number.isFinite(elapsed) || elapsed < 1) return "1'";
+  return Math.min(elapsed, 120) + "'";
+}
+
 function TeamCrest({ team, fallback }) {
+  const [broken, setBroken] = useState(false);
+  const hasLogo = Boolean(team?.logo_url) && !broken;
   return (
     <span className="score-team-crest" aria-hidden="true">
-      {team?.logo_url ? (
-        <img src={team.logo_url} alt="" />
+      {hasLogo ? (
+        <img src={team.logo_url} alt="" onError={() => setBroken(true)} />
       ) : (
         <span>{initials(team, fallback)}</span>
       )}
@@ -79,6 +92,7 @@ function ScoreMatchCard({ match }) {
   const homeScore = isLive || isFinished ? (match.home_score ?? 0) : null;
   const awayScore = isLive || isFinished ? (match.away_score ?? 0) : null;
   const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : match.status === "paused" ? "PAUSED" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
+  const minute = liveMinute(match);
 
   return (
     <a className={`score-match-card ${isLive ? "is-live" : ""}`} href={"/matches/" + match.id}>
@@ -87,7 +101,7 @@ function ScoreMatchCard({ match }) {
           {isLive ? <i /> : null}{statusLabel}
         </span>
         <span className="score-match-competition">{match.season?.competition?.name || "Competition TBC"}</span>
-        <span className="score-match-time">{isLive || isFinished ? "Match Centre" : dateLabel(match.scheduled_at)}</span>
+        <span className="score-match-time">{isLive ? (minute || "LIVE") : isFinished ? "Match Centre" : dateLabel(match.scheduled_at)}</span>
       </div>
 
       <div className="score-match-body">
@@ -101,7 +115,7 @@ function ScoreMatchCard({ match }) {
             <span>:</span>
             <b>{awayScore ?? "—"}</b>
           </div>
-          <small>{isLive ? "FOLLOW LIVE" : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>
+          <small>{isLive ? (minute || "LIVE") : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>
         </div>
         <div className="score-side away">
           <strong>{away}</strong>
@@ -110,7 +124,7 @@ function ScoreMatchCard({ match }) {
       </div>
 
       <div className="score-match-foot">
-        <span>{isLive ? "Live score updates" : isFinished ? "Verified by Zedek Sports" : "Fixture"}</span>
+        <span>{isLive ? (minute ? "Live • " + minute : "Live score updates") : isFinished ? "Verified by Zedek Sports" : "Fixture"}</span>
         <b>Open match centre <em>→</em></b>
       </div>
     </a>
