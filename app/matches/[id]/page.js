@@ -127,7 +127,7 @@ export default async function MatchPage({ params }) {
             <Team team={m.home_team} />
             <div>
               <strong>{live || official ? m.home_score ?? 0 : "—"}</strong>
-              <span>—</span>
+              <span>:</span>
               <strong>{live || official ? m.away_score ?? 0 : "—"}</strong>
             </div>
             <Team team={m.away_team} />
