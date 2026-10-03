@@ -64,10 +64,6 @@ export default function HomeScoreClient({ initialData }) {
             <span className="section-kicker"><i className="score-live-dot" /> OTI FOOTBALL NETWORK</span>
             <h1>GRASS ROOT FOOTBALL.<br /><em>WHERE YOU GROW.</em></h1>
             <p>Live scores, fixtures and the people behind the game — from community pitches across Oti.</p>
-            <div className="hero-actions">
-              <a className="hero-action-primary" href="/matches">Open Match Centre <span>→</span></a>
-              <a className="hero-action-secondary" href="/competitions">Explore competitions <span>↗</span></a>
-            </div>
           </div>
           <HeroMark />
         </div>
@@ -87,15 +83,6 @@ export default function HomeScoreClient({ initialData }) {
         </div>
         <div className="score-live-banner"><span><i className="score-live-dot" /> LIVE CENTRE</span><strong>Official Zedek match information</strong><a href="/matches?filter=live">Open live matches →</a></div>
         <HomeLiveData selectedDay={selectedDay} filter={filter} initialData={initialData} />
-      </section>
-
-      <section className="container score-explore">
-        <div className="score-topbar"><div><span className="section-kicker">FOOTBALL HUB</span><h2>Everything else lives one layer down.</h2></div></div>
-        <div className="score-explore-grid">
-          <a href="/competitions"><span>01</span><strong>Competitions</strong><small>Seasons, standings, scorers and player statistics.</small><b>→</b></a>
-          <a href="/teams"><span>02</span><strong>Teams & squads</strong><small>Club identity, full squad and individual player profiles.</small><b>→</b></a>
-          <a href="/search"><span>03</span><strong>Search the football</strong><small>Find a team, player, competition, season or match.</small><b>→</b></a>
-        </div>
       </section>
     </main>
   );
