@@ -276,3 +276,68 @@ html[data-zedek-theme="night"] .standings-table-wrap{box-shadow:0 16px 45px rgba
 @media(max-width:900px){.squad-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.squad-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.player-photo{height:155px}.mc-match{padding:14px}.mc-team strong{font-size:.86rem}}
 @media(max-width:430px){.squad-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.player-photo{height:140px}.player-card-info{padding:12px}.player-card h3{font-size:14px}.player-card p{font-size:11px}}
+
+
+/* ZEDEK LIVE SCOREBOARD — layered score hierarchy */
+.score-match-list{display:grid;gap:10px;padding:10px}
+.score-match-card{
+  position:relative;display:block;overflow:hidden;
+  border:1px solid var(--z-line);border-radius:18px;
+  background:linear-gradient(145deg,var(--z-surface),var(--z-surface-2));
+  color:var(--z-text);box-shadow:0 10px 28px rgba(16,24,39,.055);
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.score-match-card:hover{transform:translateY(-2px);border-color:var(--z-accent);box-shadow:0 18px 42px rgba(16,24,39,.11)}
+.score-match-card.is-live{border-color:color-mix(in srgb,var(--z-live) 38%,var(--z-line));box-shadow:0 12px 34px color-mix(in srgb,var(--z-live) 10%,transparent)}
+.score-match-card.is-live:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--z-live),transparent)}
+.score-match-head{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--z-line);font-size:9px}
+.score-status{display:inline-flex;align-items:center;gap:6px;font-weight:950;letter-spacing:.09em;color:var(--z-muted)}
+.score-status.live{color:var(--z-live)}
+.score-status.live i{width:7px;height:7px;border-radius:50%;background:var(--z-live);box-shadow:0 0 0 4px color-mix(in srgb,var(--z-live) 12%,transparent);animation:zedek-live-pulse 1.5s infinite}
+.score-status.finished{color:var(--z-success)}
+.score-match-competition{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:var(--z-muted);font-weight:750}
+.score-match-time{color:var(--z-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.score-match-body{display:grid;grid-template-columns:minmax(0,1fr) 132px minmax(0,1fr);align-items:center;gap:10px;padding:20px 18px}
+.score-side{display:flex;align-items:center;gap:11px;min-width:0}
+.score-side.away{justify-content:flex-end;text-align:right}
+.score-side strong{font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.score-team-crest{
+  width:52px;height:52px;flex:0 0 52px;border-radius:16px;
+  display:grid;place-items:center;overflow:hidden;
+  background:var(--z-surface-2);border:1px solid var(--z-line);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 7px 16px rgba(0,0,0,.07);
+}
+.score-team-crest img{width:80%;height:80%;object-fit:contain;display:block}
+.score-team-crest>span{font-size:12px;font-weight:950;letter-spacing:.03em;color:var(--z-accent)}
+.score-centre{text-align:center;display:grid;justify-items:center;gap:6px}
+.score-numbers{display:flex;align-items:center;justify-content:center;gap:10px;min-height:45px;font-variant-numeric:tabular-nums}
+.score-numbers b{font-size:29px;line-height:1;font-weight:950;letter-spacing:-.045em}
+.score-numbers span{font-size:18px;color:var(--z-muted);font-weight:700}
+.score-centre small{font-size:8px;letter-spacing:.1em;color:var(--z-muted);font-weight:900}
+.score-match-card.is-live .score-numbers b{color:var(--z-text)}
+.score-match-card.is-live .score-centre small{color:var(--z-live)}
+.score-match-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 15px;border-top:1px solid var(--z-line);font-size:9px;color:var(--z-muted)}
+.score-match-foot b{color:var(--z-accent);font-weight:900}
+.score-match-foot em{font-style:normal;font-size:12px;margin-left:3px}
+html[data-zedek-theme="night"] .score-match-card{background:linear-gradient(145deg,#0d1928,#111f31)}
+html[data-zedek-theme="night"] .score-team-crest{box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 9px 20px rgba(0,0,0,.25)}
+@keyframes zedek-live-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.82)}}
+@media(max-width:700px){
+  .score-match-list{padding:8px}
+  .score-match-head{grid-template-columns:auto minmax(0,1fr);gap:7px 10px}
+  .score-match-competition{grid-column:2;grid-row:1;text-align:right}
+  .score-match-time{grid-column:1/3;grid-row:2;text-align:left}
+  .score-match-body{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);gap:6px;padding:18px 12px}
+  .score-team-crest{width:46px;height:46px;flex-basis:46px;border-radius:14px}
+  .score-side{gap:7px}
+  .score-side strong{font-size:12px}
+  .score-numbers{gap:6px}.score-numbers b{font-size:25px}.score-numbers span{font-size:15px}
+}
+@media(max-width:430px){
+  .score-match-head{padding:10px 12px}
+  .score-match-body{grid-template-columns:minmax(0,1fr) 68px minmax(0,1fr);padding:16px 9px}
+  .score-team-crest{width:40px;height:40px;flex-basis:40px;border-radius:12px}
+  .score-side strong{font-size:11px}
+  .score-numbers b{font-size:23px}
+  .score-match-foot{padding:9px 12px;font-size:8px}
+}
