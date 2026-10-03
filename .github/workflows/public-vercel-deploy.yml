@@ -1,0 +1,17 @@
+name: Public Vercel Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Vercel Git deployment
+        run: |
+          echo "Public repo updated: $GITHUB_SHA"
+          echo "Vercel Git integration should deploy this main-branch commit."
