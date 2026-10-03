@@ -159,3 +159,120 @@ html[data-zedek-theme="night"] .score-live-banner{background:rgba(179,32,42,.08)
   .stat-box strong{font-size:14px}
   .match-context-links{gap:10px;font-size:11px}
 }
+
+
+/* =========================================================
+   ZEDEK SPORTS — SCORE UI SYSTEM v2
+   Hybrid inspiration: Flashscore density + Sofascore data hierarchy
+   + Zedek premium Oti identity. No copied branding/assets.
+   ========================================================= */
+:root{
+  --z-bg:#f4f5f7;
+  --z-surface:#ffffff;
+  --z-surface-2:#f8f9fb;
+  --z-text:#101827;
+  --z-muted:#697386;
+  --z-line:#e4e8ee;
+  --z-accent:#c79a45;
+  --z-live:#e33b46;
+  --z-success:#159447;
+  --z-shadow:0 14px 40px rgba(16,24,39,.07);
+}
+html[data-zedek-theme="night"]{
+  --z-bg:#07101c;
+  --z-surface:#0d1928;
+  --z-surface-2:#111f31;
+  --z-text:#f4f7fb;
+  --z-muted:#93a0b2;
+  --z-line:#203149;
+  --z-accent:#d7ad58;
+  --z-live:#ff5260;
+  --z-success:#36c978;
+  --cream:#07101c;
+  --cream-2:#0d1928;
+  --ink:#f4f7fb;
+  --gold:#d7ad58;
+  --gold-soft:#26374c;
+  --line:#203149;
+  --muted:#93a0b2;
+  --white:#0d1928;
+  --shadow:0 20px 55px rgba(0,0,0,.32);
+}
+html,body{background:var(--z-bg);color:var(--z-text);transition:background-color .2s ease,color .2s ease}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.page,.page.theme-day,.page.theme-night{background:var(--z-bg);color:var(--z-text)}
+.site-header{background:color-mix(in srgb,var(--z-surface) 94%,transparent);border-color:var(--z-line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.nav{min-height:68px}
+.brand{font-size:13px;letter-spacing:.1em}.brand-mark{background:var(--z-surface-2);box-shadow:0 5px 15px rgba(0,0,0,.06)}
+.nav-links a{color:var(--z-muted)}.nav-links a:hover{color:var(--z-text);background:var(--z-surface-2)}
+.icon-button,.theme-button{background:var(--z-surface);color:var(--z-text);border-color:var(--z-line);box-shadow:0 5px 16px rgba(0,0,0,.04)}
+
+/* Score-first home */
+.score-hero{background:linear-gradient(135deg,var(--z-surface),var(--z-bg));border-color:var(--z-line)}
+.score-hero-inner{padding-top:50px;padding-bottom:42px}
+.score-hero h1{font-weight:850}.score-live-card{background:linear-gradient(145deg,#101b2b,#17263a);border-color:#263a53}
+.score-feed{padding-top:30px}
+.score-date-strip,.score-filter-row{scrollbar-width:none}
+.score-day,.score-calendar,.score-filter{background:var(--z-surface);border-color:var(--z-line);color:var(--z-text)}
+.score-day span{color:var(--z-muted)}.score-day.active{background:var(--z-text);border-color:var(--z-text);color:var(--z-bg)}
+.score-filter.active{background:var(--z-accent);border-color:var(--z-accent);color:#111827}
+.score-live-banner{background:color-mix(in srgb,var(--z-live) 7%,var(--z-surface));border-color:color-mix(in srgb,var(--z-live) 22%,var(--z-line))}
+.score-feed .dashboard-card,.score-feed .stats-strip,.score-explore-grid a{background:var(--z-surface);border-color:var(--z-line);box-shadow:var(--z-shadow)}
+.score-feed .card-heading,.score-feed .match-row,.score-feed .result-row{border-color:var(--z-line)}
+.score-feed .count-pill{background:var(--z-surface-2)}
+.score-explore-grid a:hover{border-color:var(--z-accent)}
+
+/* Global surfaces: never leave white cards behind in night mode */
+.match-centre,.teams-page,.competition-detail,.standings-page,.player-page,.search-results,.team-page{color:var(--z-text)}
+.mc-tab,.mc-day,.mc-calendar,.mc-match,.match-detail-card,.event-row,.match-notes,
+.competition-card,.competition-match,.standings-table-wrap,.team-directory-card,.team-panel,
+.team-match-row,.player-profile-hero,.player-stat-strip,.player-season-row,.public-player-card,
+.search-result,.search-intro,.search-field-wrap,.team-profile-meta,.team-head-coach{background:var(--z-surface);border-color:var(--z-line);color:var(--z-text);box-shadow:var(--z-shadow)}
+.mc-tab,.mc-day,.mc-calendar{color:var(--z-text)}
+.mc-tab.active,.mc-day.active{background:var(--z-text);color:var(--z-bg);border-color:var(--z-text)}
+.mc-match:hover,.competition-card:hover,.team-directory-card:hover,.public-player-card:hover,.search-result:hover{border-color:var(--z-accent);transform:translateY(-2px)}
+.mc-logo,.team-logo,.player-photo,.player-profile-photo,.public-player-photo,.mini-photo,.search-logo,.hero-hub-mark{background:var(--z-surface-2);border-color:var(--z-line)}
+.mc-footer,.event-row,.lineup-player,.competition-match,.standings-table th,.standings-table td{border-color:var(--z-line)}
+.mc-score{color:var(--z-text)}
+.live-dot{color:var(--z-live)}.live-dot:before{background:var(--z-live)}
+.page-hero p,.team-profile-identity p,.player-profile-identity p,.competition-card p{color:var(--z-muted)}
+
+/* Match centre gets the dense, glanceable score-app treatment */
+.page-hero{padding-top:42px;padding-bottom:20px}.page-hero h1{font-weight:850}
+.mc-date-strip{padding-top:4px}.mc-day{min-width:86px;padding:12px 11px}.mc-day b{font-size:.78rem}.mc-day span{color:var(--z-muted)}
+.mc-match{border-radius:18px;padding:15px 18px;margin:8px 0;box-shadow:0 8px 28px rgba(16,24,39,.055)}
+.mc-match:hover{box-shadow:0 15px 38px rgba(16,24,39,.1)}
+.mc-meta{color:var(--z-muted)}.mc-meta span:last-child{color:var(--z-text)}
+.mc-teams{padding:19px 0}.mc-team strong{font-size:.95rem}.mc-score b{font-size:1.65rem}.mc-score span{color:var(--z-muted)}
+
+/* Team squad is the primary player experience; individual URLs remain searchable */
+.squad-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.player-card{background:var(--z-surface);border-color:var(--z-line);box-shadow:var(--z-shadow);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.player-card:hover{transform:translateY(-3px);border-color:var(--z-accent);box-shadow:0 18px 42px rgba(0,0,0,.13)}
+.player-photo{height:175px}.player-card-info{padding:15px}.player-card h3{font-size:17px}
+.player-card-info>span{color:var(--z-accent)}
+.team-tabs{border-color:var(--z-line)}.team-tabs button{color:var(--z-muted)}.team-tabs button.active{background:var(--z-text);color:var(--z-bg)}
+.form-w{background:color-mix(in srgb,var(--z-success) 17%,var(--z-surface));color:var(--z-success)}
+.form-d{background:color-mix(in srgb,var(--z-accent) 17%,var(--z-surface));color:var(--z-accent)}
+.form-l{background:color-mix(in srgb,var(--z-live) 15%,var(--z-surface));color:var(--z-live)}
+
+/* Search is the discovery engine for individual players */
+.quick-search{background:var(--z-surface);border-color:var(--z-line)}
+.quick-search-inner input{color:var(--z-text)}
+.search-field-wrap input{color:var(--z-text)}
+.search-result p{color:var(--z-muted)}
+
+/* Full-width night layer safety */
+html[data-zedek-theme="night"] .site-footer{background:var(--z-bg);border-color:var(--z-line)}
+html[data-zedek-theme="night"] .quick-search{background:var(--z-surface)}
+html[data-zedek-theme="night"] input,html[data-zedek-theme="night"] select{color-scheme:dark}
+html[data-zedek-theme="night"] .score-live-card{box-shadow:0 20px 55px rgba(0,0,0,.38)}
+html[data-zedek-theme="night"] .score-feed .dashboard-card,
+html[data-zedek-theme="night"] .mc-match,
+html[data-zedek-theme="night"] .team-panel,
+html[data-zedek-theme="night"] .competition-card,
+html[data-zedek-theme="night"] .standings-table-wrap{box-shadow:0 16px 45px rgba(0,0,0,.22)}
+
+@media(max-width:900px){.squad-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.squad-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.player-photo{height:155px}.mc-match{padding:14px}.mc-team strong{font-size:.86rem}}
+@media(max-width:430px){.squad-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.player-photo{height:140px}.player-card-info{padding:12px}.player-card h3{font-size:14px}.player-card p{font-size:11px}}
