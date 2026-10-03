@@ -19,7 +19,7 @@ function dateKey(value) {
 const LIVE_STATUSES = new Set(["live", "in_progress", "halftime", "paused"]);
 const FINISHED_STATUSES = new Set(["finished", "verified"]);
 
-export default function HomeLiveData({ selectedDay, filter = "ALL" }) {
+export default function HomeLiveData({ selectedDay, filter = "ALL", initialData }) {
   const [state, setState] = useState({
     matches: [], teams: 0, competitions: 0, loading: true, error: "",
   });
