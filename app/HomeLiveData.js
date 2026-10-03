@@ -84,7 +84,7 @@ function TeamCrest({ team, fallback }) {
   );
 }
 
-function ScoreMatchCard({ match, goalFlash }) {
+function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
   const isLive = LIVE_STATUSES.has(match.status);
   const isFinished = FINISHED_STATUSES.has(match.status);
   const home = teamName(match.home_team, "Home team");
@@ -94,8 +94,11 @@ function ScoreMatchCard({ match, goalFlash }) {
   const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : match.status === "paused" ? "PAUSED" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
   const minute = liveMinute(match);
 
+  const homeFavorite = favoriteTeams.has(match.home_team?.id);
+  const awayFavorite = favoriteTeams.has(match.away_team?.id);
   return (
-    <a className={`score-match-card ${isLive ? "is-live" : ""}`} href={"/matches/" + match.id}>
+    <article className={`score-match-card ${isLive ? "is-live" : ""}`}>
+      <button type="button" className={homeFavorite || awayFavorite ? "match-favorite active" : "match-favorite"} aria-label={homeFavorite || awayFavorite ? "Remove teams from My Teams" : "Add teams to My Teams"} title={homeFavorite || awayFavorite ? "Remove from My Teams" : "Add to My Teams"} onClick={() => { if (homeFavorite) onToggleFavorite(match.home_team.id); if (awayFavorite) onToggleFavorite(match.away_team.id); if (!homeFavorite && !awayFavorite) onToggleFavorite(match.home_team?.id); }}>★</button>
       <div className="score-match-head">
         <span className={isLive ? "score-status live" : isFinished ? "score-status finished" : "score-status"}>
           {isLive ? <i /> : null}{statusLabel}
@@ -132,9 +135,9 @@ function ScoreMatchCard({ match, goalFlash }) {
 
       <div className="score-match-foot">
         <span>{isLive ? (minute ? "Live • " + minute : "Live score updates") : isFinished ? "Final result" : "Fixture"}</span>
-        <b>Open match centre <em>→</em></b>
+        <a href={"/matches/" + match.id}>Open match centre <em>→</em></a>
       </div>
-    </a>
+    </article>
   );
 }
 
@@ -143,6 +146,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   const currentMatchesRef = useRef(initialMatches);
   const pendingGoalsRef = useRef(new Map());
   const [goalFlashes, setGoalFlashes] = useState({});
+  const [favoriteTeams, setFavoriteTeams] = useState(() => new Set());
   const [state, setState] = useState(() => ({
     matches: deriveVisible(initialMatches, initialData?.officialIds, selectedDay, filter).slice(0, 12),
     teams: initialData?.teams || 0,
@@ -150,6 +154,24 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
     loading: false,
     error: initialData?.error || "",
   }));
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("zedek-favorite-teams") || "[]");
+      if (Array.isArray(saved)) setFavoriteTeams(new Set(saved));
+    } catch {}
+  }, []);
+
+  function toggleFavorite(teamId) {
+    if (!teamId) return;
+    setFavoriteTeams((current) => {
+      const next = new Set(current);
+      if (next.has(teamId)) next.delete(teamId);
+      else next.add(teamId);
+      localStorage.setItem("zedek-favorite-teams", JSON.stringify([...next]));
+      return next;
+    });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -222,6 +244,9 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   }, [selectedDay, filter]);
 
   const liveCount = state.matches.filter((m) => LIVE_STATUSES.has(m.status)).length;
+  const displayedMatches = filter === "MY TEAMS"
+    ? state.matches.filter((m) => favoriteTeams.has(m.home_team?.id) || favoriteTeams.has(m.away_team?.id))
+    : state.matches;
 
   return (
     <section className="container section">
@@ -246,12 +271,12 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
             <div className="empty-state">Refreshing football data…</div>
           ) : state.matches.length ? (
             <div className="score-match-list">
-              {state.matches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} />)}
+              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} />)}
             </div>
           ) : (
             <div className="empty-state">
               <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No finished results for this date." : "No published matches for this date."}</strong>
-              <span>{filter === "MY TEAMS" ? "Team following will appear here when you choose clubs to follow." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
+              <span>{filter === "MY TEAMS" ? "Tap ★ on a match to follow a team. Your selected clubs will appear here." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
             </div>
           )}
         </div>

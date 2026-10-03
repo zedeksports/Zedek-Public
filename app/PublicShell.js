@@ -14,6 +14,7 @@ const exploreNav = [
   ["Top Scorers", "/statistics?view=scorers"],
   ["Player Stats", "/statistics?view=players"],
   ["Search", "/search"],
+  ["My Teams", "/#my-teams"],
 ];
 
 export default function PublicShell({ children }) {
