@@ -341,3 +341,15 @@ html[data-zedek-theme="night"] .score-team-crest{box-shadow:inset 0 0 0 1px rgba
   .score-numbers b{font-size:23px}
   .score-match-foot{padding:9px 12px;font-size:8px}
 }
+
+
+/* Live scoreboard finishing polish */
+.score-match-card.is-live .score-match-time{color:var(--z-live);font-weight:900}
+.score-match-card.is-live .score-centre small{font-variant-numeric:tabular-nums}
+.score-team-crest img{transition:transform .2s ease,opacity .2s ease}
+.score-match-card:hover .score-team-crest img{transform:scale(1.04)}
+.score-match-card.is-live .score-centre{min-width:0}
+@media(max-width:430px){
+  .score-match-card.is-live .score-match-time{font-size:9px}
+  .score-match-foot b{white-space:nowrap}
+}
