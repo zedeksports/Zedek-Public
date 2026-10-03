@@ -50,6 +50,73 @@ function deriveVisible(all, officialIds, selectedDay, filter) {
   });
 }
 
+function teamName(team, fallback) {
+  return team?.short_name || team?.name || fallback;
+}
+
+function initials(team, fallback) {
+  const value = teamName(team, fallback);
+  return value.split(/\s+/).map((x) => x[0]).join("").slice(0, 3).toUpperCase();
+}
+
+function TeamCrest({ team, fallback }) {
+  return (
+    <span className="score-team-crest" aria-hidden="true">
+      {team?.logo_url ? (
+        <img src={team.logo_url} alt="" />
+      ) : (
+        <span>{initials(team, fallback)}</span>
+      )}
+    </span>
+  );
+}
+
+function ScoreMatchCard({ match }) {
+  const isLive = LIVE_STATUSES.has(match.status);
+  const isFinished = FINISHED_STATUSES.has(match.status);
+  const home = teamName(match.home_team, "Home team");
+  const away = teamName(match.away_team, "Away team");
+  const homeScore = isLive || isFinished ? (match.home_score ?? 0) : null;
+  const awayScore = isLive || isFinished ? (match.away_score ?? 0) : null;
+  const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : match.status === "paused" ? "PAUSED" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
+
+  return (
+    <a className={`score-match-card ${isLive ? "is-live" : ""}`} href={"/matches/" + match.id}>
+      <div className="score-match-head">
+        <span className={isLive ? "score-status live" : isFinished ? "score-status finished" : "score-status"}>
+          {isLive ? <i /> : null}{statusLabel}
+        </span>
+        <span className="score-match-competition">{match.season?.competition?.name || "Competition TBC"}</span>
+        <span className="score-match-time">{isLive || isFinished ? "Match Centre" : dateLabel(match.scheduled_at)}</span>
+      </div>
+
+      <div className="score-match-body">
+        <div className="score-side">
+          <TeamCrest team={match.home_team} fallback="Home" />
+          <strong>{home}</strong>
+        </div>
+        <div className="score-centre">
+          <div className="score-numbers">
+            <b>{homeScore ?? "—"}</b>
+            <span>:</span>
+            <b>{awayScore ?? "—"}</b>
+          </div>
+          <small>{isLive ? "FOLLOW LIVE" : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>
+        </div>
+        <div className="score-side away">
+          <strong>{away}</strong>
+          <TeamCrest team={match.away_team} fallback="Away" />
+        </div>
+      </div>
+
+      <div className="score-match-foot">
+        <span>{isLive ? "Live score updates" : isFinished ? "Verified by Zedek Sports" : "Fixture"}</span>
+        <b>Open match centre <em>→</em></b>
+      </div>
+    </a>
+  );
+}
+
 export default function HomeLiveData({ selectedDay, filter = "ALL", initialData }) {
   const initialMatches = initialData?.matches || [];
   const [state, setState] = useState(() => ({
@@ -85,9 +152,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
           error: "",
         });
       } catch (error) {
-        if (!cancelled) setState((x) => ({
-          ...x, loading: false, error: error?.message || "Football data could not be loaded.",
-        }));
+        if (!cancelled) setState((x) => ({ ...x, loading: false, error: error?.message || "Football data could not be loaded." }));
       }
     }
     load();
@@ -119,21 +184,9 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
           {state.loading ? (
             <div className="empty-state">Refreshing football data…</div>
           ) : state.matches.length ? (
-            state.matches.map((m) => {
-              const isLive = LIVE_STATUSES.has(m.status);
-              const isFinished = FINISHED_STATUSES.has(m.status);
-              return (
-                <a className="match-row" href={"/matches/" + m.id} key={m.id}>
-                  <div>
-                    <small>{isLive ? "● LIVE" : isFinished ? "✓ VERIFIED RESULT" : "UPCOMING"} · {m.season?.competition?.name || "Competition TBC"} · {dateLabel(m.scheduled_at)}</small>
-                    <strong>{m.home_team?.short_name || m.home_team?.name || "Home team"} {isLive || isFinished ? m.home_score ?? 0 : ""}</strong>
-                    <br />
-                    <strong>{m.away_team?.short_name || m.away_team?.name || "Away team"} {isLive || isFinished ? m.away_score ?? 0 : ""}</strong>
-                  </div>
-                  <span className="row-arrow">→</span>
-                </a>
-              );
-            })
+            <div className="score-match-list">
+              {state.matches.map((m) => <ScoreMatchCard key={m.id} match={m} />)}
+            </div>
           ) : (
             <div className="empty-state">
               <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No verified results for this date." : "No published matches for this date."}</strong>
