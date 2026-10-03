@@ -62,7 +62,7 @@ export default function HomeScoreClient({ initialData }) {
         <div className="container score-hero-inner">
           <div className="score-hero-copy">
             <span className="section-kicker"><i className="score-live-dot" /> OTI FOOTBALL NETWORK</span>
-            <h1>Local football.<br /><em>Properly followed.</em></h1>
+            <h1>GRASS ROOT FOOTBALL.<br /><em>WHERE YOU GROW.</em></h1>
             <p>Live scores, fixtures and the people behind the game — from community pitches across Oti.</p>
             <div className="hero-actions">
               <a className="hero-action-primary" href="/matches">Open Match Centre <span>→</span></a>
