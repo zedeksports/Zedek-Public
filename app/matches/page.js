@@ -57,16 +57,16 @@ export default function MatchesPage(){
 
   const visible=useMemo(()=>{
     const now=Date.now();
+    const byDate=(m)=>m.scheduled_at && dateKey(m.scheduled_at)===selectedDate;
     return matches.filter(m=>{
       const live=LIVE.includes(m.status);
       const finished=FINISHED.includes(m.status);
-      const off=official.has(m.id);
       if(filter==="live") return live;
-      if(filter==="results") return off&&finished;
-      if(filter==="upcoming") return !finished&&new Date(m.scheduled_at).getTime()>=now;
-      return live||(!finished&&dateKey(m.scheduled_at)===selectedDate)||(off&&finished&&dateKey(m.scheduled_at)===selectedDate);
-    }).filter(m=>filter==="live"||dateKey(m.scheduled_at)===selectedDate);
-  },[matches,official,selectedDate,filter]);
+      if(filter==="results") return finished;
+      if(filter==="upcoming") return !finished&&!live&&m.scheduled_at&&new Date(m.scheduled_at).getTime()>=now;
+      return live || (byDate(m)&&!finished&&!live) || (byDate(m)&&finished);
+    }).filter(m=>filter==="results"||filter==="live"||byDate(m));
+  },[matches,selectedDate,filter]);
 
   return <main>
     <section className="container page-hero"><span className="section-kicker">Zedek Sports</span><h1>Match Centre</h1><p>Fixtures, live football and verified results from local football across Oti.</p></section>
@@ -80,7 +80,7 @@ export default function MatchesPage(){
       <div className="mc-tabs">
         {[["all","All football"],["upcoming","Upcoming"],["live","Live"],["results","Results"]].map(([key,label])=><button type="button" key={key} className={"mc-tab "+(filter===key?"active":"")} onClick={()=>setFilter(key)}>{label}</button>)}
       </div>
-      {loading?<div className="empty-state">Loading match centre…</div>:error?<div className="data-note">{error}</div>:!visible.length?<div className="empty-state"><strong>No published matches for this selection.</strong><span>Fixtures and verified results will appear automatically from the Control Room.</span></div>:<div className="match-list">{visible.map(m=>{const live=LIVE.includes(m.status),off=official.has(m.id)&&FINISHED.includes(m.status);return <a className="mc-match" href={"/matches/"+m.id} key={m.id}><div className="mc-meta"><span>{m.season?.competition?.name||"Competition TBC"}</span><span className={live?"live-dot":""}>{live?"LIVE":off?"OFFICIAL":fmt(m.scheduled_at)}</span></div><div className="mc-teams"><Team team={m.home_team}/><div className="mc-score">{live||off?<><b>{m.home_score??0}</b><span>:</span><b>{m.away_score??0}</b></>:<span>vs</span>}</div><Team team={m.away_team}/></div><div className="mc-footer"><span>{fmt(m.scheduled_at)}</span><span>View match →</span></div></a>})}</div>}
+      {loading?<div className="empty-state">Loading match centre…</div>:error?<div className="data-note">{error}</div>:!visible.length?<div className="empty-state"><strong>No published matches for this selection.</strong><span>Fixtures and finished results will appear automatically from the Control Room.</span></div>:<div className="match-list">{visible.map(m=>{const live=LIVE.includes(m.status),off=FINISHED.includes(m.status);return <a className="mc-match" href={"/matches/"+m.id} key={m.id}><div className="mc-meta"><span>{m.season?.competition?.name||"Competition TBC"}</span><span className={live?"live-dot":""}>{live?"LIVE":off?"OFFICIAL":fmt(m.scheduled_at)}</span></div><div className="mc-teams"><Team team={m.home_team}/><div className="mc-score">{live||off?<><b>{m.home_score??0}</b><span>:</span><b>{m.away_score??0}</b></>:<span>{m.scheduled_at?new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Africa/Accra"}).format(new Date(m.scheduled_at)):"TBC"}</span>}</div><Team team={m.away_team}/></div><div className="mc-footer"><span>{fmt(m.scheduled_at)}</span><span>View match →</span></div></a>})}</div>}
     </section>
   </main>;
 }

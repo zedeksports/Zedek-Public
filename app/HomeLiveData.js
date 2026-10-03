@@ -35,7 +35,7 @@ function deriveVisible(all, officialIds, selectedDay, filter) {
     new Date(x.scheduled_at).getTime() >= now
   );
   const dayResults = dayMatches
-    .filter((x) => official.has(x.id) && FINISHED_STATUSES.has(x.status))
+    .filter((x) => FINISHED_STATUSES.has(x.status))
     .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
 
   if (filter === "LIVE") return live;
@@ -110,12 +110,19 @@ function ScoreMatchCard({ match, goalFlash }) {
           <strong>{home}</strong>
         </div>
         <div className="score-centre">
-          <div className={`score-numbers ${goalFlash ? "goal-flash" : ""}`}>
-            <b className={goalFlash?.side === "home" ? "goal-scoring" : ""}>{homeScore ?? "—"}</b>
-            <span>:</span>
-            <b className={goalFlash?.side === "away" ? "goal-scoring" : ""}>{awayScore ?? "—"}</b>
-          </div>
-          <small>{isLive ? (minute || "LIVE") : isFinished ? "OFFICIAL RESULT" : "PRE-MATCH"}</small>\n          {goalFlash ? <div className="goal-alert" role="status"><span>⚽</span><strong>GOAL!</strong><small>{goalFlash.team} • {goalFlash.score}</small></div> : null}
+          {isLive || isFinished ? (
+            <div className={`score-numbers ${goalFlash ? "goal-flash" : ""}`}>
+              <b className={goalFlash?.side === "home" ? "goal-scoring" : ""}>{homeScore ?? 0}</b>
+              <span>:</span>
+              <b className={goalFlash?.side === "away" ? "goal-scoring" : ""}>{awayScore ?? 0}</b>
+            </div>
+          ) : (
+            <div className="score-kickoff" aria-label={match.scheduled_at ? `Kick-off at ${dateLabel(match.scheduled_at)}` : "Kick-off time to be confirmed"}>
+              {match.scheduled_at ? new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(match.scheduled_at)) : "TBC"}
+            </div>
+          )}
+          <small>{isLive ? (minute || "LIVE") : isFinished ? "FINAL RESULT" : "PRE-MATCH"}</small>
+          {goalFlash ? <div className="goal-alert" role="status"><span>⚽</span><strong>GOAL!</strong><small>{goalFlash.team} • {goalFlash.score}</small></div> : null}
         </div>
         <div className="score-side away">
           <strong>{away}</strong>
@@ -124,7 +131,7 @@ function ScoreMatchCard({ match, goalFlash }) {
       </div>
 
       <div className="score-match-foot">
-        <span>{isLive ? (minute ? "Live • " + minute : "Live score updates") : isFinished ? "Verified by Zedek Sports" : "Fixture"}</span>
+        <span>{isLive ? (minute ? "Live • " + minute : "Live score updates") : isFinished ? "Final result" : "Fixture"}</span>
         <b>Open match centre <em>→</em></b>
       </div>
     </a>
@@ -133,6 +140,9 @@ function ScoreMatchCard({ match, goalFlash }) {
 
 export default function HomeLiveData({ selectedDay, filter = "ALL", initialData }) {
   const initialMatches = initialData?.matches || [];
+  const currentMatchesRef = useRef(initialMatches);
+  const pendingGoalsRef = useRef(new Map());
+  const [goalFlashes, setGoalFlashes] = useState({});
   const [state, setState] = useState(() => ({
     matches: deriveVisible(initialMatches, initialData?.officialIds, selectedDay, filter).slice(0, 12),
     teams: initialData?.teams || 0,
@@ -203,7 +213,12 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
     }
     load();
     const refreshTimer = setInterval(load, 5000);
-    return () => { cancelled = true; clearInterval(refreshTimer); };
+    return () => {
+      cancelled = true;
+      clearInterval(refreshTimer);
+      pendingGoalsRef.current.forEach((timer) => clearTimeout(timer));
+      pendingGoalsRef.current.clear();
+    };
   }, [selectedDay, filter]);
 
   const liveCount = state.matches.filter((m) => LIVE_STATUSES.has(m.status)).length;
@@ -235,7 +250,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
             </div>
           ) : (
             <div className="empty-state">
-              <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No verified results for this date." : "No published matches for this date."}</strong>
+              <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No finished results for this date." : "No published matches for this date."}</strong>
               <span>{filter === "MY TEAMS" ? "Team following will appear here when you choose clubs to follow." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
             </div>
           )}
