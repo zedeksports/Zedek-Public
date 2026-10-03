@@ -12,7 +12,7 @@ export default function PlayerDetail(){
 
   useEffect(()=>{if(!id)return;async function load(){
     const s=createSupabaseBrowserClient();
-    const p=await s.from("players").select("id,team_id,full_name,shirt_number,position,is_captain,photo_url,date_of_birth,nationality,team:teams!players_team_id_fkey(id,name,short_name,area,logo_url)").eq("id",id).eq("is_active",true).maybeSingle();
+    const p=await s.from("players").select("id,team_id,full_name,shirt_number,position,is_captain,photo_url,date_of_birth,team:teams!players_team_id_fkey(id,name,short_name,area,logo_url)").eq("id",id).eq("is_active",true).maybeSingle();
     if(p.error){setError(p.error.message);setLoading(false);return;}
     if(!p.data){setPlayer(null);setLoading(false);return;}
     const [st,m,v]=await Promise.all([
