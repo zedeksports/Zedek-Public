@@ -57,16 +57,16 @@ export default function MatchesPage(){
 
   const visible=useMemo(()=>{
     const now=Date.now();
+    const byDate=(m)=>m.scheduled_at && dateKey(m.scheduled_at)===selectedDate;
     return matches.filter(m=>{
       const live=LIVE.includes(m.status);
       const finished=FINISHED.includes(m.status);
-      const off=official.has(m.id);
       if(filter==="live") return live;
-      if(filter==="results") return off&&finished;
-      if(filter==="upcoming") return !finished&&new Date(m.scheduled_at).getTime()>=now;
-      return live||(!finished&&dateKey(m.scheduled_at)===selectedDate)||(off&&finished&&dateKey(m.scheduled_at)===selectedDate);
-    }).filter(m=>filter==="live"||dateKey(m.scheduled_at)===selectedDate);
-  },[matches,official,selectedDate,filter]);
+      if(filter==="results") return finished;
+      if(filter==="upcoming") return !finished&&!live&&m.scheduled_at&&new Date(m.scheduled_at).getTime()>=now;
+      return live || (byDate(m)&&!finished&&!live) || (byDate(m)&&finished);
+    }).filter(m=>filter==="results"||filter==="live"||byDate(m));
+  },[matches,selectedDate,filter]);
 
   return <main>
     <section className="container page-hero"><span className="section-kicker">Zedek Sports</span><h1>Match Centre</h1><p>Fixtures, live football and verified results from local football across Oti.</p></section>
