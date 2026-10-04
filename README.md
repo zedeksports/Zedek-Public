@@ -6,3 +6,6 @@ This repository is intentionally separated from the Zedek Sports Control Room re
 
 <!-- Vercel production deployment sync -->
 <!-- Live scoreboard polish -->
+
+
+<!-- CI verification marker for account/settings batch -->
