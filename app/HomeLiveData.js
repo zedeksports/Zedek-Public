@@ -23,7 +23,7 @@ function dateKey(value) {
   }).format(new Date(value));
 }
 
-const LIVE_STATUSES = new Set(["live", "halftime"]);
+const LIVE_STATUSES = new Set(["live", "in_progress", "halftime", "paused"]);
 const FINISHED_STATUSES = new Set(["finished", "verified"]);
 const EXCLUDED_STATUSES = new Set(["postponed", "cancelled", "canceled"]);
 
