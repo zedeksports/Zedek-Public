@@ -30,7 +30,7 @@ export default function PlayerDetail(){
  if(error||!player)return <main><section className="container page-hero"><span className="section-kicker">Zedek Sports</span><h1>Player not found</h1><p>{error||"This player is not currently published."}</p><a className="button" href="/teams">← Back to teams</a></section></main>;
  return <main>
   <section className="container player-profile-hero">
-   <div className="player-profile-photo">{player.photo_url?<img src={player.photo_url} alt=""/>:<span>{(player.full_name||"P").slice(0,1)}</span>}</div>
+   <div className="player-profile-photo">{player.photo_url?<img src={player.photo_url} alt="" loading="eager" decoding="async" fetchPriority="high"/>:<span>{(player.full_name||"P").slice(0,1)}</span>}</div>
    <div className="player-profile-identity"><span className="section-kicker">{player.team?.area||"Oti local football"}</span><h1>{player.full_name}</h1><p>{player.position||"Player"} {player.shirt_number!=null?" • #"+player.shirt_number:""}{player.is_captain?" • Captain":""}</p>{player.team&&<a href={"/teams/"+player.team.id} className="player-team-link">{player.team.short_name||player.team.name} → Squad</a>}</div>
   </section>
   <section className="container player-page">
