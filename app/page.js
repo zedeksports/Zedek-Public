@@ -1,9 +1,7 @@
-import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "../lib/supabase/server";
 import HomeScoreClient from "./HomeScoreClient";
 
-const getHomeData = unstable_cache(
-  async () => {
+const getHomeData = async () => {
     const supabase = createSupabaseServerClient();
     const [{ data: matches, error: matchesError }, { count: teamCount, error: teamsError }, { count: competitionCount, error: competitionsError }, { data: ads, error: adsError }] = await Promise.all([
       supabase.from("matches")
@@ -26,12 +24,10 @@ const getHomeData = unstable_cache(
       loading: false,
       error: "",
     };
-  },
-  ["zedek-public-home-data"],
-  { revalidate: 15 }
-);
+};
 
-export const revalidate = 15;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function HomePage() {
   let initialData = {
