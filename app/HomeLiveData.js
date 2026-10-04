@@ -23,7 +23,7 @@ function dateKey(value) {
   }).format(new Date(value));
 }
 
-const LIVE_STATUSES = new Set(["live", "in_progress", "halftime", "paused"]);
+const LIVE_STATUSES = new Set(["live", "halftime"]);
 const FINISHED_STATUSES = new Set(["finished", "verified"]);
 const EXCLUDED_STATUSES = new Set(["postponed", "cancelled", "canceled"]);
 
@@ -69,9 +69,9 @@ function initials(team, fallback) {
 function liveMinute(match) {
   if (!match?.scheduled_at) return null;
   if (match.status === "halftime") return "HT";
-  if (match.status === "paused") return "PAUSED";
+  
   if (!LIVE_STATUSES.has(match.status)) return null;
-  const started = new Date(match.scheduled_at).getTime();
+  const started = new Date(match.kickoff_at || match.scheduled_at).getTime();
   const elapsed = Math.floor((Date.now() - started) / 60000);
   if (!Number.isFinite(elapsed) || elapsed < 1) return "1'";
   return Math.min(elapsed, 120) + "'";
@@ -98,7 +98,7 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
   const away = teamName(match.away_team, "Away team");
   const homeScore = isLive || isFinished ? (match.home_score ?? 0) : null;
   const awayScore = isLive || isFinished ? (match.away_score ?? 0) : null;
-  const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : match.status === "paused" ? "PAUSED" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
+  const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
   const minute = liveMinute(match);
   const homeFavorite = favoriteTeams.has(match.home_team?.id);
   const awayFavorite = favoriteTeams.has(match.away_team?.id);
@@ -205,7 +205,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
         const supabase = createSupabaseBrowserClient();
         const { data: incoming, error: matchesError } = await supabase
           .from("matches")
-          .select("id,scheduled_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))")
+          .select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))")
           .order("scheduled_at", { ascending: true })
           .limit(100);
         if (matchesError) throw matchesError;
@@ -255,7 +255,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
       }
     }
     load();
-    const refreshDelay = initialMatches.some((match) => LIVE_STATUSES.has(match.status)) ? 10000 : 60000;
+    const refreshDelay = initialMatches.some((match) => LIVE_STATUSES.has(match.status)) ? 5000 : 15000;
     const refreshTimer = setInterval(load, refreshDelay);
     return () => {
       cancelled = true;
