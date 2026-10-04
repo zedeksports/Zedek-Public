@@ -7,6 +7,7 @@ export default async function NewsPage() {
   const { data, error } = await supabase
     .from("content_posts")
     .select("id,title,slug,excerpt,cover_image_url,category,featured,published_at,author:profiles!content_posts_author_id_fkey(full_name)")
+    .eq("content_type","news")
     .eq("status","published")
     .lte("published_at", new Date().toISOString())
     .order("featured",{ascending:false})
