@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import FollowButton from "../../../components/FollowButton";
 
 export const dynamic = "force-dynamic";
 
@@ -132,6 +133,7 @@ export default async function MatchPage({ params }) {
             </div>
             <Team team={m.away_team} />
           </div>
+          <div className="match-follow-row"><FollowButton type="match" id={m.id} label="Follow match"/></div>
           {m.leg ? <div className="match-detail-note">Leg {m.leg}</div> : null}
         </div>
 

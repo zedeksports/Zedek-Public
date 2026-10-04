@@ -1,0 +1,1 @@
+import { AuthCard } from "../auth/AuthCard"; export default function ForgotPasswordPage(){return <AuthCard mode="forgot"/>;}

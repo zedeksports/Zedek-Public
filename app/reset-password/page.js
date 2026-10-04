@@ -1,0 +1,12 @@
+'use client';
+
+import { useEffect, useState } from "react";
+import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
+
+export default function ResetPasswordPage(){
+  const [password,setPassword]=useState(""); const [confirm,setConfirm]=useState("");
+  const [ready,setReady]=useState(false); const [saving,setSaving]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
+  useEffect(()=>{const supabase=createSupabaseBrowserClient();supabase.auth.getSession().then(({data})=>setReady(Boolean(data.session)));const {data}=supabase.auth.onAuthStateChange((_event,session)=>setReady(Boolean(session)));return()=>data.subscription.unsubscribe();},[]);
+  async function submit(e){e.preventDefault();setError("");setMessage("");if(password.length<8){setError("Use at least 8 characters.");return}if(password!==confirm){setError("Passwords do not match.");return}setSaving(true);const {error}=await createSupabaseBrowserClient().auth.updateUser({password});if(error)setError(error.message);else{setMessage("Password updated. You can now continue to Zedek Sports.");setTimeout(()=>window.location.href="/",900)}setSaving(false);}
+  return <main className="account-page page"><div className="container account-grid"><section className="account-intro"><span className="section-kicker">SECURE ACCOUNT RECOVERY</span><h1>Choose a new password.</h1><p>Set a new password for your Zedek Sports account. Your reset link is temporary and tied to your account.</p></section><section className="account-card"><form onSubmit={submit}><label>New password<input required minLength={8} type="password" value={password} onChange={e=>setPassword(e.target.value)} /></label><label>Confirm password<input required minLength={8} type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} /></label>{!ready&&!message?<div className="account-error">This reset link is no longer active. Request a new one.</div>:null}{error?<div className="account-error">{error}</div>:null}{message?<div className="account-message">{message}</div>:null}<button className="button primary account-submit" disabled={saving||!ready}>{saving?"Updating…":"Update password"}</button></form></section></div></main>;
+}
