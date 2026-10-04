@@ -8,7 +8,9 @@ const OFFICIAL_STATUSES = ["finished", "verified"];
 
 function kickOffTime(value) {
   if (!value) return "TBC";
-  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra",
+  }).format(new Date(value));
 }
 
 function dateTime(value) {
@@ -70,7 +72,7 @@ export default async function MatchPage({ params }) {
       supabase
         .from("match_lineups")
         .select(
-          "id,team_id,formation,captain_player_id,team:teams(id,name,short_name),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position))"
+          "id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))"
         )
         .eq("match_id", id),
       supabase.from("match_statistics").select("*").eq("match_id", id).maybeSingle(),
@@ -137,9 +139,9 @@ export default async function MatchPage({ params }) {
           <div className="match-detail-score">
             <Team team={m.home_team} />
             <div>
-              <strong>{live || official ? m.home_score ?? 0 : "—"}</strong>
-              <span>:</span>
-              <strong>{live || official ? m.away_score ?? 0 : "—"}</strong>
+              <strong>{live || official ? m.home_score ?? 0 : kickOffTime(m.scheduled_at)}</strong>
+              <span>{live || official ? ":" : ""}</span>
+              <strong>{live || official ? m.away_score ?? 0 : ""}</strong>
             </div>
             <Team team={m.away_team} />
           </div>
@@ -204,38 +206,55 @@ export default async function MatchPage({ params }) {
         ) : null}
 
         {lineups.length ? (
-          <section className="detail-section">
+          <section className="detail-section" id="lineups">
             <div className="section-heading">
               <div>
-                <span className="section-kicker">Lineups</span>
-                <h2>Teams & players</h2>
+                <span className="section-kicker">Confirmed lineups</span>
+                <h2>Starting XI & substitutes</h2>
               </div>
+              <span className="verified-badge">{live ? "LIVE LINEUPS" : "MATCH LINEUPS"}</span>
             </div>
             <div className="lineup-grid">
-              {lineups.map((l) => (
-                <div className="dashboard-card" key={l.id}>
-                  <h3>{l.team?.name}</h3>
-                  {l.formation ? <p className="lineup-formation">{l.formation}</p> : null}
-                  <div className="lineup-list">
-                    {(l.lineup_players || []).map((p) => (
-                      <div className="lineup-player" key={p.id}>
-                        <span>{p.shirt_number ?? p.player?.shirt_number ?? "—"}</span>
-                        {p.player?.id ? (
-                          <a href={`/players/${p.player.id}`}>
-                            <strong>{p.player?.full_name || "Player"}</strong>
-                          </a>
-                        ) : (
-                          <strong>{p.player?.full_name || "Player"}</strong>
-                        )}
-                        <small>{p.role || p.position || ""}</small>
-                      </div>
-                    ))}
+              {lineups.map((l) => {
+                const players = l.lineup_players || [];
+                const starters = players.filter((p) => /starter|starting|xi/i.test(p.role || ""));
+                const actualStarters = starters.length ? starters : players.slice(0, 11);
+                const bench = players.filter((p) => !actualStarters.some((s) => s.id === p.id));
+                const playerRow = (p) => (
+                  <div className="lineup-player-card" key={p.id}>
+                    <div className="lineup-avatar">
+                      {p.player?.photo_url ? <img src={p.player.photo_url} alt="" loading="lazy" decoding="async" /> : <span>{(p.player?.full_name || "P").slice(0,1).toUpperCase()}</span>}
+                    </div>
+                    <span className="lineup-number">{p.shirt_number ?? p.player?.shirt_number ?? "—"}</span>
+                    <a href={p.player?.id ? `/players/${p.player.id}` : "#"} className="lineup-player-name">
+                      <strong>{p.player?.full_name || "Player"}</strong>
+                      <small>{p.position || p.role || "Player"}{p.player_id === l.captain_player_id ? " • C" : ""}</small>
+                    </a>
                   </div>
-                </div>
-              ))}
+                );
+                return (
+                  <div className="lineup-team-card" key={l.id}>
+                    <div className="lineup-team-head">
+                      <div className="lineup-team-identity">
+                        <div className="lineup-team-logo">{l.team?.logo_url ? <img src={l.team.logo_url} alt="" loading="lazy" decoding="async" /> : <span>{(l.team?.short_name || l.team?.name || "T").slice(0,2).toUpperCase()}</span>}</div>
+                        <div><strong>{l.team?.name || "Team"}</strong><span>{l.formation || "Formation TBC"}</span></div>
+                      </div>
+                      <span>{l.submitted_at ? "Confirmed" : "Published"}</span>
+                    </div>
+                    <div className="lineup-section-label">STARTING XI</div>
+                    <div className="lineup-list">{actualStarters.map(playerRow)}</div>
+                    <div className="lineup-section-label">SUBSTITUTES</div>
+                    <div className="lineup-list lineup-bench">{bench.length ? bench.map(playerRow) : <div className="lineup-empty">No substitutes published.</div>}</div>
+                  </div>
+                );
+              })}
             </div>
           </section>
-        ) : null}
+        ) : (
+          <section className="detail-section">
+            <div className="empty-state lineup-pending"><strong>Lineups not published yet.</strong><span>Confirmed starting XIs will appear here when the Control Room publishes them.</span></div>
+          </section>
+        )
 
         {h2h.length ? (<section className="detail-section" id="h2h"><div className="section-heading"><div><span className="section-kicker">Head to head</span><h2>Recent meetings</h2></div><span className="verified-badge">Last 5</span></div><div className="h2h-list">{h2h.map((x) => { const homeWin=x.home_score!=null&&x.home_score>x.away_score; const awayWin=x.away_score!=null&&x.away_score>x.home_score; return <a className="h2h-row" href={"/matches/"+x.id} key={x.id}><span>{new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(x.scheduled_at))}</span><strong>{x.home_team?.short_name||x.home_team?.name||"Home"} <b>{x.home_score??0}:{x.away_score??0}</b> {x.away_team?.short_name||x.away_team?.name||"Away"}</strong><em>{homeWin?"HOME WIN":awayWin?"AWAY WIN":"DRAW"}</em></a>})}</div></section>) : null}
 
