@@ -196,17 +196,13 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
     async function load() {
       try {
         const supabase = createSupabaseBrowserClient();
-        const [matches, verifications, teams, competitions] = await Promise.all([
-          supabase.from("matches").select("id,scheduled_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))").order("scheduled_at", { ascending: true }).limit(100),
-          supabase.from("match_verifications").select("match_id").eq("official_result", true),
-          supabase.from("teams").select("id", { count: "exact", head: true }).eq("is_active", true),
-          supabase.from("competitions").select("id", { count: "exact", head: true }).eq("is_active", true),
-        ]);
-        if (matches.error) throw matches.error;
-        if (verifications.error) throw verifications.error;
-        if (teams.error) throw teams.error;
-        if (competitions.error) throw competitions.error;
-        const officialIds = (verifications.data || []).map((x) => x.match_id);
+        const { data: incoming, error: matchesError } = await supabase
+          .from("matches")
+          .select("id,scheduled_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))")
+          .order("scheduled_at", { ascending: true })
+          .limit(100);
+        if (matchesError) throw matchesError;
+
         const incomingMatches = incoming || [];
         const previous = currentMatchesRef.current || [];
         const previousById = new Map(previous.map((m) => [m.id, m]));
@@ -235,18 +231,18 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
           pendingGoalsRef.current.set(next.id, timer);
         }
 
-        if (!cancelled) setState((current) => ({
-          ...current,
-          matches: visible.slice(0, 12).map((next) => {
-        if (!cancelled) setState((current) => ({
-          ...current,
-          matches: visible.slice(0, 12).map((next) => {
-            if (!pendingGoalsRef.current.has(next.id)) return next;
-            return current.matches.find((m) => m.id === next.id) || next;
-          }),
-          loading: false,
-          error: "",
-        }));
+        currentMatchesRef.current = incomingMatches;
+        if (!cancelled) {
+          setState((current) => ({
+            ...current,
+            matches: visible.slice(0, 12).map((next) => {
+              if (!pendingGoalsRef.current.has(next.id)) return next;
+              return current.matches.find((m) => m.id === next.id) || next;
+            }),
+            loading: false,
+            error: "",
+          }));
+        }
       } catch (error) {
         if (!cancelled) setState((x) => ({ ...x, loading: false, error: error?.message || "Football data could not be loaded." }));
       }
