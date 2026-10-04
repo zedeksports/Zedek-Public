@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 const LIVE_STATUSES = ["live", "in_progress", "halftime", "paused"];
 const OFFICIAL_STATUSES = ["finished", "verified"];
 
-function dateTime(value) {
+function kickOffTime(value) {\n  if (!value) return "TBC";\n  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(value));\n}\n\nfunction dateTime(value) {
   return value
     ? new Intl.DateTimeFormat("en-GH", {
         weekday: "long",
@@ -25,7 +25,7 @@ function Team({ team }) {
     <a className="match-detail-team" href={team?.id ? `/teams/${team.id}` : "#"}>
       <div className="mc-logo">
         {team?.logo_url ? (
-          <img src={team.logo_url} alt="" />
+          <img src={team.logo_url} alt="" loading="eager" decoding="async" fetchPriority="high" />
         ) : (
           <span>{(team?.short_name || team?.name || "?").slice(0, 2).toUpperCase()}</span>
         )}
