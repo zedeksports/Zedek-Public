@@ -93,9 +93,12 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
   const awayScore = isLive || isFinished ? (match.away_score ?? 0) : null;
   const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : match.status === "paused" ? "PAUSED" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
   const minute = liveMinute(match);
+  const homeFavorite = favoriteTeams.has(match.home_team?.id);
+  const awayFavorite = favoriteTeams.has(match.away_team?.id);
 
   return (
-    <a className={`score-match-card ${isLive ? "is-live" : ""}`} href={"/matches/" + match.id}>
+    <article className={`score-match-card ${isLive ? "is-live" : ""}`}>
+      <button type="button" className={homeFavorite || awayFavorite ? "match-favorite active" : "match-favorite"} aria-label={homeFavorite || awayFavorite ? "Remove teams from My Teams" : "Add teams to My Teams"} title={homeFavorite || awayFavorite ? "Remove from My Teams" : "Add to My Teams"} onClick={() => { if (homeFavorite) onToggleFavorite(match.home_team.id); if (awayFavorite) onToggleFavorite(match.away_team.id); if (!homeFavorite && !awayFavorite) onToggleFavorite(match.home_team?.id); }}>★</button>
       <div className="score-match-head">
         <span className={isLive ? "score-status live" : isFinished ? "score-status finished" : "score-status"}>
           {isLive ? <i /> : null}{statusLabel}
@@ -132,9 +135,9 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
 
       <div className="score-match-foot">
         <span>{isLive ? (minute ? "Live • " + minute : "Live score updates") : isFinished ? "Final result" : "Fixture"}</span>
-        <b>Open match centre <em>→</em></b>
+        <a href={"/matches/" + match.id}>Open match centre <em>→</em></a>
       </div>
-    </a>
+    </article>
   );
 }
 
