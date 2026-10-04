@@ -91,7 +91,7 @@ function TeamCrest({ team, fallback }) {
   );
 }
 
-function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
+function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite, clockNow }) {
   const isLive = LIVE_STATUSES.has(match.status);
   const isFinished = FINISHED_STATUSES.has(match.status);
   const home = teamName(match.home_team, "Home team");
@@ -294,7 +294,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
             <div className="empty-state">Refreshing football data…</div>
           ) : state.matches.length ? (
             <div className="score-match-list">
-              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} />)}
+              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} clockNow={clockNow} />)}
             </div>
           ) : (
             <div className="empty-state">
