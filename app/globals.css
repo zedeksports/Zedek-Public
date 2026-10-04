@@ -297,12 +297,12 @@ html[data-zedek-theme="night"] .standings-table-wrap{box-shadow:0 16px 45px rgba
 .score-status.finished{color:var(--z-success)}
 .score-match-competition{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:var(--z-muted);font-weight:750}
 .score-match-time{color:var(--z-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
-.score-match-body{display:grid;grid-template-columns:minmax(0,1fr) 132px minmax(0,1fr);align-items:center;gap:10px;padding:20px 18px}
-.score-side{display:flex;align-items:center;gap:11px;min-width:0}
-.score-side.away{justify-content:flex-end;text-align:right}
+.score-match-body{display:grid;grid-template-columns:minmax(0,1fr) 104px minmax(0,1fr);align-items:center;gap:6px;padding:20px 18px}
+.score-side{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:8px;min-width:0}
+.score-side.away{grid-template-columns:minmax(0,1fr) 48px;text-align:right}
 .score-side strong{font-size:14px;line-height:1.25;overflow-wrap:anywhere}
 .score-team-crest{
-  width:52px;height:52px;flex:0 0 52px;border-radius:16px;
+  width:48px;height:48px;flex:0 0 48px;border-radius:16px;
   display:grid;place-items:center;overflow:hidden;
   background:var(--z-surface-2);border:1px solid var(--z-line);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 7px 16px rgba(0,0,0,.07);
@@ -327,16 +327,19 @@ html[data-zedek-theme="night"] .score-team-crest{box-shadow:inset 0 0 0 1px rgba
   .score-match-head{grid-template-columns:auto minmax(0,1fr);gap:7px 10px}
   .score-match-competition{grid-column:2;grid-row:1;text-align:right}
   .score-match-time{grid-column:1/3;grid-row:2;text-align:left}
-  .score-match-body{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);gap:6px;padding:18px 12px}
-  .score-team-crest{width:46px;height:46px;flex-basis:46px;border-radius:14px}
-  .score-side{gap:7px}
+  .score-match-body{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:5px;padding:18px 12px}
+  .score-team-crest{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+  .score-side{grid-template-columns:42px minmax(0,1fr);gap:6px}
+  .score-side.away{grid-template-columns:minmax(0,1fr) 42px}
   .score-side strong{font-size:12px}
   .score-numbers{gap:6px}.score-numbers b{font-size:25px}.score-numbers span{font-size:15px}
 }
 @media(max-width:430px){
   .score-match-head{padding:10px 12px}
-  .score-match-body{grid-template-columns:minmax(0,1fr) 68px minmax(0,1fr);padding:16px 9px}
-  .score-team-crest{width:40px;height:40px;flex-basis:40px;border-radius:12px}
+  .score-match-body{grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr);padding:16px 9px}
+  .score-team-crest{width:38px;height:38px;flex-basis:38px;border-radius:11px}
+  .score-side{grid-template-columns:38px minmax(0,1fr);gap:5px}
+  .score-side.away{grid-template-columns:minmax(0,1fr) 38px}
   .score-side strong{font-size:11px}
   .score-numbers b{font-size:23px}
   .score-match-foot{padding:9px 12px;font-size:8px}
