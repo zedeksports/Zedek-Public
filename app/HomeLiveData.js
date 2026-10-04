@@ -41,7 +41,7 @@ function deriveVisible(all, officialIds, selectedDay, filter) {
   if (filter === "LIVE") return live;
   if (filter === "UPCOMING") return dayUpcoming;
   if (filter === "RESULTS") return dayResults;
-  if (filter === "MY TEAMS") return [];
+  if (filter === "MY TEAMS") return dayMatches;
   return [...live, ...dayUpcoming, ...dayResults].sort((a, b) => {
     if (LIVE_STATUSES.has(a.status) !== LIVE_STATUSES.has(b.status)) {
       return LIVE_STATUSES.has(a.status) ? -1 : 1;
@@ -84,7 +84,7 @@ function TeamCrest({ team, fallback }) {
   );
 }
 
-function ScoreMatchCard({ match, goalFlash }) {
+function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
   const isLive = LIVE_STATUSES.has(match.status);
   const isFinished = FINISHED_STATUSES.has(match.status);
   const home = teamName(match.home_team, "Home team");
@@ -142,7 +142,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   const initialMatches = initialData?.matches || [];
   const currentMatchesRef = useRef(initialMatches);
   const pendingGoalsRef = useRef(new Map());
-  const [goalFlashes, setGoalFlashes] = useState({});
+  const [goalFlashes, setGoalFlashes] = useState({});\n  const [favoriteTeams, setFavoriteTeams] = useState(() => new Set());
   const [state, setState] = useState(() => ({
     matches: deriveVisible(initialMatches, initialData?.officialIds, selectedDay, filter).slice(0, 12),
     teams: initialData?.teams || 0,
@@ -246,12 +246,12 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
             <div className="empty-state">Refreshing football data…</div>
           ) : state.matches.length ? (
             <div className="score-match-list">
-              {state.matches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} />)}
+              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} />)}
             </div>
           ) : (
             <div className="empty-state">
               <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No finished results for this date." : "No published matches for this date."}</strong>
-              <span>{filter === "MY TEAMS" ? "Team following will appear here when you choose clubs to follow." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
+              <span>{filter === "MY TEAMS" ? "Tap ★ on a match to follow a team. Your selected clubs will appear here." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
             </div>
           )}
         </div>
