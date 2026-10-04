@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import FollowButton from "../../../components/FollowButton";
+import LiveMatchCentre from "./LiveMatchCentre";
 
 export const dynamic = "force-dynamic";
 
@@ -130,80 +131,10 @@ export default async function MatchPage({ params }) {
 
       <section className="container match-detail"><nav className="match-detail-tabs" aria-label="Match information"><a href="#summary">Summary</a>{(live || official) ? <a href="#stats">Stats</a> : null}{lineups.length ? <a href="#lineups">Lineups</a> : null}{h2h.length ? <a href="#h2h">H2H</a> : null}</nav>
         <div className="match-detail-card" id="summary">
-          <div className="mc-meta">
-            <span>{m.round_name || "Match"}</span>
-            <span className={live ? "live-dot" : ""}>
-              {live ? "LIVE" : official ? "OFFICIAL" : m.status}
-            </span>
-          </div>
-          <div className="match-detail-score">
-            <Team team={m.home_team} />
-            <div>
-              <strong>{live || official ? m.home_score ?? 0 : kickOffTime(m.scheduled_at)}</strong>
-              <span>{live || official ? ":" : ""}</span>
-              <strong>{live || official ? m.away_score ?? 0 : ""}</strong>
-            </div>
-            <Team team={m.away_team} />
-          </div>
+          <LiveMatchCentre initialMatch={m} initialEvents={events} initialStats={stats} />
           <div className="match-follow-row"><FollowButton type="match" id={m.id} label="Follow match"/></div>
           {m.leg ? <div className="match-detail-note">Leg {m.leg}</div> : null}
         </div>
-
-        {(live || official) ? (
-          <section className="detail-section">
-            <div className="section-heading">
-              <div>
-                <span className="section-kicker">Timeline</span>
-                <h2>Match events</h2>
-              </div>
-            </div>
-            {events.length ? (
-              <div className="event-list">
-                {events.map((e) => (
-                  <div className="event-row" key={e.id}>
-                    <b>{e.minute}'{e.extra_minute ? `+${e.extra_minute}` : ""}</b>
-                    <span>
-                      {e.event_type?.replaceAll("_", " ")}
-                      {e.player?.full_name ? ` • ${e.player.full_name}` : ""}
-                      {e.secondary_player?.full_name ? ` • ${e.secondary_player.full_name}` : ""}
-                      {e.details ? ` — ${e.details}` : ""}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">No recorded events yet.</div>
-            )}
-          </section>
-        ) : null}
-
-        {(live || official) && stats ? (
-          <section className="detail-section">
-            <div className="section-heading">
-              <div>
-                <span className="section-kicker">Match statistics</span>
-                <h2>Match statistics</h2>
-              </div>
-            </div>
-            <div className="match-stats-grid">
-              {[
-                ["Possession", `${stats.home_possession ?? 0}% — ${stats.away_possession ?? 0}%`],
-                ["Shots", `${stats.home_shots ?? 0} — ${stats.away_shots ?? 0}`],
-                ["Shots on target", `${stats.home_shots_on_target ?? 0} — ${stats.away_shots_on_target ?? 0}`],
-                ["Corners", `${stats.home_corners ?? 0} — ${stats.away_corners ?? 0}`],
-                ["Fouls", `${stats.home_fouls ?? 0} — ${stats.away_fouls ?? 0}`],
-                ["Offsides", `${stats.home_offsides ?? 0} — ${stats.away_offsides ?? 0}`],
-                ["Pass accuracy", `${stats.home_pass_accuracy ?? 0}% — ${stats.away_pass_accuracy ?? 0}%`],
-                ["xG", `${stats.home_xg ?? 0} — ${stats.away_xg ?? 0}`],
-              ].map(([label, value]) => (
-                <div className="stat-box" key={label}>
-                  <span>{label}</span>
-                  <strong>{value}</strong>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         {lineups.length ? (
           <section className="detail-section" id="lineups">
