@@ -11,7 +11,7 @@ const getHomeData = unstable_cache(
         .order("scheduled_at", { ascending: true }).limit(100),
       supabase.from("teams").select("id", { count: "exact", head: true }).eq("is_active", true),
       supabase.from("competitions").select("id", { count: "exact", head: true }).eq("is_active", true),
-      supabase.from("ad_slots").select("id,name,placement,format,image_url,target_url").eq("active", true).or("start_date.is.null,start_date.lte."+new Date().toISOString().slice(0,10)).or("end_date.is.null,end_date.gte."+new Date().toISOString().slice(0,10)).order("created_at",{ascending:false}).limit(6),
+      supabase.from("ad_slots").select("id,name,placement,format,image_url,target_url").eq("active", true).eq("placement","homepage").or("start_date.is.null,start_date.lte."+new Date().toISOString().slice(0,10)).or("end_date.is.null,end_date.gte."+new Date().toISOString().slice(0,10)).order("created_at",{ascending:false}).limit(6),
     ]);
 
     const error = matchesError || teamsError || competitionsError || adsError;
