@@ -8,7 +8,7 @@ export default async function CommunityArticlePage({ params }) {
   const supabase = createSupabaseServerClient();
   const { data: post, error } = await supabase
     .from("content_posts")
-    .select("id,title,slug,excerpt,body,cover_image_url,category,featured,published_at,author:profiles!content_posts_author_id_fkey(full_name)")
+    .select("id,title,slug,excerpt,body,cover_image_url,category,featured,published_at")
     .eq("slug", slug)
     .eq("content_type","community_update")
     .eq("status","published")
@@ -23,7 +23,7 @@ export default async function CommunityArticlePage({ params }) {
         <span className="section-kicker">{post.category || "Community"}</span>
         <h1>{post.title}</h1>
         {post.excerpt ? <p>{post.excerpt}</p> : null}
-        <div className="news-meta"><span>{post.author?.full_name || "Zedek Sports"}</span><span>{post.published_at ? new Intl.DateTimeFormat("en-GH",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date(post.published_at)) : ""}</span></div>
+        <div className="news-meta"><span>{"Zedek Sports"}</span><span>{post.published_at ? new Intl.DateTimeFormat("en-GH",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date(post.published_at)) : ""}</span></div>
       </header>
       {post.cover_image_url ? <div className="news-article-cover"><img src={post.cover_image_url} alt="" fetchPriority="high" decoding="async" /></div> : null}
       <div className="news-body">{String(post.body || "").split(/\n\s*\n/).map((paragraph,i)=><p key={i}>{paragraph}</p>)}</div>
