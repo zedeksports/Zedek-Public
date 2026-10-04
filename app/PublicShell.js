@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 
 const primaryNav=[["Matches","/matches"],["Live","/matches?filter=live"]];
-const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["Surveys","/survey"],["Feedback","/feedback"],["My Teams","/favorites"]];
+const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["Surveys","/survey"],["Feedback","/feedback"],["Sponsors","/sponsors"],["My Teams","/favorites"]];
 
 export default function PublicShell({children}){
  const [searchOpen,setSearchOpen]=useState(false),[menuOpen,setMenuOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[night,setNight]=useState(false),[user,setUser]=useState(null),[unread,setUnread]=useState(0);
- useEffect(()=>{const saved=localStorage.getItem("zedek-theme");const isNight=saved==="night";setNight(isNight);document.documentElement.dataset.zedekTheme=isNight?"night":"day";const supabase=createSupabaseBrowserClient();let mounted=true;supabase.auth.getSession().then(async({data})=>{if(!mounted)return;setUser(data.session?.user||null);if(data.session){const n=await supabase.from("user_notifications").select("id",{count:"exact",head:true}).is("read_at",null);if(mounted)setUnread(n.count||0)}});const {data}=supabase.auth.onAuthStateChange((_event,session)=>{setUser(session?.user||null);if(!session)setUnread(0)});return()=>{mounted=false;data.subscription.unsubscribe()};},[]);
+ useEffect(()=>{const saved=localStorage.getItem("zedek-theme");const isNight=saved==="night";setNight(isNight);document.documentElement.dataset.zedekTheme=isNight?"night":"day";const supabase=createSupabaseBrowserClient();let mounted=true;const refreshUnread=async(session)=>{if(!session){if(mounted)setUnread(0);return}const n=await supabase.from("user_notifications").select("id",{count:"exact",head:true}).is("read_at",null);if(mounted)setUnread(n.count||0)};
+ supabase.auth.getSession().then(async({data})=>{if(!mounted)return;setUser(data.session?.user||null);await refreshUnread(data.session);});
+ const unreadTimer=setInterval(()=>{if(user)refreshUnread(user?{user}:null)},30000);const {data}=supabase.auth.onAuthStateChange((_event,session)=>{setUser(session?.user||null);if(!session)setUnread(0)});return()=>{mounted=false;clearInterval(unreadTimer);data.subscription.unsubscribe()};},[]);
  function toggleTheme(){const next=!night;setNight(next);localStorage.setItem("zedek-theme",next?"night":"day");document.documentElement.dataset.zedekTheme=next?"night":"day";}
  function closeLayers(){setMenuOpen(false);setSearchOpen(false);setAccountOpen(false);}
  async function signOut(){await createSupabaseBrowserClient().auth.signOut();closeLayers();window.location.href="/";}
