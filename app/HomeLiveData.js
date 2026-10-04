@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 
-function kickOffTime(value) {\n  if (!value) return "TBC";\n  return new Intl.DateTimeFormat("en-GB", {\n    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra",\n  }).format(new Date(value));\n}\n\nfunction dateLabel(value) {
+function kickOffTime(value) {
+  if (!value) return "TBC";
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra",
+  }).format(new Date(value));
+}
+
+function dateLabel(value) {
   if (!value) return "Date TBC";
   return new Intl.DateTimeFormat("en-GH", {
     day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra",
