@@ -97,8 +97,26 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
   const awayFavorite = favoriteTeams.has(match.away_team?.id);
 
   return (
-    <article className={`score-match-card ${isLive ? "is-live" : ""}`}>
-      <button type="button" className={homeFavorite || awayFavorite ? "match-favorite active" : "match-favorite"} aria-label={homeFavorite || awayFavorite ? "Remove teams from My Teams" : "Add teams to My Teams"} title={homeFavorite || awayFavorite ? "Remove from My Teams" : "Add to My Teams"} onClick={() => { if (homeFavorite) onToggleFavorite(match.home_team.id); if (awayFavorite) onToggleFavorite(match.away_team.id); if (!homeFavorite && !awayFavorite) onToggleFavorite(match.home_team?.id); }}>★</button>
+    <article
+      className={`score-match-card ${isLive ? "is-live" : ""}`}
+      role="link"
+      tabIndex={0}
+      onClick={() => { window.location.href = "/matches/" + match.id; }}
+      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); window.location.href = "/matches/" + match.id; } }}
+      aria-label={`Open match centre for ${home} versus ${away}`}
+    >
+      <button
+        type="button"
+        className={homeFavorite || awayFavorite ? "match-favorite active" : "match-favorite"}
+        aria-label={homeFavorite || awayFavorite ? "Remove teams from My Teams" : "Add teams to My Teams"}
+        title={homeFavorite || awayFavorite ? "Remove from My Teams" : "Add to My Teams"}
+        onClick={(event) => {
+          event.stopPropagation();
+          if (homeFavorite) onToggleFavorite(match.home_team.id);
+          if (awayFavorite) onToggleFavorite(match.away_team.id);
+          if (!homeFavorite && !awayFavorite) onToggleFavorite(match.home_team?.id);
+        }}
+      >★</button>
       <div className="score-match-head">
         <span className={isLive ? "score-status live" : isFinished ? "score-status finished" : "score-status"}>
           {isLive ? <i /> : null}{statusLabel}
@@ -189,10 +207,10 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
         if (teams.error) throw teams.error;
         if (competitions.error) throw competitions.error;
         const officialIds = (verifications.data || []).map((x) => x.match_id);
-        const incoming = matches.data || [];
+        const incomingMatches = incoming || [];
         const previous = currentMatchesRef.current || [];
         const previousById = new Map(previous.map((m) => [m.id, m]));
-        const visible = deriveVisible(incoming, officialIds, selectedDay, filter);
+        const visible = deriveVisible(incomingMatches, initialData?.officialIds, selectedDay, filter);
 
         // Hold a score change for 8 seconds, then reveal it with the goal animation.
         for (const next of visible) {
@@ -217,15 +235,15 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
           pendingGoalsRef.current.set(next.id, timer);
         }
 
-        currentMatchesRef.current = incoming;
+        if (!cancelled) setState((current) => ({
+          ...current,
+          matches: visible.slice(0, 12).map((next) => {
         if (!cancelled) setState((current) => ({
           ...current,
           matches: visible.slice(0, 12).map((next) => {
             if (!pendingGoalsRef.current.has(next.id)) return next;
             return current.matches.find((m) => m.id === next.id) || next;
           }),
-          teams: teams.count || 0,
-          competitions: competitions.count || 0,
           loading: false,
           error: "",
         }));
@@ -234,7 +252,8 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
       }
     }
     load();
-    const refreshTimer = setInterval(load, 5000);
+    const refreshDelay = initialMatches.some((match) => LIVE_STATUSES.has(match.status)) ? 10000 : 60000;
+    const refreshTimer = setInterval(load, refreshDelay);
     return () => {
       cancelled = true;
       clearInterval(refreshTimer);
