@@ -142,7 +142,8 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   const initialMatches = initialData?.matches || [];
   const currentMatchesRef = useRef(initialMatches);
   const pendingGoalsRef = useRef(new Map());
-  const [goalFlashes, setGoalFlashes] = useState({});\n  const [favoriteTeams, setFavoriteTeams] = useState(() => new Set());
+  const [goalFlashes, setGoalFlashes] = useState({});
+  const [favoriteTeams, setFavoriteTeams] = useState(() => new Set());
   const [state, setState] = useState(() => ({
     matches: deriveVisible(initialMatches, initialData?.officialIds, selectedDay, filter).slice(0, 12),
     teams: initialData?.teams || 0,
@@ -150,6 +151,24 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
     loading: false,
     error: initialData?.error || "",
   }));
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("zedek-favorite-teams") || "[]");
+      if (Array.isArray(saved)) setFavoriteTeams(new Set(saved));
+    } catch {}
+  }, []);
+
+  function toggleFavorite(teamId) {
+    if (!teamId) return;
+    setFavoriteTeams((current) => {
+      const next = new Set(current);
+      if (next.has(teamId)) next.delete(teamId);
+      else next.add(teamId);
+      localStorage.setItem("zedek-favorite-teams", JSON.stringify([...next]));
+      return next;
+    });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -222,6 +241,9 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   }, [selectedDay, filter]);
 
   const liveCount = state.matches.filter((m) => LIVE_STATUSES.has(m.status)).length;
+  const displayedMatches = filter === "MY TEAMS"
+    ? state.matches.filter((m) => favoriteTeams.has(m.home_team?.id) || favoriteTeams.has(m.away_team?.id))
+    : state.matches;
 
   return (
     <section className="container section">
