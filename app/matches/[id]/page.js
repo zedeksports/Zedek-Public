@@ -6,7 +6,12 @@ export const dynamic = "force-dynamic";
 const LIVE_STATUSES = ["live", "in_progress", "halftime", "paused"];
 const OFFICIAL_STATUSES = ["finished", "verified"];
 
-function kickOffTime(value) {\n  if (!value) return "TBC";\n  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(value));\n}\n\nfunction dateTime(value) {
+function kickOffTime(value) {
+  if (!value) return "TBC";
+  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(value));
+}
+
+function dateTime(value) {
   return value
     ? new Intl.DateTimeFormat("en-GH", {
         weekday: "long",
