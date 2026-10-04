@@ -109,7 +109,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <section className="live-centre-panel live-stats-panel" id="stats">
         <div className="live-centre-panel-head"><span>MATCH INTELLIGENCE</span><h2>Live match statistics</h2></div>
         <div className="live-stat-team-head"><span>{match?.home_team?.short_name || match?.home_team?.name || "Home"}</span><span>{match?.away_team?.short_name || match?.away_team?.name || "Away"}</span></div>
-        {stats ? <div className="live-stat-list">{statRows.map(([label,h,a]) => <StatRow key={label} label={label} home={h} away={a} />)}</div> : <div className="live-empty"><strong>Statistics are not available yet.</strong><span>As the reporter records possession, shots, corners, fouls and xG, this panel updates automatically.</span></div>}
+        {hasStats ? <div className="live-stat-list">{statRows.map(([label,h,a]) => <StatRow key={label} label={label} home={h} away={a} />)}</div> : <div className="live-empty"><strong>Statistics are not available yet.</strong><span>As the reporter records possession, shots, corners, fouls and xG, this panel updates automatically.</span></div>}
       </section>
     </div>
   </section>;
