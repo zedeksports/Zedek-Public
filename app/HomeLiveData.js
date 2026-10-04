@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 
-function dateLabel(value) {
+function kickOffTime(value) {\n  if (!value) return "TBC";\n  return new Intl.DateTimeFormat("en-GB", {\n    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra",\n  }).format(new Date(value));\n}\n\nfunction dateLabel(value) {
   if (!value) return "Date TBC";
   return new Intl.DateTimeFormat("en-GH", {
     day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra",
@@ -76,7 +76,7 @@ function TeamCrest({ team, fallback }) {
   return (
     <span className="score-team-crest" aria-hidden="true">
       {hasLogo ? (
-        <img src={team.logo_url} alt="" onError={() => setBroken(true)} />
+        <img src={team.logo_url} alt="" loading="eager" decoding="async" fetchPriority="high" onError={() => setBroken(true)} />
       ) : (
         <span>{initials(team, fallback)}</span>
       )}
@@ -139,7 +139,7 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
             </div>
           ) : (
             <div className="score-kickoff" aria-label={match.scheduled_at ? `Kick-off at ${dateLabel(match.scheduled_at)}` : "Kick-off time to be confirmed"}>
-              {match.scheduled_at ? new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra" }).format(new Date(match.scheduled_at)) : "TBC"}
+              {kickOffTime(match.scheduled_at)}
             </div>
           )}
           <small>{isLive ? (minute || "LIVE") : isFinished ? "FINAL RESULT" : "PRE-MATCH"}</small>
