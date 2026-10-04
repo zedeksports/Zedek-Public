@@ -6,7 +6,7 @@ export default async function CommunityPage() {
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("content_posts")
-    .select("id,title,slug,excerpt,cover_image_url,category,featured,published_at,author:profiles!content_posts_author_id_fkey(full_name)")
+    .select("id,title,slug,excerpt,cover_image_url,category,featured,published_at")
     .eq("content_type","community_update")
     .eq("status","published")
     .lte("published_at", new Date().toISOString())
@@ -31,7 +31,7 @@ export default async function CommunityPage() {
                 <span className="section-kicker">{post.category || "Community"}</span>
                 <h2>{post.title}</h2>
                 {post.excerpt ? <p>{post.excerpt}</p> : null}
-                <div className="news-meta"><span>{post.author?.full_name || "Zedek Sports"}</span><span>{post.published_at ? new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(post.published_at)) : ""}</span></div>
+                <div className="news-meta"><span>{"Zedek Sports"}</span><span>{post.published_at ? new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(post.published_at)) : ""}</span></div>
               </div>
             </a>
           ))}
