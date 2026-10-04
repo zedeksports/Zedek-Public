@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 
 const primaryNav=[["Matches","/matches"],["Live","/matches?filter=live"]];
-const exploreNav=[["News","/news"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/favorites"]];
+const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/favorites"]];
 
 export default function PublicShell({children}){
  const [searchOpen,setSearchOpen]=useState(false),[menuOpen,setMenuOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[night,setNight]=useState(false),[user,setUser]=useState(null),[unread,setUnread]=useState(0);
