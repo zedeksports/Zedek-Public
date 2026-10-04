@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect,useMemo,useState} from "react";
+import {useSearchParams} from "next/navigation";
 import {createSupabaseBrowserClient} from "../../lib/supabase/browser";
 
 const LIVE=["live","in_progress","halftime","paused"];
@@ -20,12 +21,14 @@ function Team({team}){
 }
 
 export default function MatchesPage(){
+  const searchParams=useSearchParams();
   const [matches,setMatches]=useState([]);
   const [official,setOfficial]=useState(new Set());
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
   const [selectedDate,setSelectedDate]=useState(dateKey(new Date()));
   const [filter,setFilter]=useState("all");
+  useEffect(()=>{const requested=searchParams.get("filter");if(["all","upcoming","live","results"].includes(requested))setFilter(requested);},[searchParams]);
 
   useEffect(()=>{
     async function load(){
