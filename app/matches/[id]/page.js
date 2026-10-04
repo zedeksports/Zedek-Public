@@ -116,8 +116,8 @@ export default async function MatchPage({ params }) {
         </div>
       </section>
 
-      <section className="container match-detail">
-        <div className="match-detail-card">
+      <section className="container match-detail"><nav className="match-detail-tabs" aria-label="Match information"><a href="#summary">Summary</a>{(live || official) ? <a href="#stats">Stats</a> : null}{lineups.length ? <a href="#lineups">Lineups</a> : null}{h2h.length ? <a href="#h2h">H2H</a> : null}</nav>
+        <div className="match-detail-card" id="summary">
           <div className="mc-meta">
             <span>{m.round_name || "Match"}</span>
             <span className={live ? "live-dot" : ""}>
@@ -227,7 +227,7 @@ export default async function MatchPage({ params }) {
           </section>
         ) : null}
 
-        {m.notes ? (
+        {h2h.length ? (<section className="detail-section" id="h2h"><div className="section-heading"><div><span className="section-kicker">Head to head</span><h2>Recent meetings</h2></div><span className="verified-badge">Last 5</span></div><div className="h2h-list">{h2h.map((x) => { const homeWin=x.home_score!=null&&x.home_score>x.away_score; const awayWin=x.away_score!=null&&x.away_score>x.home_score; return <a className="h2h-row" href={"/matches/"+x.id} key={x.id}><span>{new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(x.scheduled_at))}</span><strong>{x.home_team?.short_name||x.home_team?.name||"Home"} <b>{x.home_score??0}:{x.away_score??0}</b> {x.away_team?.short_name||x.away_team?.name||"Away"}</strong><em>{homeWin?"HOME WIN":awayWin?"AWAY WIN":"DRAW"}</em></a>})}</div></section> : null}\n\n        {m.notes ? (
           <section className="detail-section">
             <span className="section-kicker">Match notes</span>
             <p className="match-notes">{m.notes}</p>
