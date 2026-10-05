@@ -44,7 +44,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const [events, setEvents] = useState(initialEvents || []);
   const [stats, setStats] = useState(initialStats || null);
   const [now, setNow] = useState(Date.now());
-  const pendingMatchRef = useRef(null);
+  const matchRef = useRef(initialMatch);\n  const eventsRef = useRef(initialEvents || []);\n  matchRef.current = match;\n  eventsRef.current = events;\n  const pendingMatchRef = useRef(null);
   const pendingEventsRef = useRef(new Map());
   const initialCutoffRef = useRef(Date.now() - 5000);
   const previousScoreRef = useRef({ home: initialMatch?.home_score ?? 0, away: initialMatch?.away_score ?? 0 });
@@ -69,13 +69,13 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
       if (!m.error && m.data) {
         const next = m.data;
-        const differs = SCORE_KEYS.some((key) => (next?.[key] ?? null) !== (match?.[key] ?? null));
+        const differs = SCORE_KEYS.some((key) => (next?.[key] ?? null) !== (matchRef.current?.[key] ?? null));
         if (!differs) {
           pendingMatchRef.current = null;
         } else if (!pendingMatchRef.current || pendingMatchRef.current.signature !== JSON.stringify(SCORE_KEYS.map((key) => next?.[key] ?? null))) {
           pendingMatchRef.current = { data: next, detectedAt, signature: JSON.stringify(SCORE_KEYS.map((key) => next?.[key] ?? null)) };
         } else if (detectedAt - pendingMatchRef.current.detectedAt >= 5000) {
-          const previous = { home: match?.home_score ?? 0, away: match?.away_score ?? 0 };
+          const previous = { home: matchRef.current?.home_score ?? 0, away: matchRef.current?.away_score ?? 0 };
           setMatch(pendingMatchRef.current.data);
           const updated = pendingMatchRef.current.data;
           const newHome = updated.home_score ?? 0, newAway = updated.away_score ?? 0;
@@ -91,7 +91,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         const fetchedEvents = e.data || [];
         fetchedEvents.forEach((event) => {
           const created = event.created_at ? new Date(event.created_at).getTime() : detectedAt;
-          if (created <= initialCutoffRef.current || events.some((x) => x.id === event.id)) return;
+          if (created <= initialCutoffRef.current || eventsRef.current.some((x) => x.id === event.id)) return;
           const pending = pendingEventsRef.current.get(event.id);
           if (!pending) pendingEventsRef.current.set(event.id, detectedAt);
           else if (detectedAt - pending >= 5000) pendingEventsRef.current.delete(event.id);
@@ -107,7 +107,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     refresh();
     const timer = setInterval(refresh, 2000);
     return () => { cancelled = true; clearInterval(timer); };
-  }, [initialMatch.id, events, match]);
+  }, [initialMatch.id]);
 
   const live = LIVE_STATUSES.has(match?.status);
   const official = OFFICIAL_STATUSES.has(match?.status);
@@ -137,7 +137,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     <div className="live-centre-grid">
       <section className="live-centre-panel">
         <div className="live-centre-panel-head"><span>LIVE FEED</span><h2>Match events</h2></div>
-        {events.length ? <div className="live-event-list">{events.map(e => <div className="live-event" key={e.id}><b>{e.minute}'{e.extra_minute ? "+"+e.extra_minute : ""}</b><span className={"live-event-icon " + e.event_type}>{e.event_type === "goal" ? "⚽" : e.event_type === "yellow_card" ? "🟨" : e.event_type === "red_card" ? "🟥" : "•"}</span><div><strong>{eventLabel(e.event_type)}</strong><small>{e.player?.full_name || e.team?.name || ""}{e.event_type === "goal" && e.secondary_player?.full_name ? " • Assist: " + e.secondary_player.full_name : ""}{e.details ? " — " + e.details : ""}</small></div></div>)}</div> : <div className="live-empty">No events recorded yet.</div>}
+        {events.length ? <div className="live-event-list">{events.map(e => <div className="live-event" key={e.id}><b>{e.minute}'{e.extra_minute ? "+"+e.extra_minute : ""}</b><span className={"live-event-icon " + e.event_type}>{e.event_type === "goal" ? "⚽" : e.event_type === "yellow_card" ? "🟨" : e.event_type === "red_card" ? "🟥" : "•"}</span><div><strong>{e.event_type === "goal" ? "Goal: " + (e.player?.full_name || "Unknown scorer") : eventLabel(e.event_type)}</strong><small>{e.event_type === "goal" && e.secondary_player?.full_name ? "Assist: " + e.secondary_player.full_name : e.player?.full_name || e.team?.name || ""}{e.details ? " — " + e.details : ""}</small></div></div>)}</div> : <div className="live-empty">No events recorded yet.</div>}
       </section>
 
       <section className="live-centre-panel live-stats-panel" id="stats">
