@@ -121,7 +121,6 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const primaryAd=streamAds[0]?.ad_slot||null;
   const streamingUrl=primaryChannel?.url||match?.streaming_url||"";
   const mediaChannel=primaryChannel ? [primaryChannel.name,primaryChannel.provider].filter(Boolean).join(" · ") : (match?.media_channel||"Channel TBC");
-  const matchPreview=preview?.summary||preview?.headline||match?.match_preview||"Official match preview will appear here before kick-off.";
   const streamingAd=primaryAd ? [primaryAd.name,primaryAd.sponsor?.name].filter(Boolean).join(" · ") : (match?.streaming_ad_text||"Live streaming information will appear here when officially available.");
   const formData=(initialForm||[]).map((x,i)=>({...x,rank:x.rank||i+1,team:x.team||([match?.home_team,match?.away_team][i]),results:x.results||[]}));
   const minute=minuteLabel(match,now);
