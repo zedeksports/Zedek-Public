@@ -29,7 +29,7 @@ export default function OfficialPortal(){
       if(ids.length){
         const [players,matches]=await Promise.all([
           supabase.from("players").select("id,full_name,shirt_number,position,photo_url,is_captain,team_id").in("team_id",ids).eq("is_active",true).order("shirt_number"),
-          supabase.from("matches").select("id,scheduled_at,status,home_score,away_score,home_team_id,away_team_id,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))").or(ids.map(id=>"home_team_id.eq."+id+",away_team_id.eq."+id).join(",")).order("scheduled_at",{ascending:true}).limit(30)
+          supabase.from("matches").select("id,scheduled_at,status,home_score,away_score,home_team_id,away_team_id,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))").or("home_team_id.in.("+ids.join(",")+"),away_team_id.in.("+ids.join(",")+")").order("scheduled_at",{ascending:true}).limit(30)
         ]);
         if(mounted){setTeamData([{players:players.data||[],matches:matches.data||[]}]);}
       }
