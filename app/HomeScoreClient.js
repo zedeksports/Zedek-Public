@@ -57,7 +57,7 @@ export default function HomeScoreClient({ initialData }) {
   const [filter, setFilter] = useState("ALL");
 
   return (
-    <main className="page theme-day">
+    <main className="page">
       <section className="score-hero">
         <div className="container score-hero-inner">
           <div className="score-hero-copy">
