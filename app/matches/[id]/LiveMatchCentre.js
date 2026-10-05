@@ -44,7 +44,8 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[h2h]=useState(initialH2H||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
   const matchRef=useRef(initialMatch),eventsRef=useRef(initialEvents||[]);
   matchRef.current=match; eventsRef.current=events;
-  const pendingMatchRef=useRef(null),pendingEventsRef=useRef(new Map()),initialCutoffRef=useRef(Date.now()-5000),goalTimerRef=useRef(null);\n  const [goalAnimation,setGoalAnimation]=useState(null);
+  const pendingMatchRef=useRef(null),pendingEventsRef=useRef(new Map()),initialCutoffRef=useRef(Date.now()-5000),goalTimerRef=useRef(null);
+  const [goalAnimation,setGoalAnimation]=useState(null);
 
   useEffect(()=>{const clock=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(clock)},[]);
 
