@@ -72,6 +72,13 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           const previous={home:matchRef.current?.home_score??0,away:matchRef.current?.away_score??0};
           setMatch(pendingMatchRef.current.data);
           const u=pendingMatchRef.current.data,nh=u.home_score??0,na=u.away_score??0;
+          if(nh!==previous.home||na!==previous.away){
+            const side=nh>previous.home?"home":na>previous.away?"away":null;
+            const scoringTeam=side==="home"?(u.home_team?.name||"Home team"):side==="away"?(u.away_team?.name||"Away team"):"Match score";
+            setGoalAnimation({side,team:scoringTeam,score:nh+":"+na});
+            if(goalTimerRef.current)window.clearTimeout(goalTimerRef.current);
+            goalTimerRef.current=window.setTimeout(()=>setGoalAnimation(null),2600);
+          }
           pendingMatchRef.current=null;
         }
       }
@@ -185,6 +192,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
+      {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}
     </div>
     {prematch?<div className="prematch-accordion-stack">
       <MatchSummaryCard match={match} venue={resolvedVenue} />
