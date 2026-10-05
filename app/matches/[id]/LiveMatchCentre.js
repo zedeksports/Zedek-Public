@@ -45,7 +45,10 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const [stats, setStats] = useState(initialStats || null);
   const [now, setNow] = useState(Date.now());
   const matchRef = useRef(initialMatch);
-  const eventsRef = useRef(initialEvents || []);\n  matchRef.current = match;\n  eventsRef.current = events;\n  const pendingMatchRef = useRef(null);
+  const eventsRef = useRef(initialEvents || []);
+  matchRef.current = match;
+  eventsRef.current = events;
+  const pendingMatchRef = useRef(null);
   const pendingEventsRef = useRef(new Map());
   const initialCutoffRef = useRef(Date.now() - 5000);
   const previousScoreRef = useRef({ home: initialMatch?.home_score ?? 0, away: initialMatch?.away_score ?? 0 });
