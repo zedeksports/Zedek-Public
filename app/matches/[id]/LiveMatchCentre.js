@@ -40,8 +40,8 @@ function eventLabel(type) {
   return String(type || "event").replaceAll("_"," ");
 }
 
-export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialH2H, initialForm }) {
-  const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[h2h]=useState(initialH2H||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
+export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialH2H, initialForm, initialPreview, initialChannels, initialStreamAds }) {
+  const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[h2h]=useState(initialH2H||[]),[preview,setPreview]=useState(initialPreview||null),[channels,setChannels]=useState(initialChannels||[]),[streamAds,setStreamAds]=useState(initialStreamAds||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
   const matchRef=useRef(initialMatch),eventsRef=useRef(initialEvents||[]);
   matchRef.current=match; eventsRef.current=events;
   const pendingMatchRef=useRef(null),pendingEventsRef=useRef(new Map()),initialCutoffRef=useRef(Date.now()-5000),goalTimerRef=useRef(null);
@@ -53,11 +53,14 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     let cancelled=false;
     async function refresh(){
       const s=createSupabaseBrowserClient();
-      const [m,e,st,l]=await Promise.all([
+      const [m,e,st,l,pv,ch,sa]=await Promise.all([
         s.from("matches").select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
         s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(full_name,shirt_number),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
-        s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id)
+        s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
+        s.from("match_previews").select("id,match_id,headline,summary,key_storylines,form_note,h2h_note,venue_note,status,published_at,updated_at").eq("match_id",initialMatch.id).eq("status","published").maybeSingle(),
+        s.from("match_channels").select("id,match_id,channel_type,name,provider,url,is_primary,active,starts_at,ends_at,updated_at").eq("match_id",initialMatch.id).eq("active",true).order("is_primary",{ascending:false}).order("updated_at",{ascending:false}),
+        s.from("match_stream_ads").select("id,match_id,ad_slot_id,position,active,ad_slot:ad_slots(id,name,placement,format,image_url,target_url,active,sponsor:sponsors(id,name,logo_url,website_url))").eq("match_id",initialMatch.id).eq("active",true).order("priority").order("created_at",{ascending:false})
       ]);
       if(cancelled)return;
       const detectedAt=Date.now();
@@ -100,6 +103,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       }
       if(!st.error)setStats(st.data||null);
       if(!l.error)setLineups(l.data||[]);
+      if(!pv.error)setPreview(pv.data||null);
+      if(!ch.error)setChannels(ch.data||[]);
+      if(!sa.error)setStreamAds(sa.data||[]);
     }
     refresh();
     const timer=setInterval(refresh,2000);
@@ -113,8 +119,11 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const referee=match?.referee||"Referee TBC";
   const matchPreview=match?.match_preview||"Official match preview will appear here before kick-off.";
   const mediaChannel=match?.media_channel||"Channel TBC";
-  const streamingUrl=match?.streaming_url||"";
-  const streamingAd=match?.streaming_ad_text||"Live streaming information will appear here when officially available.";
+  const primaryChannel=channels.find(x=>x.is_primary)||channels[0]||null;
+  const primaryAd=streamAds[0]?.ad_slot||null;
+  const streamingUrl=primaryChannel?.url||match?.streaming_url||"";
+  const mediaChannel=primaryChannel ? [primaryChannel.name,primaryChannel.provider].filter(Boolean).join(" · ") : (match?.media_channel||"Channel TBC");
+  const streamingAd=primaryAd ? [primaryAd.name,primaryAd.sponsor?.name].filter(Boolean).join(" · ") : (match?.streaming_ad_text||"Live streaming information will appear here when officially available.");
   const formData=(initialForm||[]).map((x,i)=>({...x,rank:x.rank||i+1,team:x.team||([match?.home_team,match?.away_team][i]),results:x.results||[]}));
   const minute=minuteLabel(match,now);
   const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":String(match.status||"").toUpperCase();
@@ -194,9 +203,10 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
       {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}
+      {primaryAd ? <a className="live-stream-ad" href={primaryAd.target_url||streamingUrl||"#"} target={primaryAd.target_url||streamingUrl?"_blank":undefined} rel={primaryAd.target_url||streamingUrl?"noreferrer":undefined} aria-label={primaryAd.name||"Live stream sponsor"}>{primaryAd.image_url?<img src={primaryAd.image_url} alt={primaryAd.name||"Live stream sponsor"} />:<span><strong>{primaryAd.name||"Live stream"}</strong>{primaryAd.sponsor?.name?<small>{primaryAd.sponsor.name}</small>:null}</span>}</a>:null}
     </div>
     {prematch?<div className="prematch-accordion-stack">
-      <MatchSummaryCard match={match} venue={resolvedVenue} />
+      <MatchSummaryCard match={match} venue={resolvedVenue} referee={referee} preview={preview} />
       <FormSection teams={formData} defaultOpen={true} />
       <CollapsibleSection title="HEAD TO HEAD" eyebrow="PREVIOUS MEETINGS">
         <H2HPreview matches={h2h} match={match} />
@@ -205,7 +215,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         <div className="mc-match-information">
           <div><span>VENUE</span><strong>{resolvedVenue}</strong></div>
           <div><span>REFEREE</span><strong>{referee}</strong></div>
-          <div><span>CHANNEL</span><strong>{mediaChannel}</strong></div>
+          <div><span>CHANNEL</span><strong>{mediaChannel}</strong>{primaryChannel?.url?<a href={primaryChannel.url} target="_blank" rel="noreferrer">Open channel</a>:null}</div>
           <div><span>STREAMING</span><strong>{streamingAd}</strong>{streamingUrl?<a href={streamingUrl} target="_blank" rel="noreferrer">View streaming information</a>:null}</div>
         </div>
       </CollapsibleSection>
