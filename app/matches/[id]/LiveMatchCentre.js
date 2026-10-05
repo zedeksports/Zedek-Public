@@ -126,25 +126,33 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   ],[stats]);
 
   const lineupByTeam=useMemo(()=>{
-    const rank=p=>{
+    const groupFor=p=>{
       const v=String(p.position||p.player?.position||p.role||"").toLowerCase();
-      if(/goal|keeper|\bgk\b/.test(v))return 0;
-      if(/def|back|cb|lb|rb|wing.?back/.test(v))return 1;
-      if(/mid|dm|cm|am/.test(v))return 2;
-      if(/forward|striker|attack|wing|fw/.test(v))return 3;
-      return 4;
+      if(/goal|keeper/.test(v)||v==="gk")return "GK";
+      if(/def|back|cb|lb|rb|wing.?back/.test(v))return "DEF";
+      if(/mid|dm|cm|am/.test(v))return "MID";
+      if(/forward|striker|attack|wing|fw/.test(v))return "FWD";
+      return "OTHER";
     };
     return lineups.map(l=>{
       const raw=l.lineup_players||[];
       const star=raw.filter(p=>/starter|starting|xi/i.test(p.role||""));
-      const starters=(star.length?star:raw.slice(0,11)).slice(0,11).sort((a,b)=>rank(a)-rank(b)||Number(a.shirt_number??a.player?.shirt_number??999)-Number(b.shirt_number??b.player?.shirt_number??999));
-      return {...l,starters,bench:raw.filter(p=>!starters.some(s=>s.id===p.id))};
+      const starters=(star.length?star:raw.slice(0,11)).slice(0,11);
+      const groups={GK:[],DEF:[],MID:[],FWD:[],OTHER:[]};
+      starters.forEach(p=>groups[groupFor(p)].push(p));
+      Object.values(groups).forEach(list=>list.sort((a,b)=>Number(a.shirt_number??a.player?.shirt_number??999)-Number(b.shirt_number??b.player?.shirt_number??999)));
+      return {...l,starters,groups,bench:raw.filter(p=>!starters.some(s=>s.id===p.id))};
     });
   },[lineups]);
 
   const homeLineup=lineupByTeam.find(l=>l.team_id===match?.home_team?.id)||lineupByTeam[0];
   const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id)||lineupByTeam[1];
-  const lineupRows=Array.from({length:Math.max(homeLineup?.starters?.length||0,awayLineup?.starters?.length||0)},(_,i)=>[homeLineup?.starters?.[i],awayLineup?.starters?.[i]]);
+  const positionGroups=["GK","DEF","MID","FWD","OTHER"];
+  const positionLabels={GK:"GOALKEEPER",DEF:"DEFENDERS",MID:"MIDFIELDERS",FWD:"FORWARDS",OTHER:"OTHER"};
+  const lineupRows=positionGroups.flatMap(group=>{
+    const h=homeLineup?.groups?.[group]||[], a=awayLineup?.groups?.[group]||[];
+    return Array.from({length:Math.max(h.length,a.length)},(_,i)=>({group,h:h[i],a:a[i]}));
+  });
 
   function PlayerCell({item,lineup,away}){
     if(!item)return <div className="head-to-head-empty">—</div>;
@@ -163,7 +171,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const renderLineups=()=>lineups.length?<div className="head-to-head-lineups">
     <div className="head-to-head-team-head"><div>{homeLineup?.team?.logo_url?<img src={homeLineup.team.logo_url} alt=""/>:null}<strong>{homeLineup?.team?.short_name||homeLineup?.team?.name||"Home"}</strong></div><span>STARTING XI · HEAD TO HEAD</span><div><strong>{awayLineup?.team?.short_name||awayLineup?.team?.name||"Away"}</strong>{awayLineup?.team?.logo_url?<img src={awayLineup.team.logo_url} alt=""/>:null}</div></div>
     <div className="head-to-head-label"><span>GK FIRST</span><small>Players aligned by position group</small><span>GK FIRST</span></div>
-    <div className="head-to-head-rows">{lineupRows.map(([h,a],i)=><div className="head-to-head-row" key={i}><PlayerCell item={h} lineup={homeLineup}/><span className="head-to-head-vs">VS</span><PlayerCell item={a} lineup={awayLineup} away/></div>)}</div>
+    <div className="head-to-head-rows">{lineupRows.map(({group,h,a},i)=><div className="head-to-head-row-wrap" key={group+"-"+i}>{(i===0||lineupRows[i-1].group!==group)?<div className="head-to-head-position-label">{positionLabels[group]}</div>:null}<div className="head-to-head-row"><PlayerCell item={h} lineup={homeLineup}/><span className="head-to-head-vs">VS</span><PlayerCell item={a} lineup={awayLineup} away/></div></div>)}</div>
     <div className="head-to-head-bench"><div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><span key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</span>)}</div><div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><span key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</span>)}</div></div>
   </div>:<div className="live-empty"><strong>Lineups not available yet.</strong><span>Confirmed lineups will appear here when submitted.</span></div>;
 
