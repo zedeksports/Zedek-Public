@@ -67,7 +67,7 @@ export function FormSection({ teams = [], defaultOpen = true }) {
     <CollapsibleSection title="FORM" eyebrow="RECENT TEAM FORM" defaultOpen={defaultOpen} className="mc-form-section">
       <div className="mc-form-grid">
         {teams.map((team, index) => (
-          <FormTeamCard key={team?.id || team?.team_id || index} team={team} rank={team?.rank || index + 1} results={team?.results || []} />
+          <FormTeamCard key={team?.team?.id || team?.teamId || index} team={team?.team} rank={team?.rank || index + 1} results={team?.results || []} />
         ))}
       </div>
       <div className="mc-form-legend" aria-label="Form legend">
