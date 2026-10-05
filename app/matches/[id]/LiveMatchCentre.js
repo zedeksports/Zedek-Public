@@ -102,6 +102,16 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const prematch=!live&&!official;
   const resolvedVenue=match?.venue||match?.home_team?.home_venue||match?.away_team?.home_venue||"Venue TBC";
   const referee=match?.referee||"Referee TBC";
+  const matchPreview=match?.match_preview||"Official match preview will appear here before kick-off.";
+  const mediaChannel=match?.media_channel||"Channel TBC";
+  const streamingUrl=match?.streaming_url||"";
+  const streamingAd=match?.streaming_ad_text||"Live streaming information will appear here when officially available.";
+  const summaryLayers=[
+    {key:"preview",label:"MATCH PREVIEW",content:matchPreview},
+    {key:"form",label:"FORM",content:"Recent form is shown from available verified match records. Flashscore can be used as an external reference where coverage exists."},
+    {key:"channel",label:"CHANNEL",content:mediaChannel},
+    {key:"stream",label:"LIVE STREAMING",content:streamingAd}
+  ];
   const minute=minuteLabel(match,now);
   const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":String(match.status||"").toUpperCase();
 
