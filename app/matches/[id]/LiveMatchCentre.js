@@ -190,8 +190,8 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   return <section className="live-centre-layer">
     <div className="live-centre-hero">
-      <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
+      <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
       {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}
     </div>
