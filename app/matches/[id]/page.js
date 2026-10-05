@@ -28,3 +28,5 @@ export default async function MatchPage({ params }) {
   const stats=statsResult.error?null:statsResult.data||null;
   return <main className="match-centre-page"><LiveMatchCentre initialMatch={m} initialEvents={events} initialStats={stats} initialLineups={lineups} initialH2H={h2h}/></main>;
 }
+
+// Production rebuild trigger: preserve the verified Match Centre implementation.
