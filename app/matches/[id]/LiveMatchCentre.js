@@ -19,7 +19,6 @@ function TeamBlock({ team, score }) {
   return <div className="live-centre-team">
     <div className="live-centre-crest">{team?.logo_url ? <img src={team.logo_url} alt="" /> : <span>{(team?.short_name || team?.name || "?").slice(0,2).toUpperCase()}</span>}</div>
     <strong>{team?.name || "Team TBC"}</strong>
-    <b>{score ?? 0}</b>
   </div>;
 }
 
@@ -43,7 +42,6 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const matchRef=useRef(initialMatch),eventsRef=useRef(initialEvents||[]);
   matchRef.current=match; eventsRef.current=events;
   const pendingMatchRef=useRef(null),pendingEventsRef=useRef(new Map()),initialCutoffRef=useRef(Date.now()-5000);
-  const [goalAnimation,setGoalAnimation]=useState(null);
 
   useEffect(()=>{const clock=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(clock)},[]);
 
@@ -71,10 +69,6 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           const previous={home:matchRef.current?.home_score??0,away:matchRef.current?.away_score??0};
           setMatch(pendingMatchRef.current.data);
           const u=pendingMatchRef.current.data,nh=u.home_score??0,na=u.away_score??0;
-          if(nh!==previous.home||na!==previous.away){
-            setGoalAnimation({side:nh>previous.home?"home":"away",score:nh+":"+na});
-            window.setTimeout(()=>setGoalAnimation(null),5000);
-          }
           pendingMatchRef.current=null;
         }
       }
@@ -179,9 +173,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     <div className="live-centre-hero">
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
-      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?(minute||"LIVE"):official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
-      {live?<div className="live-clock-card"><span>MATCH CLOCK</span><strong>{minute||"LIVE"}</strong><small>Live clock • public feed is 5s behind the desk</small></div>:null}
-      {goalAnimation?<div className="live-goal-animation" role="status"><span>⚽</span><strong>GOAL</strong><b>{goalAnimation.score}</b></div>:null}
+      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
     </div>
     <div className="live-centre-switcher" role="tablist" aria-label="Match centre sections">
       {[["events","Events"],["lineups","Lineups"],["stats","Stats"],["h2h","H2H"]].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={tab===key} className={tab===key?"active":""} onClick={()=>setTab(key)}><span>{key==="events"?"◆":key==="lineups"?"XI":key==="stats"?"≋":"↔"}</span>{label}</button>)}
