@@ -134,7 +134,7 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, favoriteMatches, onTo
         </div>
         <div className="score-match-context">
           <strong>{match.season?.competition?.name || "Competition TBC"}</strong>
-          <span>{match.venue || "Oti football"}</span>
+          <span>{match.venue || match.home_team?.home_venue || match.away_team?.home_venue || "Venue TBC"}</span>
         </div>
         <span className="score-match-time">{isLive ? (minute || "LIVE") : isFinished ? "FINAL" : dateLabel(match.scheduled_at)}</span>
       </div>
@@ -235,7 +235,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
         const supabase = createSupabaseBrowserClient();
         const { data: incoming, error: matchesError } = await supabase
           .from("matches")
-          .select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))")
+          .select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))")
           .order("scheduled_at", { ascending: true })
           .limit(100);
         if (matchesError) throw matchesError;
