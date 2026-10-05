@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./home-premium.css";
 import PublicShell from "./PublicShell";
 
 export const metadata = {
