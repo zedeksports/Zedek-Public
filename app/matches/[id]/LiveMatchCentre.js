@@ -1,17 +1,9 @@
-'use client';
-
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
-import { CollapsibleSection, FormSection, H2HPreview, MatchSummaryCard } from "./MatchCentreSections";
-
-const LIVE_STATUSES = new Set(["live","in_progress","halftime","paused"]);
-const OFFICIAL_STATUSES = new Set(["finished","verified"]);
-
-function minuteLabel(match, now) {
-  if (!match || !LIVE_STATUSES.has(match.status)) return null;
-  if (match.status === "halftime") return "HT";
-  const start = new Date(match.second_half_at || match.kickoff_at || match.scheduled_at).getTime();
-  if (!Number.isFinite(start)) return "LIVE";
+    <div className="live-centre-hero">
+      <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
+      <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
+      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
+    </div>
+        {prematch?VE";
   const elapsed = Math.max(1, Math.floor((now - start) / 60000) + (match.second_half_at ? 45 : 0));
   return Math.min(elapsed, 120) + "'";
 }
