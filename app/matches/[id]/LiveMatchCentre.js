@@ -186,7 +186,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>\n    </div>
         {prematch?<div className="prematch-accordion-stack">
-      <MatchSummaryCard match={match} venue={resolvedVenue} />
+      <MatchSummaryCard match={match} venue={resolvedVenue} referee={referee} />
       <FormSection teams={formData} defaultOpen={true} />
       <CollapsibleSection title="HEAD TO HEAD" eyebrow="PREVIOUS MEETINGS">
         <H2HPreview matches={h2h} match={match} />
