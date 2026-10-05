@@ -1261,3 +1261,16 @@ html[data-zedek-theme="night"] .mc-form-team-card{
   .mc-form-indicator{width:25px;height:25px;flex-basis:25px}
   .mc-summary-meta{grid-template-columns:1fr}
 }
+
+.mc-summary-preview{
+  position:relative;
+  margin-top:11px;
+  padding:12px 13px;
+  border:1px solid var(--oti-border);
+  border-radius:12px;
+  background:rgba(22,119,255,.035);
+}
+.mc-summary-preview>span{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;font-weight:900;color:var(--oti-muted);margin-bottom:6px}
+.mc-summary-preview p{margin:0;padding-right:90px;font-size:11px;line-height:1.55;color:var(--oti-text)}
+.mc-summary-preview>b{position:absolute;right:12px;top:12px;font-size:9px;color:var(--oti-blue);font-weight:900}
+@media(max-width:500px){.mc-summary-preview p{padding-right:0}.mc-summary-preview>b{position:static;display:block;margin-top:8px}}
