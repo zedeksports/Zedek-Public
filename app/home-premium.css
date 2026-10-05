@@ -262,3 +262,115 @@
 .score-day.active,.score-filter.active{box-shadow:inset 2px 2px 4px rgba(255,255,255,.24),inset -3px -3px 6px rgba(75,45,9,.20),0 7px 15px rgba(0,0,0,.19)!important}
 
 /* Production rebuild trigger: premium embossed homepage 30% pass. */
+
+
+/* Premium palette — cream white / deep blue-black / elegant gold */
+:root{
+  --zp-bg:#f4efe4;
+  --zp-panel:#fffaf0;
+  --zp-panel2:#e8edf2;
+  --zp-cream:#f7f2e8;
+  --zp-gold:#c89b3c;
+  --zp-gold2:#8d6a25;
+  --zp-line:rgba(200,155,60,.28);
+  --zp-muted:#5e6a78;
+  --zp-white:#fffdf7;
+  --zp-ink:#07111d;
+  --zp-blue:#0b1a2b;
+  --zp-blue2:#122b43;
+}
+
+/* Keep the identity dark, but let premium cream become the dominant canvas. */
+body{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(200,155,60,.08),transparent 25%),
+    linear-gradient(180deg,#fffdf7 0%,#f4efe4 48%,#eef2f5 100%)!important;
+  color:var(--zp-ink)!important;
+}
+.score-feed{
+  background:
+    linear-gradient(180deg,#fffdf7 0%,#f4efe4 68%,#edf1f4 100%)!important;
+}
+.score-topbar h2,
+.score-feed .card-heading h3{
+  color:var(--zp-blue)!important;
+}
+.score-feed .dashboard-card,
+.score-feed .stats-strip,
+.home-dashboard .news-card,
+.score-explore-grid a{
+  background:
+    linear-gradient(145deg,#fffdf8 0%,#f3eee4 58%,#e7edf2 100%)!important;
+  color:var(--zp-ink)!important;
+  border-color:rgba(200,155,60,.24)!important;
+}
+.score-match-card{
+  background:
+    linear-gradient(145deg,#ffffff 0%,#f6f1e8 62%,#e7edf2 100%)!important;
+  color:var(--zp-ink)!important;
+  border-color:rgba(200,155,60,.26)!important;
+}
+.score-match-card.is-live{
+  background:
+    linear-gradient(145deg,#fffdf8 0%,#f5eee5 58%,#dfe7ee 100%)!important;
+}
+.score-match-competition,
+.score-match-foot span,
+.score-status,
+.score-day span{
+  color:#667384!important;
+}
+.score-side strong,
+.score-feed .stats-strip b{
+  color:var(--zp-blue)!important;
+}
+.score-centre small,
+.score-feed .stats-strip span{
+  color:#657180!important;
+}
+.score-team-crest{
+  background:linear-gradient(145deg,#17304a,#081522)!important;
+  border-color:rgba(200,155,60,.48)!important;
+}
+.score-numbers b{
+  color:var(--zp-blue)!important;
+}
+.score-kickoff{
+  color:#a87824!important;
+}
+.score-day,.score-calendar,.score-filter,.match-favorite{
+  background:linear-gradient(145deg,#fffdf8,#e9eef2)!important;
+  color:var(--zp-blue)!important;
+  border-color:rgba(200,155,60,.24)!important;
+}
+.score-day.active,.score-filter.active{
+  background:linear-gradient(145deg,#d8b15c,#b88428)!important;
+  color:#101923!important;
+  border-color:#e0c273!important;
+}
+.score-live-banner{
+  background:linear-gradient(145deg,#10253a,#07131f)!important;
+  border-color:rgba(200,155,60,.36)!important;
+}
+.score-live-banner strong{color:#fffdf7!important}
+.score-live-banner a,.score-all-link{color:#a87824!important}
+.score-explore-grid a{color:var(--zp-blue)!important}
+.home-dashboard .news-card-body h2{color:var(--zp-blue)!important}
+.site-footer.public-global-footer{
+  background:linear-gradient(145deg,#07111d,#0d2033)!important;
+  color:#f7f2e8!important;
+  border-top-color:rgba(200,155,60,.32)!important;
+}
+.public-global-footer p,.public-global-footer .footer-links{color:#c1cbd5!important}
+
+/* Header remains deep blue-black for a strong luxury frame. */
+.public-global-header{
+  background:linear-gradient(180deg,#081421,#0c1d30)!important;
+  border-bottom-color:rgba(200,155,60,.34)!important;
+}
+.public-global-header .brand{color:#fffdf7!important}
+.public-global-header .nav-links a{color:#c5ced8!important}
+.public-global-header .nav-links a:hover{
+  background:linear-gradient(145deg,#18324b,#091522)!important;
+  color:#fffdf7!important;
+}
