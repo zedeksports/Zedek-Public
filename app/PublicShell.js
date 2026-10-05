@@ -49,6 +49,6 @@ export default function PublicShell({children}){
   {menuOpen&&<button className="zedek-drawer-backdrop" aria-label="Close menu" onClick={()=>setMenuOpen(false)}/>}
   {children}
   <PWAInstallPrompt />
-  <footer className="site-footer public-global-footer"><div className="container footer-inner"><div><div className="brand footer-brand"><span className="brand-mark">O</span><span>OTI <b>FOOTBALL NETWORK</b></span></div><p>Live football. Local teams. Real scores. Real people.</p></div><div className="footer-links"><a href="/matches">Matches</a><a href="/matches?filter=live">Live</a><a href="/competitions">Football Hub</a>{user?<a href="/settings">Settings</a>:<a href="/login">Sign in</a>}</div></div></footer>
+  <footer className="site-footer public-global-footer"><div className="container footer-inner"><div><div className="brand footer-brand"><span className="brand-mark">O</span><span>OTI <b>FOOTBALL NETWORK</b></span></div><p>Live football. Local teams. Real scores. Real people.</p></div><div className="footer-links"><a href="/matches">Matches</a><a href="/matches?filter=live">Live</a><a href="/competitions">Football Hub</a><a href="/install">Install App</a>{user?<a href="/settings">Settings</a>:<a href="/login">Sign in</a>}</div></div></footer>
  </div>;
 }
