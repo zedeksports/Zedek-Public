@@ -260,3 +260,5 @@
 .score-hero h1{text-shadow:0 2px 0 rgba(0,0,0,.72),0 4px 0 rgba(0,0,0,.35),0 18px 38px rgba(0,0,0,.42)!important}
 .score-kickoff,.score-numbers b{filter:drop-shadow(0 3px 2px rgba(0,0,0,.48))}
 .score-day.active,.score-filter.active{box-shadow:inset 3px 3px 6px rgba(255,255,255,.45),inset -5px -5px 8px rgba(75,45,9,.40),0 10px 22px rgba(0,0,0,.32)!important}
+
+/* Production rebuild trigger: premium embossed homepage final pass. */
