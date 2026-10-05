@@ -1,18 +1,10 @@
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
-import FollowButton from "../../../components/FollowButton";
 import LiveMatchCentre from "./LiveMatchCentre";
 
 export const dynamic = "force-dynamic";
 
 const LIVE_STATUSES = ["live", "in_progress", "halftime", "paused"];
 const OFFICIAL_STATUSES = ["finished", "verified"];
-
-function kickOffTime(value) {
-  if (!value) return "TBC";
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Accra",
-  }).format(new Date(value));
-}
 
 function dateTime(value) {
   return value
@@ -28,21 +20,6 @@ function dateTime(value) {
     : "Date TBC";
 }
 
-function Team({ team }) {
-  return (
-    <a className="match-detail-team" href={team?.id ? `/teams/${team.id}` : "#"}>
-      <div className="mc-logo">
-        {team?.logo_url ? (
-          <img src={team.logo_url} alt="" loading="eager" decoding="async" fetchPriority="high" />
-        ) : (
-          <span>{(team?.short_name || team?.name || "?").slice(0, 2).toUpperCase()}</span>
-        )}
-      </div>
-      <h2>{team?.name || "Team TBC"}</h2>
-    </a>
-  );
-}
-
 export default async function MatchPage({ params }) {
   const { id } = await params;
   const supabase = createSupabaseServerClient();
@@ -52,7 +29,7 @@ export default async function MatchPage({ params }) {
       supabase
         .from("matches")
         .select(
-          "id,scheduled_at,status,home_score,away_score,venue,round_name,leg,notes,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))"
+          "id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,round_name,leg,notes,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))"
         )
         .eq("id", id)
         .maybeSingle(),
@@ -80,30 +57,26 @@ export default async function MatchPage({ params }) {
     ]);
 
   if (matchResult.error) {
-    return (
-      <main>
-        <div className="container data-note">{matchResult.error.message}</div>
-      </main>
-    );
+    return <main><div className="container data-note">{matchResult.error.message}</div></main>;
   }
 
   const m = matchResult.data;
-  if (!m) {
-    return (
-      <main>
-        <div className="container data-note">Match not found.</div>
-      </main>
-    );
-  }
+  if (!m) return <main><div className="container data-note">Match not found.</div></main>;
 
   const h2hResult = m.home_team?.id && m.away_team?.id
-    ? await supabase.from("matches").select("id,scheduled_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name),away_team:teams!matches_away_team_id_fkey(id,name,short_name)").neq("id", id).or(`and(home_team_id.eq.${m.home_team.id},away_team_id.eq.${m.away_team.id}),and(home_team_id.eq.${m.away_team.id},away_team_id.eq.${m.home_team.id})`).in("status", ["finished","verified"]).order("scheduled_at",{ascending:false}).limit(5)
+    ? await supabase
+        .from("matches")
+        .select("id,scheduled_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name),away_team:teams!matches_away_team_id_fkey(id,name,short_name)")
+        .neq("id", id)
+        .or(`and(home_team_id.eq.${m.home_team.id},away_team_id.eq.${m.away_team.id}),and(home_team_id.eq.${m.away_team.id},away_team_id.eq.${m.home_team.id})`)
+        .in("status", ["finished", "verified"])
+        .order("scheduled_at", { ascending: false })
+        .limit(5)
     : { data: [], error: null };
-  const h2h = h2hResult.error ? [] : h2hResult.data || [];
 
+  const h2h = h2hResult.error ? [] : h2hResult.data || [];
   const live = LIVE_STATUSES.includes(m.status);
-  const official =
-    Boolean(verificationResult.data?.length) && OFFICIAL_STATUSES.includes(m.status);
+  const official = Boolean(verificationResult.data?.length) && OFFICIAL_STATUSES.includes(m.status);
   const events = eventsResult.error ? [] : eventsResult.data || [];
   const lineups = lineupsResult.error ? [] : lineupsResult.data || [];
   const stats = statsResult.error ? null : statsResult.data || null;
@@ -111,90 +84,15 @@ export default async function MatchPage({ params }) {
   return (
     <main>
       <section className="container page-hero">
-        <div className="public-breadcrumbs">
-          <a href="/matches">← All matches</a>
-        </div>
+        <div className="public-breadcrumbs"><a href="/matches">← All matches</a></div>
         <span className="section-kicker">{m.season?.competition?.name || "Competition"}</span>
         <h1>{live ? "Live Match" : official ? "Official Result" : "Match Centre"}</h1>
         <p>{dateTime(m.scheduled_at)}{m.venue ? ` • ${m.venue}` : ""}</p>
-        <div className="match-context-links">
-          {m.season?.competition?.id ? (
-            <a href={`/competitions/${m.season.competition.id}`}>View competition →</a>
-          ) : null}
-          {m.season?.id ? (
-            <a href={`/standings?competition=${m.season.competition?.id || ""}&season=${m.season.id}`}>
-              View standings →
-            </a>
-          ) : null}
-        </div>
       </section>
-
-      <section className="container match-detail"><nav className="match-detail-tabs" aria-label="Match information"><a href="#summary">Summary</a>{(live || official) ? <a href="#stats">Stats</a> : null}{lineups.length ? <a href="#lineups">Lineups</a> : null}{h2h.length ? <a href="#h2h">H2H</a> : null}</nav>
-        <div className="match-detail-card" id="summary">
-          <LiveMatchCentre initialMatch={m} initialEvents={events} initialStats={stats} />
-          <div className="match-follow-row"><FollowButton type="match" id={m.id} label="Follow match"/></div>
-          {m.leg ? <div className="match-detail-note">Leg {m.leg}</div> : null}
+      <section className="container match-detail">
+        <div className="match-detail-card">
+          <LiveMatchCentre initialMatch={m} initialEvents={events} initialStats={stats} initialLineups={lineups} initialH2H={h2h} />
         </div>
-
-        {lineups.length ? (
-          <section className="detail-section" id="lineups">
-            <div className="section-heading">
-              <div>
-                <span className="section-kicker">Confirmed lineups</span>
-                <h2>Starting XI & substitutes</h2>
-              </div>
-              <span className="verified-badge">{live ? "LIVE LINEUPS" : "MATCH LINEUPS"}</span>
-            </div>
-            <div className="lineup-grid">
-              {lineups.map((l) => {
-                const players = l.lineup_players || [];
-                const starters = players.filter((p) => /starter|starting|xi/i.test(p.role || ""));
-                const actualStarters = starters.length ? starters : players.slice(0, 11);
-                const bench = players.filter((p) => !actualStarters.some((s) => s.id === p.id));
-                const playerRow = (p) => (
-                  <div className="lineup-player-card" key={p.id}>
-                    <div className="lineup-avatar">
-                      {p.player?.photo_url ? <img src={p.player.photo_url} alt="" loading="lazy" decoding="async" /> : <span>{(p.player?.full_name || "P").slice(0,1).toUpperCase()}</span>}
-                    </div>
-                    <span className="lineup-number">{p.shirt_number ?? p.player?.shirt_number ?? "—"}</span>
-                    <a href={p.player?.id ? `/players/${p.player.id}` : "#"} className="lineup-player-name">
-                      <strong>{p.player?.full_name || "Player"}</strong>
-                      <small>{p.position || p.role || "Player"}{p.player_id === l.captain_player_id ? " • C" : ""}</small>
-                    </a>
-                  </div>
-                );
-                return (
-                  <div className="lineup-team-card" key={l.id}>
-                    <div className="lineup-team-head">
-                      <div className="lineup-team-identity">
-                        <div className="lineup-team-logo">{l.team?.logo_url ? <img src={l.team.logo_url} alt="" loading="lazy" decoding="async" /> : <span>{(l.team?.short_name || l.team?.name || "T").slice(0,2).toUpperCase()}</span>}</div>
-                        <div><strong>{l.team?.name || "Team"}</strong><span>{l.formation || "Formation TBC"}</span></div>
-                      </div>
-                      <span>{l.submitted_at ? "Confirmed" : "Published"}</span>
-                    </div>
-                    <div className="lineup-section-label">STARTING XI</div>
-                    <div className="lineup-list">{actualStarters.map(playerRow)}</div>
-                    <div className="lineup-section-label">SUBSTITUTES</div>
-                    <div className="lineup-list lineup-bench">{bench.length ? bench.map(playerRow) : <div className="lineup-empty">No substitutes published.</div>}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        ) : (
-          <section className="detail-section">
-            <div className="empty-state lineup-pending"><strong>Lineups not published yet.</strong><span>Confirmed starting XIs will appear here when the Control Room publishes them.</span></div>
-          </section>
-        )}
-
-        {h2h.length ? (<section className="detail-section" id="h2h"><div className="section-heading"><div><span className="section-kicker">Head to head</span><h2>Recent meetings</h2></div><span className="verified-badge">Last 5</span></div><div className="h2h-list">{h2h.map((x) => { const homeWin=x.home_score!=null&&x.home_score>x.away_score; const awayWin=x.away_score!=null&&x.away_score>x.home_score; return <a className="h2h-row" href={"/matches/"+x.id} key={x.id}><span>{new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(x.scheduled_at))}</span><strong>{x.home_team?.short_name||x.home_team?.name||"Home"} <b>{x.home_score??0}:{x.away_score??0}</b> {x.away_team?.short_name||x.away_team?.name||"Away"}</strong><em>{homeWin?"HOME WIN":awayWin?"AWAY WIN":"DRAW"}</em></a>})}</div></section>) : null}
-
-        {m.notes ? (
-          <section className="detail-section">
-            <span className="section-kicker">Match notes</span>
-            <p className="match-notes">{m.notes}</p>
-          </section>
-        ) : null}
       </section>
     </main>
   );
