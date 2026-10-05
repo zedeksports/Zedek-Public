@@ -103,6 +103,7 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, favoriteMatches, onTo
   const minute = liveMinute(match, clockNow);
   const homeFavorite = favoriteTeams.has(match.home_team?.id);
   const awayFavorite = favoriteTeams.has(match.away_team?.id);
+  const matchFavorite = favoriteMatches.has(match.id);
 
   return (
     <article
@@ -115,14 +116,12 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, favoriteMatches, onTo
     >
       <button
         type="button"
-        className={homeFavorite || awayFavorite ? "match-favorite active" : "match-favorite"}
-        aria-label={homeFavorite || awayFavorite ? "Remove teams from My Teams" : "Add teams to My Teams"}
-        title={homeFavorite || awayFavorite ? "Remove from My Teams" : "Add to My Teams"}
+        className={matchFavorite ? "match-favorite active" : "match-favorite"}
+        aria-label={matchFavorite ? "Remove match from Favourites" : "Add match to Favourites"}
+        title={matchFavorite ? "Remove from Favourites" : "Add to Favourites"}
         onClick={(event) => {
           event.stopPropagation();
-          if (homeFavorite) onToggleFavorite(match.home_team.id);
-          if (awayFavorite) onToggleFavorite(match.away_team.id);
-          if (!homeFavorite && !awayFavorite) onToggleFavorite(match.home_team?.id);
+          onToggleMatchFavorite(match.id);
         }}
       >★</button>
       <div className="score-match-head">
@@ -179,6 +178,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   const pendingGoalsRef = useRef(new Map());
   const [goalFlashes, setGoalFlashes] = useState({});
   const [favoriteTeams, setFavoriteTeams] = useState(() => new Set());
+  const [favoriteMatches, setFavoriteMatches] = useState(() => new Set());
   const [clockNow, setClockNow] = useState(Date.now());
   const [state, setState] = useState(() => ({
     matches: deriveVisible(initialMatches, initialData?.officialIds, selectedDay, filter).slice(0, 12),
@@ -191,9 +191,21 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("zedek-favorite-teams") || "[]");
+      const savedMatches = JSON.parse(localStorage.getItem("zedek-favorite-matches") || "[]");
       if (Array.isArray(saved)) setFavoriteTeams(new Set(saved));
+      if (Array.isArray(savedMatches)) setFavoriteMatches(new Set(savedMatches));
     } catch {}
   }, []);
+
+  function toggleMatchFavorite(matchId) {
+    if (!matchId) return;
+    setFavoriteMatches((current) => {
+      const next = new Set(current);
+      if (next.has(matchId)) next.delete(matchId); else next.add(matchId);
+      localStorage.setItem("zedek-favorite-matches", JSON.stringify([...next]));
+      return next;
+    });
+  }
 
   function toggleFavorite(teamId) {
     if (!teamId) return;
@@ -276,7 +288,9 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   const liveCount = state.matches.filter((m) => LIVE_STATUSES.has(m.status)).length;
   const displayedMatches = filter === "MY TEAMS"
     ? state.matches.filter((m) => favoriteTeams.has(m.home_team?.id) || favoriteTeams.has(m.away_team?.id))
-    : state.matches;
+    : filter === "FAVOURITES"
+      ? state.matches.filter((m) => favoriteMatches.has(m.id))
+      : state.matches;
 
   return (
     <section className="container section">
@@ -299,14 +313,14 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
           </div>
           {state.loading ? (
             <div className="empty-state">Refreshing football data…</div>
-          ) : state.matches.length ? (
+          ) : displayedMatches.length ? (
             <div className="score-match-list">
-              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} clockNow={clockNow} />)}
+              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} favoriteMatches={favoriteMatches} onToggleFavorite={toggleFavorite} onToggleMatchFavorite={toggleMatchFavorite} clockNow={clockNow} />)}
             </div>
           ) : (
             <div className="empty-state">
-              <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No finished results for this date." : "No published matches for this date."}</strong>
-              <span>{filter === "MY TEAMS" ? "Tap ★ on a match to follow a team. Your selected clubs will appear here." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
+              <strong>{filter === "MY TEAMS" ? "No followed teams yet." : filter === "FAVOURITES" ? "No favourite matches yet." : filter === "LIVE" ? "No live matches for this date." : filter === "RESULTS" ? "No finished results for this date." : "No published matches for this date."}</strong>
+              <span>{filter === "MY TEAMS" ? "Followed clubs will appear here." : filter === "FAVOURITES" ? "Tap ★ on any match to save it here for quick access." : "Published Zedek fixtures and verified results will appear here automatically."}</span>
             </div>
           )}
         </div>
