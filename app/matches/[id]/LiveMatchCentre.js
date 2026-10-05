@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
+import { CollapsibleSection, FormSection, H2HPreview, MatchSummaryCard } from "./MatchCentreSections";
 
 const LIVE_STATUSES = new Set(["live","in_progress","halftime","paused"]);
 const OFFICIAL_STATUSES = new Set(["finished","verified"]);
@@ -52,7 +53,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     async function refresh(){
       const s=createSupabaseBrowserClient();
       const [m,e,st,l]=await Promise.all([
-        s.from("matches").select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
+        s.from("matches").select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
         s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(full_name,shirt_number),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
         s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id)
@@ -106,13 +107,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const mediaChannel=match?.media_channel||"Channel TBC";
   const streamingUrl=match?.streaming_url||"";
   const streamingAd=match?.streaming_ad_text||"Live streaming information will appear here when officially available.";
-  const summaryLayers=[
-    {key:"preview",label:"MATCH PREVIEW",content:matchPreview},
-    {key:"form",label:"FORM",content:"Recent form is shown from available verified match records. Flashscore can be used as an external reference where coverage exists."},
-    {key:"channel",label:"CHANNEL",content:mediaChannel},
-    {key:"stream",label:"LIVE STREAMING",content:streamingAd}
-  ];
-  const formData=(initialForm||[]).map((x,i)=>({team:i===0?(match?.home_team?.short_name||match?.home_team?.name||"Home"):(match?.away_team?.short_name||match?.away_team?.name||"Away"),results:x.results||[]}));
+  const formData=(initialForm||[]).map((x,i)=>({...x,rank:x.rank||i+1,team:x.team||([match?.home_team,match?.away_team][i]),results:x.results||[]}));
   const minute=minuteLabel(match,now);
   const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":String(match.status||"").toUpperCase();
 
@@ -191,24 +186,39 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
     </div>
-    {prematch?<section className="prematch-summary-card" aria-label="Match Summary">
-      <div className="prematch-summary-head"><span>PRE-MATCH</span><h2>Match Summary</h2></div>
-      <div className="prematch-summary-grid">
-        <div className="prematch-summary-layer"><span>MATCH PREVIEW</span><p>{matchPreview}</p></div>
-        <div className="prematch-summary-layer"><span>FORM</span><div className="prematch-form-list">{formData.map((team,i)=><div className="prematch-form-team" key={i}><b>{team.team}</b><div>{team.results.length?team.results.map((v,j)=><i className={v.toLowerCase()} key={j}>{v}</i>):<small>No verified form</small>}</div></div>)}</div></div>
-        <div className="prematch-summary-layer"><span>CHANNEL</span><p>{mediaChannel}</p></div>
-        <div className="prematch-summary-layer"><span>LIVE STREAMING</span><p>{streamingAd}</p>{streamingUrl?<a href={streamingUrl} target="_blank" rel="noreferrer">View streaming information</a>:null}</div>
-      </div>
-      <div className="prematch-summary-official"><div><span>REFEREE</span><strong>{referee}</strong></div><div><span>VENUE</span><strong>{resolvedVenue}</strong></div></div>
-    </section>:null}
-    <div className="live-centre-switcher" role="tablist" aria-label="Match centre sections">
+    {prematch?<div className="prematch-accordion-stack">
+      <MatchSummaryCard match={match} venue={resolvedVenue} />
+      <FormSection teams={formData} defaultOpen={true} />
+      <CollapsibleSection title="HEAD TO HEAD" eyebrow="PREVIOUS MEETINGS">
+        <H2HPreview matches={h2h} match={match} />
+      </CollapsibleSection>
+      <CollapsibleSection title="MATCH INFORMATION" eyebrow="OFFICIAL DETAILS">
+        <div className="mc-match-information">
+          <div><span>VENUE</span><strong>{resolvedVenue}</strong></div>
+          <div><span>REFEREE</span><strong>{referee}</strong></div>
+          <div><span>CHANNEL</span><strong>{mediaChannel}</strong></div>
+          <div><span>STREAMING</span><strong>{streamingAd}</strong>{streamingUrl?<a href={streamingUrl} target="_blank" rel="noreferrer">View streaming information</a>:null}</div>
+        </div>
+      </CollapsibleSection>
+      <CollapsibleSection title="LINEUPS" eyebrow="TEAM SHEETS">
+        {renderLineups()}
+      </CollapsibleSection>
+      <CollapsibleSection title="MATCH STATISTICS" eyebrow="MATCH INTELLIGENCE">
+        {renderStats()}
+      </CollapsibleSection>
+      <CollapsibleSection title="LIVE EVENTS" eyebrow="MATCH FEED">
+        {renderEvents()}
+      </CollapsibleSection>
+    </div>:null}
+    {!prematch?<div className="live-centre-switcher" role="tablist" aria-label="Match centre sections">
       {[["events","Events"],["lineups","Lineups"],["stats","Stats"],["h2h","H2H"]].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={tab===key} className={tab===key?"active":""} onClick={()=>setTab(key)}><span>{key==="events"?"◆":key==="lineups"?"XI":key==="stats"?"≋":"↔"}</span>{label}</button>)}
-    </div>
-    <div className="live-centre-content">
+    </div>:null}
+    {!prematch?<div className="live-centre-content">
       {tab==="events"?<section className="live-centre-panel"><div className="live-centre-panel-head"><span>LIVE FEED</span><h2>Events</h2></div>{renderEvents()}</section>:null}
       {tab==="lineups"?<section className="live-centre-panel"><div className="live-centre-panel-head"><span>TEAM SHEETS</span><h2>Lineups</h2></div>{renderLineups()}</section>:null}
       {tab==="stats"?<section className="live-centre-panel live-stats-panel"><div className="live-centre-panel-head"><span>MATCH INTELLIGENCE</span><h2>Stats</h2></div>{renderStats()}</section>:null}
       {tab==="h2h"?<section className="live-centre-panel"><div className="live-centre-panel-head"><span>HEAD TO HEAD</span><h2>Head to Head</h2></div>{h2h.length?(()=>{const homeId=match?.home_team?.id,awayId=match?.away_team?.id;const homeWins=h2h.filter(x=>(x.home_team?.id===homeId&&Number(x.home_score)>Number(x.away_score))||(x.away_team?.id===homeId&&Number(x.away_score)>Number(x.home_score))).length;const awayWins=h2h.filter(x=>(x.home_team?.id===awayId&&Number(x.home_score)>Number(x.away_score))||(x.away_team?.id===awayId&&Number(x.away_score)>Number(x.home_score))).length;const draws=h2h.filter(x=>Number(x.home_score)===Number(x.away_score)).length;const homeName=match?.home_team?.name||match?.home_team?.short_name||"Home";const awayName=match?.away_team?.name||match?.away_team?.short_name||"Away";return <div className="h2h-content"><div className="h2h-summary"><div className="h2h-summary-team"><span>{homeName}</span><strong>{homeWins}</strong><small>WINS</small></div><div className="h2h-summary-middle"><span>HEAD TO HEAD</span><b>{draws}</b><small>DRAWS</small></div><div className="h2h-summary-team"><span>{awayName}</span><strong>{awayWins}</strong><small>WINS</small></div></div><div className="h2h-legend"><span><i className="h2h-dot win"/>Win</span><span><i className="h2h-dot draw"/>Draw</span><span><i className="h2h-dot loss"/>Loss</span></div><div className="h2h-section-title">PREVIOUS MEETINGS</div><div className="h2h-list">{h2h.map((x)=>{const homeScore=Number(x.home_score??0),awayScore=Number(x.away_score??0),draw=homeScore===awayScore;const homeWon=homeScore>awayScore,awayWon=awayScore>homeScore;const homeMark=draw?"D":((x.home_team?.id===homeId&&homeWon)||(x.away_team?.id===homeId&&awayWon))?"W":"L";const awayMark=draw?"D":homeMark==="W"?"L":"W";const result=draw?"DRAW":homeMark==="W"?homeName.toUpperCase()+" WIN":awayName.toUpperCase()+" WIN";return <a className="h2h-row" href={"/matches/"+x.id} key={x.id}><span className="h2h-date">{new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(x.scheduled_at))}</span><div className="h2h-team-side"><strong>{x.home_team?.name||x.home_team?.short_name||"Home"}</strong><b className={"h2h-result "+homeMark.toLowerCase()}>{homeMark}</b></div><div className="h2h-score"><b>{homeScore}</b><span>–</span><b>{awayScore}</b></div><div className="h2h-team-side away"><b className={"h2h-result "+awayMark.toLowerCase()}>{awayMark}</b><strong>{x.away_team?.name||x.away_team?.short_name||"Away"}</strong></div><em className={"h2h-outcome "+(draw?"draw":homeMark==="W"?"win":"loss")}>{result}</em></a>})}</div></div>})():<div className="live-empty"><strong>No previous meetings found.</strong><span>Head-to-head results will appear here when available.</span></div>}</section>:null}
-    </div>
+    </div>:null}
+
   </section>;
 }
