@@ -293,7 +293,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
       pendingGoalsRef.current.forEach((timer) => clearTimeout(timer));
       pendingGoalsRef.current.clear();
     };
-  }, [selectedDay, filter]);
+  }, [selectedDay, filter, favoriteMatches]);
 
   const liveCount = state.matches.filter((m) => LIVE_STATUSES.has(m.status)).length;
   const displayedMatches = filter === "MY TEAMS"
