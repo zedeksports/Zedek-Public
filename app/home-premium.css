@@ -245,20 +245,20 @@
   .score-kickoff{font-size:19px!important}
 }
 
-/* 78% EMBOSS INTENSITY — stronger tactile surfaces */
+/* 43% EMBOSS INTENSITY — balanced tactile surfaces */
 .score-feed,.score-hero,.site-footer.public-global-footer{background-color:#0a1119!important}
 .public-global-header,.score-feed .dashboard-card,.score-match-card,.score-live-banner,.score-feed .stats-strip,.home-dashboard .news-card,.score-explore-grid a,.score-day,.score-calendar,.score-filter,.match-favorite,.score-team-crest{
-  background-image:linear-gradient(145deg,rgba(255,255,255,.115) 0%,rgba(255,255,255,.035) 18%,rgba(255,255,255,0) 42%),linear-gradient(325deg,rgba(0,0,0,.38) 0%,rgba(0,0,0,.08) 58%,rgba(255,255,255,.035) 100%)!important;
-  box-shadow:inset 3px 3px 6px rgba(255,255,255,.105),inset -5px -5px 9px rgba(0,0,0,.48),0 16px 32px rgba(0,0,0,.30)!important;
+  background-image:linear-gradient(145deg,rgba(255,255,255,.065) 0%,rgba(255,255,255,.018) 18%,rgba(255,255,255,0) 42%),linear-gradient(325deg,rgba(0,0,0,.22) 0%,rgba(0,0,0,.045) 58%,rgba(255,255,255,.02) 100%)!important;
+  box-shadow:inset 2px 2px 4px rgba(255,255,255,.06),inset -3px -3px 6px rgba(0,0,0,.30),0 11px 24px rgba(0,0,0,.20)!important;
 }
-.public-global-header{box-shadow:inset 0 2px 0 rgba(255,255,255,.10),inset 0 -3px 7px rgba(0,0,0,.52),0 12px 30px rgba(0,0,0,.35)!important}
-.score-match-card:after,.score-feed .dashboard-card:after,.home-dashboard .news-card:after,.score-explore-grid a:after{content:"";position:absolute;inset:1px;border-radius:inherit;pointer-events:none;border-top:1px solid rgba(255,255,255,.09);border-left:1px solid rgba(255,255,255,.045);opacity:.8}
+.public-global-header{box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -2px 5px rgba(0,0,0,.32),0 9px 24px rgba(0,0,0,.24)!important}
+.score-match-card:after,.score-feed .dashboard-card:after,.home-dashboard .news-card:after,.score-explore-grid a:after{content:"";position:absolute;inset:1px;border-radius:inherit;pointer-events:none;border-top:1px solid rgba(255,255,255,.055);border-left:1px solid rgba(255,255,255,.028);opacity:.6}
 .score-match-card,.score-feed .dashboard-card,.home-dashboard .news-card,.score-explore-grid a{position:relative}
-.score-match-card:hover{transform:translateY(-3px) scale(1.003)!important;box-shadow:inset 3px 3px 7px rgba(255,255,255,.12),inset -6px -6px 11px rgba(0,0,0,.52),0 24px 44px rgba(0,0,0,.38)!important}
-.score-team-crest{border-width:2px!important;box-shadow:inset 3px 3px 7px rgba(255,255,255,.14),inset -5px -5px 9px rgba(0,0,0,.52),0 9px 18px rgba(0,0,0,.35)!important}
-.score-team-crest img{filter:drop-shadow(0 4px 5px rgba(0,0,0,.5))!important}
-.score-hero h1{text-shadow:0 2px 0 rgba(0,0,0,.72),0 4px 0 rgba(0,0,0,.35),0 18px 38px rgba(0,0,0,.42)!important}
-.score-kickoff,.score-numbers b{filter:drop-shadow(0 3px 2px rgba(0,0,0,.48))}
-.score-day.active,.score-filter.active{box-shadow:inset 3px 3px 6px rgba(255,255,255,.45),inset -5px -5px 8px rgba(75,45,9,.40),0 10px 22px rgba(0,0,0,.32)!important}
+.score-match-card:hover{transform:translateY(-2px)!important;box-shadow:inset 2px 2px 5px rgba(255,255,255,.07),inset -4px -4px 8px rgba(0,0,0,.34),0 18px 32px rgba(0,0,0,.28)!important}
+.score-team-crest{border-width:1px!important;box-shadow:inset 2px 2px 5px rgba(255,255,255,.075),inset -3px -3px 6px rgba(0,0,0,.34),0 7px 14px rgba(0,0,0,.24)!important}
+.score-team-crest img{filter:drop-shadow(0 3px 4px rgba(0,0,0,.34))!important}
+.score-hero h1{text-shadow:0 2px 0 rgba(0,0,0,.55),0 12px 30px rgba(0,0,0,.30)!important}
+.score-kickoff,.score-numbers b{filter:drop-shadow(0 2px 2px rgba(0,0,0,.32))}
+.score-day.active,.score-filter.active{box-shadow:inset 2px 2px 4px rgba(255,255,255,.32),inset -3px -3px 6px rgba(75,45,9,.25),0 8px 17px rgba(0,0,0,.24)!important}
 
-/* Production rebuild trigger: premium embossed homepage final pass. */
+/* Production rebuild trigger: premium embossed homepage balanced pass. */
