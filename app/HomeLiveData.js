@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
+import FollowButton from "../components/FollowButton";
 
 function kickOffTime(value) {
   if (!value) return "TBC";
