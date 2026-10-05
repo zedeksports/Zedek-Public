@@ -52,7 +52,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     async function refresh(){
       const s=createSupabaseBrowserClient();
       const [m,e,st,l]=await Promise.all([
-        s.from("matches").select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
+        s.from("matches").select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
         s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(full_name,shirt_number),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
         s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id)
@@ -98,7 +98,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   },[initialMatch.id]);
 
   const live=LIVE_STATUSES.has(match?.status);
-  const official=OFFICIAL_STATUSES.has(match?.status);
+  const official=OFFICIAL_STATUSES.has(match?.status);\n  const prematch=!live&&!official;\n  const resolvedVenue=match?.venue||match?.home_team?.home_venue||match?.away_team?.home_venue||"Venue TBC";\n  const referee=match?.referee||"Referee TBC";
   const minute=minuteLabel(match,now);
   const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":String(match.status||"").toUpperCase();
 
@@ -175,7 +175,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     <div className="live-centre-hero">
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
-      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
+      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>\n      {prematch?<div className="live-centre-match-details" aria-label="Official match details"><div><span>REFEREE</span><strong>{referee}</strong></div><div><span>VENUE</span><strong>{resolvedVenue}</strong></div></div>:null}
     </div>
     <div className="live-centre-switcher" role="tablist" aria-label="Match centre sections">
       {[["events","Events"],["lineups","Lineups"],["stats","Stats"],["h2h","H2H"]].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={tab===key} className={tab===key?"active":""} onClick={()=>setTab(key)}><span>{key==="events"?"◆":key==="lineups"?"XI":key==="stats"?"≋":"↔"}</span>{label}</button>)}
