@@ -72,9 +72,9 @@ function liveMinute(match, now = Date.now()) {
   if (match.status === "halftime") return "HT";
   
   if (!LIVE_STATUSES.has(match.status)) return null;
-  const started = new Date(match.kickoff_at || match.scheduled_at).getTime();
-  const elapsed = Math.floor((now - started) / 60000);
-  if (!Number.isFinite(elapsed) || elapsed < 1) return "1'";
+  const started = new Date(match.second_half_at || match.kickoff_at || match.scheduled_at).getTime();
+  if (!Number.isFinite(started)) return "LIVE";
+  const elapsed = Math.max(1, Math.floor((now - started) / 60000) + (match.second_half_at ? 45 : 0));
   return Math.min(elapsed, 120) + "'";
 }
 
