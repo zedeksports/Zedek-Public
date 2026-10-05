@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "../lib/supabase/browser";
+import PWAInstallPrompt from "./PWAInstallPrompt";
 
 const primaryNav=[["Matches","/matches"],["Live","/matches?filter=live"]];
 const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/favorites"]];
 
 export default function PublicShell({children}){
  const [menuOpen,setMenuOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[night,setNight]=useState(false),[user,setUser]=useState(null),[unread,setUnread]=useState(0);
- useEffect(()=>{const saved=localStorage.getItem("zedek-theme");const isNight=saved==="night";setNight(isNight);document.documentElement.dataset.zedekTheme=isNight?"night":"day";const supabase=createSupabaseBrowserClient();let mounted=true;supabase.auth.getSession().then(async({data})=>{if(!mounted)return;setUser(data.session?.user||null);if(data.session){const n=await supabase.from("user_notifications").select("id",{count:"exact",head:true}).is("read_at",null);if(mounted)setUnread(n.count||0)}});const {data}=supabase.auth.onAuthStateChange((_event,session)=>{setUser(session?.user||null);if(!session)setUnread(0)});return()=>{mounted=false;data.subscription.unsubscribe()};},[]);
+ useEffect(()=>{if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{}); const saved=localStorage.getItem("zedek-theme");const isNight=saved==="night";setNight(isNight);document.documentElement.dataset.zedekTheme=isNight?"night":"day";const supabase=createSupabaseBrowserClient();let mounted=true;supabase.auth.getSession().then(async({data})=>{if(!mounted)return;setUser(data.session?.user||null);if(data.session){const n=await supabase.from("user_notifications").select("id",{count:"exact",head:true}).is("read_at",null);if(mounted)setUnread(n.count||0)}});const {data}=supabase.auth.onAuthStateChange((_event,session)=>{setUser(session?.user||null);if(!session)setUnread(0)});return()=>{mounted=false;data.subscription.unsubscribe()};},[]);
  function toggleTheme(){const next=!night;setNight(next);localStorage.setItem("zedek-theme",next?"night":"day");document.documentElement.dataset.zedekTheme=next?"night":"day";}
  function closeLayers(){setMenuOpen(false);setAccountOpen(false);}
  async function signOut(){await createSupabaseBrowserClient().auth.signOut();closeLayers();window.location.href="/";}
@@ -47,6 +48,7 @@ export default function PublicShell({children}){
   </aside>
   {menuOpen&&<button className="zedek-drawer-backdrop" aria-label="Close menu" onClick={()=>setMenuOpen(false)}/>}
   {children}
+  <PWAInstallPrompt />
   <footer className="site-footer public-global-footer"><div className="container footer-inner"><div><div className="brand footer-brand"><span className="brand-mark">O</span><span>OTI <b>FOOTBALL NETWORK</b></span></div><p>Live football. Local teams. Real scores. Real people.</p></div><div className="footer-links"><a href="/matches">Matches</a><a href="/matches?filter=live">Live</a><a href="/competitions">Football Hub</a>{user?<a href="/settings">Settings</a>:<a href="/login">Sign in</a>}</div></div></footer>
  </div>;
 }
