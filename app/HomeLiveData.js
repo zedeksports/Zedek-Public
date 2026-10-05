@@ -28,7 +28,7 @@ const LIVE_STATUSES = new Set(["live", "in_progress", "halftime", "paused"]);
 const FINISHED_STATUSES = new Set(["finished", "verified"]);
 const EXCLUDED_STATUSES = new Set(["postponed", "cancelled", "canceled"]);
 
-function deriveVisible(all, officialIds, selectedDay, filter) {
+function deriveVisible(all, officialIds, selectedDay, filter, favoriteMatchIds = new Set()) {
   const official = new Set(officialIds || []);
   const now = Date.now();
   const dayMatches = selectedDay
@@ -46,6 +46,7 @@ function deriveVisible(all, officialIds, selectedDay, filter) {
     .filter((x) => FINISHED_STATUSES.has(x.status))
     .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
 
+  if (filter === "FAVOURITES") return all.filter((x) => favoriteMatchIds.has(x.id));
   if (filter === "LIVE") return live;
   if (filter === "UPCOMING") return dayUpcoming;
   if (filter === "RESULTS") return dayResults;
@@ -193,9 +194,18 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
       const saved = JSON.parse(localStorage.getItem("zedek-favorite-teams") || "[]");
       const savedMatches = JSON.parse(localStorage.getItem("zedek-favorite-matches") || "[]");
       if (Array.isArray(saved)) setFavoriteTeams(new Set(saved));
-      if (Array.isArray(savedMatches)) setFavoriteMatches(new Set(savedMatches));
+      if (Array.isArray(savedMatches)) {
+        const nextFavorites = new Set(savedMatches);
+        setFavoriteMatches(nextFavorites);
+        if (filter === "FAVOURITES") {
+          setState((current) => ({
+            ...current,
+            matches: initialMatches.filter((match) => nextFavorites.has(match.id)).slice(0, 12),
+          }));
+        }
+      }
     } catch {}
-  }, []);
+  }, [filter]);
 
   function toggleMatchFavorite(matchId) {
     if (!matchId) return;
@@ -233,7 +243,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
         const incomingMatches = incoming || [];
         const previous = currentMatchesRef.current || [];
         const previousById = new Map(previous.map((m) => [m.id, m]));
-        const visible = deriveVisible(incomingMatches, initialData?.officialIds, selectedDay, filter);
+        const visible = deriveVisible(incomingMatches, initialData?.officialIds, selectedDay, filter, favoriteMatches);
 
         // Hold a score change for 8 seconds, then reveal it with the goal animation.
         for (const next of visible) {
@@ -309,7 +319,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
               <span className="section-kicker">{liveCount ? "Live now" : filter === "RESULTS" ? "Official" : "Match feed"}</span>
               <h3>{filter === "MY TEAMS" ? "Team following" : "Matches for this date"}</h3>
             </div>
-            <span className="count-pill">{shownMatches.length}</span>
+            <span className="count-pill">{displayedMatches.length}</span>
           </div>
           {state.loading ? (
             <div className="empty-state">Refreshing football data…</div>
