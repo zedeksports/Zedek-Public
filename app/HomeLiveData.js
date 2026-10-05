@@ -126,11 +126,17 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite, clo
         }}
       >★</button>
       <div className="score-match-head">
-        <span className={isLive ? "score-status live" : isFinished ? "score-status finished" : "score-status"}>
-          {isLive ? <i /> : null}{statusLabel}
-        </span>
-        <span className="score-match-competition">{match.season?.competition?.name || "Competition TBC"}</span>
-        <span className="score-match-time">{isLive ? (minute || "LIVE") : isFinished ? "Match Centre" : dateLabel(match.scheduled_at)}</span>
+        <div className="score-match-status">
+          <span className={isLive ? "score-status live" : isFinished ? "score-status finished" : "score-status"}>
+            {isLive ? <i /> : null}{statusLabel}
+          </span>
+          {isLive ? <span className="live-minute">{minute || "LIVE"}</span> : null}
+        </div>
+        <div className="score-match-context">
+          <strong>{match.season?.competition?.name || "Competition TBC"}</strong>
+          <span>{match.venue || "Oti football"}</span>
+        </div>
+        <span className="score-match-time">{isLive ? (minute || "LIVE") : isFinished ? "FINAL" : dateLabel(match.scheduled_at)}</span>
       </div>
 
       <div className="score-match-body">
@@ -150,7 +156,7 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite, clo
               {kickOffTime(match.scheduled_at)}
             </div>
           )}
-          <small>{isLive ? (minute || "LIVE") : isFinished ? "FINAL RESULT" : "PRE-MATCH"}</small>
+          <small>{isLive ? (minute || "LIVE") : isFinished ? "FULL TIME" : "KICK-OFF"}</small>
           {goalFlash ? <div className="goal-alert" role="status"><span>⚽</span><strong>GOAL!</strong><small>{goalFlash.team} • {goalFlash.score}</small></div> : null}
         </div>
         <div className="score-side away">
