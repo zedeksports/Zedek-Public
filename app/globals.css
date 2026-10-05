@@ -675,3 +675,26 @@ html[data-zedek-theme="night"] .mc-match{
   background:var(--z-glass-light);
   border-color:var(--z-glass-border);
 }
+
+
+/* Zedek Sports — homepage clean glass, mini navigation menu */
+.zedek-drawer{width:min(280px,82vw);right:-280px;padding:14px;box-shadow:-14px 0 36px rgba(0,0,0,.16)}
+.zedek-drawer.open{right:0}
+.zedek-drawer-head{padding-bottom:10px;justify-content:flex-end;border-bottom:1px solid rgba(255,255,255,.12)}
+.drawer-close{width:32px;height:32px;border-radius:9px;font-size:20px}
+.drawer-primary,.drawer-section{gap:4px;padding:11px 0}
+.drawer-primary a,.drawer-section a{padding:8px 10px;border-radius:9px;font-size:12px}
+.drawer-section a{font-size:12px}
+.drawer-note{padding:10px;border-radius:10px;font-size:10px;line-height:1.45}
+.drawer-kicker{font-size:7px}
+.page.theme-day .score-live-card,
+.page.theme-day .score-feed .dashboard-card,
+.page.theme-day .score-feed .stats-strip,
+.page.theme-day .score-explore-grid a,
+.page.theme-day .score-match-card,
+.page.theme-day .score-match-card:hover,
+.page.theme-day .score-match-card.is-live,
+.page.theme-day .grass-root-art,
+.page.theme-day .feature-card,
+.page.theme-day .hero-panel{box-shadow:none}
+.page.theme-day .score-match-card:hover,.page.theme-day .score-explore-grid a:hover{transform:none}
