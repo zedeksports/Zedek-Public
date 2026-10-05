@@ -39,7 +39,7 @@ function eventLabel(type) {
   return String(type || "event").replaceAll("_"," ");
 }
 
-export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialH2H }) {
+export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialH2H, initialForm }) {
   const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[h2h]=useState(initialH2H||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
   const matchRef=useRef(initialMatch),eventsRef=useRef(initialEvents||[]);
   matchRef.current=match; eventsRef.current=events;
@@ -112,6 +112,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     {key:"channel",label:"CHANNEL",content:mediaChannel},
     {key:"stream",label:"LIVE STREAMING",content:streamingAd}
   ];
+  const formData=(initialForm||[]).map((x,i)=>({team:i===0?(match?.home_team?.short_name||match?.home_team?.name||"Home"):(match?.away_team?.short_name||match?.away_team?.name||"Away"),results:x.results||[]}));
   const minute=minuteLabel(match,now);
   const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":String(match.status||"").toUpperCase();
 
@@ -189,6 +190,16 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>\n    </div>
+    {prematch?<section className="prematch-summary-card" aria-label="Match Summary">
+      <div className="prematch-summary-head"><span>PRE-MATCH</span><h2>Match Summary</h2></div>
+      <div className="prematch-summary-grid">
+        <div className="prematch-summary-layer"><span>MATCH PREVIEW</span><p>{matchPreview}</p></div>
+        <div className="prematch-summary-layer"><span>FORM</span><div className="prematch-form-list">{formData.map((team,i)=><div className="prematch-form-team" key={i}><b>{team.team}</b><div>{team.results.length?team.results.map((v,j)=><i className={v.toLowerCase()} key={j}>{v}</i>):<small>No verified form</small>}</div></div>)}</div></div>
+        <div className="prematch-summary-layer"><span>CHANNEL</span><p>{mediaChannel}</p></div>
+        <div className="prematch-summary-layer"><span>LIVE STREAMING</span><p>{streamingAd}</p>{streamingUrl?<a href={streamingUrl} target="_blank" rel="noreferrer">View streaming information</a>:null}</div>
+      </div>
+      <div className="prematch-summary-official"><div><span>REFEREE</span><strong>{referee}</strong></div><div><span>VENUE</span><strong>{resolvedVenue}</strong></div></div>
+    </section>:null}
     <div className="live-centre-switcher" role="tablist" aria-label="Match centre sections">
       {[["events","Events"],["lineups","Lineups"],["stats","Stats"],["h2h","H2H"]].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={tab===key} className={tab===key?"active":""} onClick={()=>setTab(key)}><span>{key==="events"?"◆":key==="lineups"?"XI":key==="stats"?"≋":"↔"}</span>{label}</button>)}
     </div>
