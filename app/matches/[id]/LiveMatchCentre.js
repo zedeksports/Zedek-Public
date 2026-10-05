@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
+import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 
 const LIVE_STATUSES = new Set(["live","in_progress","halftime","paused"]);
 const OFFICIAL_STATUSES = new Set(["finished","verified"]);
