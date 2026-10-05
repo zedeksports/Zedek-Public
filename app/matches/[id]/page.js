@@ -65,7 +65,7 @@ export default async function MatchPage({ params }) {
       supabase
         .from("match_events")
         .select(
-          "id,event_type,minute,extra_minute,details,player_id,secondary_player_id,team_id,player:players!match_events_player_id_fkey(id,full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number),team:teams(id,name,short_name)"
+          "id,event_type,minute,extra_minute,details,created_at,player_id,secondary_player_id,team_id,player:players!match_events_player_id_fkey(id,full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number),team:teams(id,name,short_name)"
         )
         .eq("match_id", id)
         .order("minute", { ascending: true })
