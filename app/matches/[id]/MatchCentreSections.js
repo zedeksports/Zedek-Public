@@ -137,9 +137,14 @@ export function MatchSummaryCard({ match, venue, referee }) {
       </div>
       <div className="mc-summary-meta">
         <div><span>VENUE</span><strong>{venue || "Venue TBC"}</strong></div>
+        <div><span>REFEREE</span><strong>{referee || "Referee TBC"}</strong></div>
         <div><span>DATE</span><strong>{dateLabel}</strong></div>
         <div><span>KICK-OFF</span><strong>{timeLabel}</strong></div>
-        {countdown ? <div><span>COUNTDOWN</span><strong>{countdown}</strong></div> : null}
+      </div>
+      <div className="mc-summary-preview">
+        <span>MATCH PREVIEW</span>
+        <p>{match?.match_preview || "Official match preview will appear here before kick-off."}</p>
+        {countdown ? <b>{countdown}</b> : null}
       </div>
     </section>
   );
