@@ -734,3 +734,103 @@ html[data-zedek-theme="night"] .match-centre-page .head-to-head-bench>div{backgr
 html[data-zedek-theme="night"] input,html[data-zedek-theme="night"] select,html[data-zedek-theme="night"] textarea{background:rgba(255,255,255,.05)!important;color:var(--ui-text)!important;border-color:var(--ui-border)!important}
 @media(max-width:760px){.public-global-header .nav{min-height:50px;padding:5px 0}.public-global-header .primary-nav a{padding:6px 8px;font-size:10px}.public-global-header .header-actions{gap:4px}}
 @media(max-width:430px){.public-global-header .primary-nav a{padding:5px 6px;font-size:9px}.public-global-header .icon-button,.public-global-header .theme-button,.public-global-header .account-avatar{width:30px;height:30px;min-height:30px}.public-global-header .sign-in-button{padding:0 7px}}
+
+
+/* =========================================================
+   OTI NETWORK — GLOBAL SPORTS DESIGN TOKENS
+   Applies the major visual language across public routes.
+   ========================================================= */
+:root{
+  --oti-bg:#eef3f6;
+  --oti-surface:rgba(255,255,255,.76);
+  --oti-surface-strong:rgba(255,255,255,.91);
+  --oti-text:#0b1724;
+  --oti-muted:#687688;
+  --oti-border:rgba(11,34,55,.12);
+  --oti-blue:#1677ff;
+  --oti-blue-2:#35a7ff;
+  --oti-gold:#d6ad4f;
+  --oti-green:#18b878;
+  --oti-red:#ef5361;
+  --oti-shadow:0 18px 50px rgba(8,25,43,.10),0 3px 12px rgba(8,25,43,.055);
+}
+html[data-zedek-theme="night"]{
+  --oti-bg:#07131f;
+  --oti-surface:rgba(13,29,46,.74);
+  --oti-surface-strong:rgba(14,32,51,.91);
+  --oti-text:#f3f7fb;
+  --oti-muted:#aab8c7;
+  --oti-border:rgba(255,255,255,.11);
+  --oti-shadow:0 20px 54px rgba(0,0,0,.28),0 3px 12px rgba(0,0,0,.16);
+}
+html,body{
+  background:
+    radial-gradient(circle at 15% 0%,rgba(22,119,255,.055),transparent 28%),
+    radial-gradient(circle at 90% 20%,rgba(214,173,79,.05),transparent 22%),
+    linear-gradient(180deg,var(--oti-bg),var(--oti-bg))!important;
+  color:var(--oti-text)!important;
+}
+body{overflow-x:hidden}
+a,button,input,select,textarea{font-family:inherit}
+button,a{touch-action:manipulation}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid rgba(22,119,255,.68);outline-offset:2px}
+
+/* Public surfaces on secondary routes */
+.page-hero,.match-centre,.competition-card,.competition-match,.team-directory-card,.team-panel,.team-profile-meta,.team-match-row,.player-card,.news-card,.standings-table-wrap,.dashboard-card,.detail-section,.match-detail-card,.live-centre-panel,.match-notes,.mc-match,.lineup-team-card{
+  border-color:var(--oti-border)!important;
+  color:var(--oti-text)!important;
+  background:var(--oti-surface)!important;
+  box-shadow:var(--oti-shadow)!important;
+  backdrop-filter:blur(18px) saturate(125%);
+  -webkit-backdrop-filter:blur(18px) saturate(125%);
+}
+.page-hero{
+  border-radius:0 0 22px 22px;
+  background:
+    radial-gradient(circle at 82% 20%,rgba(22,119,255,.10),transparent 30%),
+    linear-gradient(145deg,var(--oti-surface-strong),var(--oti-surface))!important;
+}
+html[data-zedek-theme="night"] .page-hero{
+  background:
+    radial-gradient(circle at 82% 20%,rgba(22,119,255,.13),transparent 30%),
+    linear-gradient(145deg,rgba(14,32,51,.92),rgba(13,29,46,.72))!important;
+}
+.page-hero h1,.section-heading h2,.section-heading h3,.card-heading h3,.match-detail-card h1,.match-detail-card h2,.detail-section h2,.detail-section h3{
+  color:var(--oti-text)!important;
+}
+.page-hero p,.section-heading p,.data-note,.empty-state,.detail-section small{color:var(--oti-muted)!important}
+.button,.primary-button,.secondary-button,.action-button,.mc-tab{
+  border-radius:10px!important;
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+}
+.button:hover,.primary-button:hover,.secondary-button:hover,.action-button:hover,.mc-tab:hover{transform:translateY(-1px)!important}
+.primary-button,.action-button{background:linear-gradient(135deg,var(--oti-blue),var(--oti-blue-2))!important;border-color:transparent!important;color:#fff!important;box-shadow:0 10px 24px rgba(22,119,255,.18)!important}
+.secondary-button{background:var(--oti-surface)!important;border-color:var(--oti-border)!important;color:var(--oti-text)!important;box-shadow:0 6px 18px rgba(8,25,43,.05)!important}
+input,select,textarea{
+  background:var(--oti-surface-strong)!important;color:var(--oti-text)!important;border-color:var(--oti-border)!important;
+  border-radius:10px!important;
+}
+input::placeholder,textarea::placeholder{color:var(--oti-muted)!important}
+html[data-zedek-theme="night"] input,html[data-zedek-theme="night"] select,html[data-zedek-theme="night"] textarea{
+  background:rgba(255,255,255,.045)!important;color:var(--oti-text)!important;border-color:var(--oti-border)!important;
+}
+
+/* Match Centre remains focused: only the four requested panels. */
+.match-centre-page .live-centre-switcher{
+  background:rgba(8,24,38,.94)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.12)!important;
+  border-radius:16px!important;
+}
+.match-centre-page .live-centre-switcher button{border-radius:10px!important}
+.match-centre-page .live-centre-switcher button.active{
+  background:linear-gradient(135deg,#1677ff,#35a7ff)!important;color:#fff!important;border-color:rgba(255,255,255,.16)!important;
+  box-shadow:0 9px 22px rgba(22,119,255,.24)!important;
+}
+.match-centre-page .live-centre-switcher button.active span{color:#fff!important}
+html[data-zedek-theme="night"] .match-centre-page .live-centre-content{background:transparent!important}
+html[data-zedek-theme="night"] .match-centre-page .live-centre-panel{background:var(--oti-surface)!important;color:var(--oti-text)!important}
+
+/* Keep status language consistent across routes. */
+.live-dot,.score-status.live i{background:var(--oti-red)!important}
+.live-dot{box-shadow:0 0 0 4px rgba(239,83,97,.10)}
