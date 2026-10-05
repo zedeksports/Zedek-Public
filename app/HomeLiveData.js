@@ -66,13 +66,13 @@ function initials(team, fallback) {
   return value.split(/\s+/).map((x) => x[0]).join("").slice(0, 3).toUpperCase();
 }
 
-function liveMinute(match) {
+function liveMinute(match, now = Date.now()) {
   if (!match?.scheduled_at) return null;
   if (match.status === "halftime") return "HT";
   
   if (!LIVE_STATUSES.has(match.status)) return null;
   const started = new Date(match.kickoff_at || match.scheduled_at).getTime();
-  const elapsed = Math.floor((Date.now() - started) / 60000);
+  const elapsed = Math.floor((now - started) / 60000);
   if (!Number.isFinite(elapsed) || elapsed < 1) return "1'";
   return Math.min(elapsed, 120) + "'";
 }
@@ -91,7 +91,7 @@ function TeamCrest({ team, fallback }) {
   );
 }
 
-function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
+function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite, clockNow }) {
   const isLive = LIVE_STATUSES.has(match.status);
   const isFinished = FINISHED_STATUSES.has(match.status);
   const home = teamName(match.home_team, "Home team");
@@ -99,7 +99,7 @@ function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite }) {
   const homeScore = isLive || isFinished ? (match.home_score ?? 0) : null;
   const awayScore = isLive || isFinished ? (match.away_score ?? 0) : null;
   const statusLabel = isLive ? (match.status === "halftime" ? "HALF-TIME" : "LIVE") : isFinished ? "FT" : "KICK-OFF";
-  const minute = liveMinute(match);
+  const minute = liveMinute(match, clockNow);
   const homeFavorite = favoriteTeams.has(match.home_team?.id);
   const awayFavorite = favoriteTeams.has(match.away_team?.id);
 
@@ -172,6 +172,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
   const pendingGoalsRef = useRef(new Map());
   const [goalFlashes, setGoalFlashes] = useState({});
   const [favoriteTeams, setFavoriteTeams] = useState(() => new Set());
+  const [clockNow, setClockNow] = useState(Date.now());
   const [state, setState] = useState(() => ({
     matches: deriveVisible(initialMatches, initialData?.officialIds, selectedDay, filter).slice(0, 12),
     teams: initialData?.teams || 0,
@@ -293,7 +294,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
             <div className="empty-state">Refreshing football data…</div>
           ) : state.matches.length ? (
             <div className="score-match-list">
-              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} />)}
+              {displayedMatches.map((m) => <ScoreMatchCard key={m.id} match={m} goalFlash={goalFlashes[m.id]} favoriteTeams={favoriteTeams} onToggleFavorite={toggleFavorite} clockNow={clockNow} />)}
             </div>
           ) : (
             <div className="empty-state">
