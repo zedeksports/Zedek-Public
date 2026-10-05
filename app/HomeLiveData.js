@@ -92,7 +92,7 @@ function TeamCrest({ team, fallback }) {
   );
 }
 
-function ScoreMatchCard({ match, goalFlash, favoriteTeams, onToggleFavorite, clockNow }) {
+function ScoreMatchCard({ match, goalFlash, favoriteTeams, favoriteMatches, onToggleFavorite, onToggleMatchFavorite, clockNow }) {
   const isLive = LIVE_STATUSES.has(match.status);
   const isFinished = FINISHED_STATUSES.has(match.status);
   const home = teamName(match.home_team, "Home team");
@@ -295,7 +295,7 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
               <span className="section-kicker">{liveCount ? "Live now" : filter === "RESULTS" ? "Official" : "Match feed"}</span>
               <h3>{filter === "MY TEAMS" ? "Team following" : "Matches for this date"}</h3>
             </div>
-            <span className="count-pill">{state.matches.length}</span>
+            <span className="count-pill">{shownMatches.length}</span>
           </div>
           {state.loading ? (
             <div className="empty-state">Refreshing football data…</div>

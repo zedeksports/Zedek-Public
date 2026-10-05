@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import HomeLiveData from "./HomeLiveData";
 
-const filters = ["ALL", "LIVE", "UPCOMING", "RESULTS", "MY TEAMS"];
+const filters = ["ALL", "LIVE", "UPCOMING", "RESULTS", "MY TEAMS", "FAVOURITES"];
 
 function dayItems() {
   const base = new Date();
