@@ -188,8 +188,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     <div className="live-centre-hero">
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
-      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>\n      {prematch?<div className="live-centre-match-details" aria-label="Official match details"><div><span>REFEREE</span><strong>{referee}</strong></div><div><span>VENUE</span><strong>{resolvedVenue}</strong></div></div>:null}
-    </div>
+      <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong><span>{live?"LIVE":official?"FINAL":"KICK-OFF"}</span></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>\n    </div>
     <div className="live-centre-switcher" role="tablist" aria-label="Match centre sections">
       {[["events","Events"],["lineups","Lineups"],["stats","Stats"],["h2h","H2H"]].map(([key,label])=><button key={key} type="button" role="tab" aria-selected={tab===key} className={tab===key?"active":""} onClick={()=>setTab(key)}><span>{key==="events"?"◆":key==="lineups"?"XI":key==="stats"?"≋":"↔"}</span>{label}</button>)}
     </div>
