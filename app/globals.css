@@ -922,3 +922,11 @@ html[data-zedek-theme="night"] .match-centre-page .live-centre-panel{background:
 .prematch-summary-official strong{display:block;font-size:.84rem}
 @media(max-width:800px){.prematch-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.prematch-summary-grid,.prematch-summary-official{grid-template-columns:1fr}.prematch-summary-card{padding:12px}}
+
+.prematch-form-list{display:grid;gap:8px}
+.prematch-form-team{display:grid;gap:5px}
+.prematch-form-team>b{font-size:.72rem}
+.prematch-form-team>div{display:flex;gap:5px}
+.prematch-form-team i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:.58rem;font-style:normal;font-weight:900;border:1px solid rgba(20,29,43,.1)}
+.prematch-form-team i.w{background:rgba(35,150,85,.14)}.prematch-form-team i.d{background:rgba(180,150,35,.14)}.prematch-form-team i.l{background:rgba(190,60,60,.12)}
+.prematch-form-team small{font-size:.68rem;color:var(--muted,#6d6a63)}
