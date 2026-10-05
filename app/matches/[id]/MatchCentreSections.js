@@ -93,7 +93,7 @@ function countdownText(target) {
   return "Kicks off in " + Math.max(1, minutes) + "m";
 }
 
-export function MatchSummaryCard({ match, venue }) {
+export function MatchSummaryCard({ match, venue, referee }) {
   const [countdown, setCountdown] = useState("");
   useEffect(() => {
     const update = () => setCountdown(countdownText(match?.scheduled_at));
