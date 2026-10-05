@@ -93,7 +93,7 @@ function countdownText(target) {
   return "Kicks off in " + Math.max(1, minutes) + "m";
 }
 
-export function MatchSummaryCard({ match, venue, referee }) {
+export function MatchSummaryCard({ match, venue, referee, preview }) {
   const [countdown, setCountdown] = useState("");
   useEffect(() => {
     const update = () => setCountdown(countdownText(match?.scheduled_at));
@@ -143,7 +143,9 @@ export function MatchSummaryCard({ match, venue, referee }) {
       </div>
       <div className="mc-summary-preview">
         <span>MATCH PREVIEW</span>
-        <p>{match?.match_preview || "Official match preview will appear here before kick-off."}</p>
+        {preview?.headline ? <strong>{preview.headline}</strong> : null}
+        <p>{preview?.summary || preview?.headline || match?.match_preview || "Official match preview will appear here before kick-off."}</p>
+        {preview?.key_storylines ? <small>{preview.key_storylines}</small> : null}
         {countdown ? <b>{countdown}</b> : null}
       </div>
     </section>
