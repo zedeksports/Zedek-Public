@@ -38,23 +38,30 @@ function StatRow({ label, home, away, suffix = "" }) {
 }
 
 function formationNumbers(value){const nums=String(value||"").match(/\d+/g)||[];return nums.map(Number).filter(Boolean)}
-function formationRows(formation,count){
- const nums=formationNumbers(formation); if(nums.length!==3||nums.reduce((a,b)=>a+b,0)!==count-1)return null;
- return [1,...nums];
-}
-function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\bgk\b/.test(v))return "GK";if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";if(/forward|striker|attack|wing|\bfw\b/.test(v))return "FWD";return "OTHER"}
-function playerSlot(item,index,groupCounts,formation){
- const group=roleGroup(item.position||item.player?.position||item.role);
- const groupIndex=groupCounts[group]??0; groupCounts[group]=groupIndex+1;
- const nums=formationNumbers(formation); const lineCounts=nums.length===3&&nums.reduce((a,b)=>a+b,0)===10?nums:null;
- const templates={GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72],[29,67],[50,70],[71,67]],MID:[[18,48],[37,54],[50,47],[63,54],[82,48],[30,43],[70,43]],FWD:[[18,25],[38,31],[50,22],[62,31],[82,25],[35,20],[65,20]],OTHER:[[50,50]]};
- const fallback=templates[group]||templates.OTHER;
- const targetCount=group==="DEF"?lineCounts?.[0]:group==="MID"?lineCounts?.[1]:group==="FWD"?lineCounts?.[2]:null;
- if(targetCount&&groupIndex<targetCount){
-   const step=targetCount===1?0:58/(targetCount-1);
-   return [21+step*groupIndex,group==="DEF"?72:group==="MID"?49:27];
- }
- return fallback[Math.min(groupIndex,fallback.length-1)]||[50,50];
+function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\\bgk\\b/.test(v))return "GK";if(/def|back|\\b(cb|lb|rb|lwb|rwb)\\b/.test(v))return "DEF";if(/mid|\\b(dm|cm|am|lm|rm)\\b/.test(v))return "MID";if(/forward|striker|attack|wing|\\bfw\\b/.test(v))return "FWD";return "OTHER"}
+
+function formationSlots(lineup){
+ const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
+ const nums=formationNumbers(lineup?.formation);
+ const valid=nums.length>=2&&nums.length<=5&&nums.reduce((a,b)=>a+b,0)===10;
+ const gk=starters.find(p=>roleGroup(p.position||p.player?.position||p.role)==="GK")||starters[0];
+ const out=[];
+ if(gk) out.push({item:gk,row:0,rowCount:1,group:"GK"});
+ const field=starters.filter(p=>p!==gk);
+ const rows=valid?nums:[Math.max(0,field.filter(p=>roleGroup(p.position||p.player?.position||p.role)==="DEF").length),Math.max(0,field.filter(p=>roleGroup(p.position||p.player?.position||p.role)==="MID").length),Math.max(0,field.filter(p=>roleGroup(p.position||p.player?.position||p.role)==="FWD").length)].filter(Boolean);
+ const assigned=new Set(gk?[gk.id]:[]);
+ let cursor=0;
+ rows.forEach((count,rowIndex)=>{
+   const expected=rowIndex===0?"DEF":rowIndex===rows.length-1?"FWD":"MID";
+   const preferred=field.filter(p=>!assigned.has(p.id)&&roleGroup(p.position||p.player?.position||p.role)===expected);
+   const fallback=field.filter(p=>!assigned.has(p.id));
+   const pool=[...preferred,...fallback];
+   for(let i=0;i<count&&pool.length;i++){
+     const item=pool.shift(); assigned.add(item.id);
+     out.push({item,row:rowIndex+1,rowCount:count,group:expected});
+   }
+ });
+ return out;
 }
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
@@ -238,19 +245,10 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="pitch-centre-dot"/>
       <div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
       <div className="pitch-goal pitch-goal-top"/><div className="pitch-goal pitch-goal-bottom"/>
-      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>lineup?lineup.starters.map((item,i)=>{
-        const slots={GK:[],DEF:[],MID:[],FWD:[],OTHER:[]};
-        lineup.starters.forEach(p=>slots[roleGroup(p.position||p.player?.position||p.role)].push(p));
-        const group=roleGroup(item.position||item.player?.position||item.role);
-        const list=slots[group];
-        const groupIndex=list.findIndex(p=>p.id===item.id);
-        const nums=formationNumbers(lineup.formation);
-        const lineCounts=nums.length===3&&nums.reduce((a,b)=>a+b,0)===10?nums:null;
-        const count=group==="DEF"?lineCounts?.[0]:group==="MID"?lineCounts?.[1]:group==="FWD"?lineCounts?.[2]:null;
-        const safeCount=count||Math.max(list.length,1);
-        const x=safeCount===1?50:18+(64*(groupIndex/(safeCount-1)));
-        const baseY=group==="GK"?91:group==="DEF"?72:group==="MID"?50:group==="FWD"?28:50;
-        const y=away?100-baseY:baseY;
+      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>lineup?formationSlots(lineup).map(({item,row,rowCount,group})=>{
+        const rowY=[91,76,60,44,28,16][Math.min(row,5)];
+        const y=away?100-rowY:rowY;
+        const x=rowCount===1?50:18+(64*(formationSlots(lineup).filter(s=>s.row===row).findIndex(s=>s.item.id===item.id)/(rowCount-1)));
         return <div className={"zedek-pitch-player "+(away?"away":"home")} style={{left:x+"%",top:y+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={away} teamId={lineup.team_id}/></div>;
       }):null)}
     </div>
