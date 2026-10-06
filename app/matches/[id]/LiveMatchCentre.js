@@ -43,18 +43,27 @@ function formationRows(formation,count){
  return [1,...nums];
 }
 function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\bgk\b/.test(v))return "GK";if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";if(/forward|striker|attack|wing|\bfw\b/.test(v))return "FWD";return "OTHER"}
+const FORMATION_LAYOUTS={
+ "4-4-2":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[18,51],[39,54],[61,54],[82,51]],FWD:[[35,27],[65,27]]},
+ "4-3-3":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[22,51],[50,56],[78,51]],FWD:[[18,27],[50,21],[82,27]]},
+ "4-2-3-1":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[32,58],[68,58],[20,39],[50,35],[80,39]],FWD:[[50,20]]},
+ "3-5-2":{GK:[[50,91]],DEF:[[27,74],[50,78],[73,74]],MID:[[12,56],[31,54],[50,58],[69,54],[88,56]],FWD:[[35,27],[65,27]]},
+ "3-4-3":{GK:[[50,91]],DEF:[[27,74],[50,78],[73,74]],MID:[[18,53],[39,56],[61,56],[82,53]],FWD:[[18,27],[50,21],[82,27]]},
+ "5-3-2":{GK:[[50,91]],DEF:[[10,68],[30,74],[50,77],[70,74],[90,68]],MID:[[22,50],[50,55],[78,50]],FWD:[[35,27],[65,27]]},
+ "5-4-1":{GK:[[50,91]],DEF:[[10,68],[30,74],[50,77],[70,74],[90,68]],MID:[[18,51],[39,55],[61,55],[82,51]],FWD:[[50,23]]},
+ "4-1-4-1":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[50,61],[18,46],[39,50],[61,50],[82,46]],FWD:[[50,22]]},
+ "4-3-2-1":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[22,52],[50,57],[78,52],[35,35],[65,35]],FWD:[[50,20]]},
+ "3-4-2-1":{GK:[[50,91]],DEF:[[27,74],[50,78],[73,74]],MID:[[18,53],[39,56],[61,56],[82,53],[37,36],[63,36]],FWD:[[50,20]]},
+ "4-3-1-2":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[22,52],[50,57],[78,52],[50,36]],FWD:[[35,23],[65,23]]},
+ "4-2-2-2":{GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[30,58],[70,58],[30,39],[70,39]],FWD:[[38,22],[62,22]]}
+};
 function playerSlot(item,index,groupCounts,formation){
  const group=roleGroup(item.position||item.player?.position||item.role);
  const groupIndex=groupCounts[group]??0; groupCounts[group]=groupIndex+1;
- const nums=formationNumbers(formation); const lineCounts=nums.length===3&&nums.reduce((a,b)=>a+b,0)===10?nums:null;
- const templates={GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72],[29,67],[50,70],[71,67]],MID:[[18,48],[37,54],[50,47],[63,54],[82,48],[30,43],[70,43]],FWD:[[18,25],[38,31],[50,22],[62,31],[82,25],[35,20],[65,20]],OTHER:[[50,50]]};
- const fallback=templates[group]||templates.OTHER;
- const targetCount=group==="DEF"?lineCounts?.[0]:group==="MID"?lineCounts?.[1]:group==="FWD"?lineCounts?.[2]:null;
- if(targetCount&&groupIndex<targetCount){
-   const step=targetCount===1?0:58/(targetCount-1);
-   return [21+step*groupIndex,group==="DEF"?72:group==="MID"?49:27];
- }
- return fallback[Math.min(groupIndex,fallback.length-1)]||[50,50];
+ const layout=FORMATION_LAYOUTS[String(formation||"").trim()];
+ const fallback={GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72]],MID:[[18,51],[39,54],[61,54],[82,51]],FWD:[[18,27],[50,21],[82,27]],OTHER:[[50,50]]};
+ const slots=layout?.[group]||fallback[group]||fallback.OTHER;
+ return slots[Math.min(groupIndex,slots.length-1)]||[50,50];
 }
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
