@@ -62,7 +62,7 @@ export async function POST(request) {
 
   const pagePath = cleanPath(body?.page_path);
   const eventKey = typeof body?.event_key === "string" ? body.event_key.trim() : "";
-  if (!eventKey || eventKey.length > 128) {
+  if (!/^[a-zA-Z0-9]{16,128}$/.test(eventKey)) {
     return Response.json({ ok: false }, { status: 400 });
   }
 
@@ -86,7 +86,7 @@ export async function POST(request) {
       session_id: sessionId,
       event_type: "session_start",
       page_path: pagePath,
-      event_key: `${eventKey}:session`,
+      event_key: eventKey + ":session",
       referrer,
       device_type: deviceType(userAgent)
     });
@@ -97,7 +97,7 @@ export async function POST(request) {
     session_id: sessionId,
     event_type: eventType,
     page_path: pagePath,
-    event_key,
+    event_key: eventKey,
     referrer,
     device_type: deviceType(userAgent)
   });
@@ -112,7 +112,8 @@ export async function POST(request) {
   }
 
   if (newVisitor) setCookie(store, VISITOR_COOKIE, visitorId, VISITOR_MAX_AGE);
-  if (newSession) setCookie(store, SESSION_COOKIE, sessionId, SESSION_MAX_AGE);
+  // Refresh the rolling 30-minute session window on every accepted event.
+  setCookie(store, SESSION_COOKIE, sessionId, SESSION_MAX_AGE);
 
   return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
 }
