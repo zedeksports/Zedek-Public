@@ -2,6 +2,7 @@ import "./globals.css";
 import "./home-premium.css";
 import PublicShell from "./PublicShell";
 import SiteAnalyticsTracker from "./SiteAnalyticsTracker";
+import SitePresenceTracker from "./SitePresenceTracker";
 
 export const metadata = {
   title: "ZEDEK SPORTS",
@@ -13,6 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <SiteAnalyticsTracker />
+        <SitePresenceTracker />
         <PublicShell>{children}</PublicShell>
       </body>
     </html>
