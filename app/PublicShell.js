@@ -6,7 +6,7 @@ import PWAInstallPrompt from "./PWAInstallPrompt";
 import LiveNotificationAlerts from "./LiveNotificationAlerts";
 
 const primaryNav=[["Matches","/matches"],["Live","/matches?filter=live"]];
-const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/favorites"]];
+const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/my-teams"]];
 
 export default function PublicShell({children}){
  const [menuOpen,setMenuOpen]=useState(false),[accountOpen,setAccountOpen]=useState(false),[night,setNight]=useState(false),[user,setUser]=useState(null),[unread,setUnread]=useState(0);
@@ -23,7 +23,7 @@ export default function PublicShell({children}){
     </nav>
     <div className="header-actions">
       <button className="icon-button menu-button" onClick={()=>setMenuOpen(x=>!x)} aria-expanded={menuOpen} aria-label="Open football menu">☰</button>
-      {user?<div className="account-wrap"><button className="account-avatar" onClick={()=>setAccountOpen(x=>!x)} aria-expanded={accountOpen} aria-label="Account">{(user.user_metadata?.full_name||user.email||"O").slice(0,1).toUpperCase()}</button>{accountOpen?<div className="account-menu"><strong>{user.user_metadata?.full_name||user.email}</strong><a href="/favorites" onClick={closeLayers}>★ Favourites</a><a href="/notifications" onClick={closeLayers}>◉ Notifications {unread>0?<b>{unread>99?"99+":unread}</b>:null}</a><a href="/settings" onClick={closeLayers}>⚙ Settings</a><button onClick={signOut}>Sign out</button></div>:null}</div>:<a className="sign-in-button" href="/login">Sign in</a>}
+      {user?<div className="account-wrap"><button className="account-avatar" onClick={()=>setAccountOpen(x=>!x)} aria-expanded={accountOpen} aria-label="Account">{(user.user_metadata?.full_name||user.email||"O").slice(0,1).toUpperCase()}</button>{accountOpen?<div className="account-menu"><strong>{user.user_metadata?.full_name||user.email}</strong><a href="/favorites" onClick={closeLayers}>★ Favourites</a><a href="/my-teams" onClick={closeLayers}>⚽ My Teams</a><a href="/notifications" onClick={closeLayers}>◉ Notifications {unread>0?<b>{unread>99?"99+":unread}</b>:null}</a><a href="/settings" onClick={closeLayers}>⚙ Settings</a><button onClick={signOut}>Sign out</button></div>:null}</div>:<a className="sign-in-button" href="/login">Sign in</a>}
       <button className="theme-button" onClick={toggleTheme} aria-label="Toggle day and night mode">{night?"☀":"☾"}</button>
     </div>
    </div>
@@ -44,7 +44,7 @@ export default function PublicShell({children}){
    <div className="zedek-drawer-head"><div><span className="drawer-kicker">OTI FOOTBALL NETWORK</span><strong>Football menu</strong></div><button className="drawer-close" onClick={()=>setMenuOpen(false)} aria-label="Close menu">×</button></div>
    <div className="drawer-primary">{primaryNav.map(([label,href])=><a key={href} href={href} onClick={()=>setMenuOpen(false)}>{label}<span>→</span></a>)}</div>
    <div className="drawer-section"><span className="drawer-kicker">EXPLORE</span>{exploreNav.map(([label,href])=><a key={href} href={href} onClick={()=>setMenuOpen(false)}>{label}<span>↗</span></a>)}</div>
-   <div className="drawer-section account-drawer-links"><span className="drawer-kicker">YOUR FOOTBALL</span>{user?<><a href="/favorites" onClick={()=>setMenuOpen(false)}>Favourites<span>★</span></a><a href="/notifications" onClick={()=>setMenuOpen(false)}>Notifications{unread>0?<span>{unread}</span>:<span>→</span>}</a><a href="/settings" onClick={()=>setMenuOpen(false)}>Settings<span>⚙</span></a></>:<a href="/login" onClick={()=>setMenuOpen(false)}>Sign in<span>→</span></a>}</div>
+   <div className="drawer-section account-drawer-links"><span className="drawer-kicker">YOUR FOOTBALL</span>{user?<><a href="/favorites" onClick={()=>setMenuOpen(false)}>Favourites<span>★</span></a><a href="/my-teams" onClick={()=>setMenuOpen(false)}>My Teams<span>⚽</span></a><a href="/notifications" onClick={()=>setMenuOpen(false)}>Notifications{unread>0?<span>{unread}</span>:<span>→</span>}</a><a href="/settings" onClick={()=>setMenuOpen(false)}>Settings<span>⚙</span></a></>:<a href="/login" onClick={()=>setMenuOpen(false)}>Sign in<span>→</span></a>}</div>
    <div className="drawer-note">Follow local teams, find live scores and keep your football settings synced to your account.</div>
   </aside>
   {menuOpen&&<button className="zedek-drawer-backdrop" aria-label="Close menu" onClick={()=>setMenuOpen(false)}/>}
