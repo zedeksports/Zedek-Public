@@ -288,9 +288,8 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===item.player_id);
     const stateClass=sentOff?" sent-off":cautioned?" cautioned":"";
     return <div className={"head-to-head-player"+(away?" away":"")+stateClass}>
-      <span className="head-to-head-number">{item.shirt_number??item.player?.shirt_number??"—"}</span>
-      <div className="head-to-head-avatar">{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}<b className="lineup-rating-badge">{rating.toFixed(1)}</b>{cap&&<b className="lineup-captain-badge" title="Team captain">C</b>}{sentOff&&<b className="lineup-card-state red" title={hasSecondYellow?"Sent off after second yellow":"Sent off"}>RED</b>}{cautioned&&<b className="lineup-card-state yellow" title="Yellow card">YC</b>}</div>
-      <a href={item.player?.id?"/players/"+item.player.id:"#"}><strong>{item.player?.full_name||"Player"}</strong><small>{item.position||item.player?.position||"Player"}{cap?" · CAPTAIN":""}</small></a>
+      <div className="head-to-head-avatar"><b className="lineup-shirt-number">{item.shirt_number??item.player?.shirt_number??"—"}</b>{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}<b className="lineup-rating-badge">{rating.toFixed(1)}</b>{cap&&<b className="lineup-captain-badge" title="Team captain">C</b>}{sentOff&&<b className="lineup-card-state red" title={hasSecondYellow?"Sent off after second yellow":"Sent off"}>RED</b>}{cautioned&&<b className="lineup-card-state yellow" title="Yellow card">YC</b>}</div>
+      <a href={item.player?.id?"/players/"+item.player.id:"#"} aria-label={item.player?.full_name||"Player"}><strong>{item.player?.full_name||"Player"}</strong><small>{item.position||item.player?.position||"Player"}{cap?" · CAPTAIN":""}</small></a>
       <div className="lineup-event-badges">{goals>0&&<i title="Goals">⚽{goals>1?goals:""}</i>}{assists>0&&<i title="Assists">A{assists>1?assists:""}</i>}{yellows>0&&<i title="Yellow card">🟨{yellows>1?yellows:""}</i>}{reds>0&&<i title="Red card">🟥</i>}{subOut&&<i title="Substituted">↕</i>}</div>    </div>;
   }
 
