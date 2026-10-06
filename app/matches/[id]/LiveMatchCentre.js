@@ -113,16 +113,6 @@ function specificRole(value){
  return null;
 }
 
-function fallbackFormationSlots(lineup){
- const nums=formationNumbers(lineup?.formation);
- if(nums.length<2||nums.length>5||nums.reduce((a,b)=>a+b,0)!==10)return null;
- const xFor=count=>count===1?[50]:count===2?[39,61]:count===3?[24,50,76]:count===4?[14,38,62,86]:[10,30,50,70,90];
- const rows=[["DEF",nums[0]],...nums.slice(1).map((n,i)=>[i===nums.length-2?"FWD":"MID",n])];
- const slots=[["GK",50,92]];
- rows.forEach(([group,count],i)=>xFor(count).forEach(x=>slots.push([group,x,82-i*10])));
- return slots;
-}
-
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
