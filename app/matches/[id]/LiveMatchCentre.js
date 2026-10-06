@@ -221,7 +221,13 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   },[lineups]);
 
   const homeLineup=lineupByTeam.find(l=>l.team_id===match?.home_team?.id)||lineupByTeam[0];
-  const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id)||lineupByTeam[1];\n  const motmId=useMemo(()=>{\n    if(!official)return null;\n    const starters=lineupByTeam.flatMap(l=>l.starters||[]);\n    const ranked=starters.map(item=>({id:item.player_id||item.player?.id,rating:ratingForPlayer(item,events,match,item.team_id||lineupByTeam.find(l=>l.starters?.some(s=>s.id===item.id))?.team_id,stats)})).filter(x=>x.id);\n    return ranked.sort((a,b)=>b.rating-a.rating)[0]?.id||null;\n  },[official,lineupByTeam,events,match,stats]);
+  const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id)||lineupByTeam[1];
+  const motmId=useMemo(()=>{
+    if(!official)return null;
+    const starters=lineupByTeam.flatMap(l=>l.starters||[]);
+    const ranked=starters.map(item=>({id:item.player_id||item.player?.id,rating:ratingForPlayer(item,events,match,item.team_id||lineupByTeam.find(l=>l.starters?.some(s=>s.id===item.id))?.team_id,stats)})).filter(x=>x.id);
+    return ranked.sort((a,b)=>b.rating-a.rating)[0]?.id||null;
+  },[official,lineupByTeam,events,match,stats]);
 
   function PlayerCell({item,lineup,away,teamId}){
     if(!item)return null;
