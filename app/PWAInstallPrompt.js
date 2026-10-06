@@ -17,23 +17,40 @@ export default function PWAInstallPrompt() {
     };
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
-    const standalone = window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone;
+
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      window.navigator.standalone;
     if (standalone) setInstalled(true);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
 
-  if (installed || !installEvent) return null;
+  async function handleInstall() {
+    if (installEvent) {
+      await installEvent.prompt();
+      setInstallEvent(null);
+      return;
+    }
+    window.location.href = "/install";
+  }
 
   return (
-    <div className="pwa-install-banner" role="region" aria-label="Install ZEDEK SPORTS">
+    <div className="pwa-install-banner" role="region" aria-label="ZEDEK SPORTS app download">
       <div>
-        <strong>Install ZEDEK SPORTS</strong>
-        <span>Get the local football app on your phone for faster access.</span>
+        <strong>{installed ? "ZEDEK SPORTS App" : "Download ZEDEK SPORTS"}</strong>
+        <span>
+          {installed
+            ? "App installed. Open the app from your home screen."
+            : "Install the local football app for faster access and live updates."}
+        </span>
       </div>
-      <button className="button" onClick={async () => { await installEvent.prompt(); setInstallEvent(null); }}>Install</button>
+      <button className="button" onClick={handleInstall}>
+        {installed ? "Install Help" : installEvent ? "Download App" : "Download App"}
+      </button>
     </div>
   );
 }
