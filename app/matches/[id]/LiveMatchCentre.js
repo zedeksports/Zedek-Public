@@ -37,17 +37,24 @@ function StatRow({ label, home, away, suffix = "" }) {
   </div>;
 }
 
-function formationNumbers(value){const nums=String(value||"").match(/\\d+/g)||[];return nums.map(Number).filter(Boolean)}
+function formationNumbers(value){const nums=String(value||"").match(/\d+/g)||[];return nums.map(Number).filter(Boolean)}
 function formationRows(formation,count){
  const nums=formationNumbers(formation); if(nums.length!==3||nums.reduce((a,b)=>a+b,0)!==count-1)return null;
  return [1,...nums];
 }
-function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\\bgk\\b/.test(v))return "GK";if(/def|back|\\b(cb|lb|rb|lwb|rwb)\\b/.test(v))return "DEF";if(/mid|\\b(dm|cm|am|lm|rm)\\b/.test(v))return "MID";if(/forward|striker|attack|wing|\\bfw\\b/.test(v))return "FWD";return "OTHER"}
-function playerSlot(item,index,groupCounts){
+function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\bgk\b/.test(v))return "GK";if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";if(/forward|striker|attack|wing|\bfw\b/.test(v))return "FWD";return "OTHER"}
+function playerSlot(item,index,groupCounts,formation){
  const group=roleGroup(item.position||item.player?.position||item.role);
  const groupIndex=groupCounts[group]??0; groupCounts[group]=groupIndex+1;
+ const nums=formationNumbers(formation); const lineCounts=nums.length===3&&nums.reduce((a,b)=>a+b,0)===10?nums:null;
  const templates={GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72],[29,67],[50,70],[71,67]],MID:[[18,48],[37,54],[50,47],[63,54],[82,48],[30,43],[70,43]],FWD:[[18,25],[38,31],[50,22],[62,31],[82,25],[35,20],[65,20]],OTHER:[[50,50]]};
- const slots=templates[group]||templates.OTHER; return slots[Math.min(groupIndex,slots.length-1)]||[50,50];
+ const fallback=templates[group]||templates.OTHER;
+ const targetCount=group==="DEF"?lineCounts?.[0]:group==="MID"?lineCounts?.[1]:group==="FWD"?lineCounts?.[2]:null;
+ if(targetCount&&groupIndex<targetCount){
+   const step=targetCount===1?0:58/(targetCount-1);
+   return [21+step*groupIndex,group==="DEF"?72:group==="MID"?49:27];
+ }
+ return fallback[Math.min(groupIndex,fallback.length-1)]||[50,50];
 }
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
@@ -228,7 +235,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       {[homeLineup,awayLineup].map((lineup,sideIndex)=>lineup?<div className={"zedek-pitch-side "+(sideIndex?"away-side":"")} key={lineup.id}>
         <div className="zedek-pitch">
           <div className="pitch-half-line"/><div className="pitch-centre-circle"/><div className="pitch-centre-dot"/><div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
-          {lineup.starters.map((item,i)=>{const groupCounts={};for(let j=0;j<i;j++)playerSlot(lineup.starters[j],j,groupCounts);const [x,y]=playerSlot(item,i,groupCounts);const pos=sideIndex?100-y:y;return <div className="zedek-pitch-player" style={{left:x+"%",top:pos+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={Boolean(sideIndex)} teamId={lineup.team_id}/></div>})}
+          {lineup.starters.map((item,i)=>{const groupCounts={};for(let j=0;j<i;j++)playerSlot(lineup.starters[j],j,groupCounts,lineup.formation);const [x,y]=playerSlot(item,i,groupCounts,lineup.formation);const pos=sideIndex?100-y:y;return <div className="zedek-pitch-player" style={{left:x+"%",top:pos+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={Boolean(sideIndex)} teamId={lineup.team_id}/></div>})}
         </div>
         <div className="zedek-pitch-team-label">{lineup.team?.short_name||lineup.team?.name||"Team"} <b>{lineup.formation||"—"}</b></div>
       </div>:null)}
