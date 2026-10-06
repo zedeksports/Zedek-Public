@@ -12,35 +12,28 @@ function navigationKey(pathname, search) {
 export default function AnalyticsTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const search = searchParams?.toString() || "";
+  const key = navigationKey(pathname, search);
 
   useEffect(() => {
-    const search = searchParams?.toString() || "";
-    const key = navigationKey(pathname, search);
     if (window[GLOBAL_KEY] === key) return;
     window[GLOBAL_KEY] = key;
-
-    const controller = new AbortController();
-    const eventKey = crypto.randomUUID().replace(/-/g, "");
 
     fetch("/api/analytics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
       keepalive: true,
-      signal: controller.signal,
       body: JSON.stringify({
         event_type: "page_view",
         page_path: key.slice(0, 512),
-        event_key: eventKey
+        event_key: crypto.randomUUID().replace(/-/g, "")
       })
     }).catch(() => {});
-
-    return () => controller.abort();
-  }, [pathname, searchParams]);
+  }, [key]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      const current = navigationKey(pathname, searchParams?.toString() || "");
       fetch("/api/analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,14 +41,14 @@ export default function AnalyticsTracker() {
         keepalive: true,
         body: JSON.stringify({
           event_type: "session_heartbeat",
-          page_path: current.slice(0, 512),
+          page_path: key.slice(0, 512),
           event_key: crypto.randomUUID().replace(/-/g, "")
         })
       }).catch(() => {});
     }, 60000);
 
     return () => window.clearInterval(timer);
-  }, [pathname, searchParams]);
+  }, [key]);
 
   return null;
 }
