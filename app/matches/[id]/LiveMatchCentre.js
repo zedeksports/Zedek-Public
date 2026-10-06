@@ -114,7 +114,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   const live=LIVE_STATUSES.has(match?.status);
   const official=OFFICIAL_STATUSES.has(match?.status);
-  const prematch=!live&&!official;
+  const interrupted=INTERRUPTION_STATUSES.has(match?.status);\n  const prematch=!live&&!official&&!interrupted;
   const resolvedVenue=match?.venue||match?.home_team?.home_venue||match?.away_team?.home_venue||"Venue TBC";
   const referee=match?.referee||"Referee TBC";
   const primaryChannel=channels.find(x=>x.is_primary)||channels[0]||null;
