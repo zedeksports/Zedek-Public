@@ -279,15 +279,19 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const playerEvents=events.filter(e=>e.player_id===item.player_id||e.secondary_player_id===item.player_id);
     const goals=playerEvents.filter(e=>e.event_type==="goal"&&e.player_id===item.player_id).length;
     const assists=playerEvents.filter(e=>e.event_type==="goal"&&e.secondary_player_id===item.player_id).length;
-    const yellows=playerEvents.filter(e=>e.event_type==="yellow_card"&&e.player_id===item.player_id).length;
-    const reds=playerEvents.filter(e=>e.event_type==="red_card"&&e.player_id===item.player_id).length;
+    const cardEvents=playerEvents.filter(e=>e.player_id===item.player_id);
+    const yellows=cardEvents.filter(e=>e.event_type==="yellow_card"||e.event_type==="second_yellow").length;
+    const reds=cardEvents.filter(e=>e.event_type==="red_card"||e.event_type==="second_yellow").length;
+    const hasSecondYellow=cardEvents.some(e=>e.event_type==="second_yellow");
+    const sentOff=reds>0;
+    const cautioned=yellows>0&&!sentOff;
     const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===item.player_id);
-    return <div className={"head-to-head-player"+(away?" away":"")}>
+    const stateClass=sentOff?" sent-off":cautioned?" cautioned":"";
+    return <div className={"head-to-head-player"+(away?" away":"")+stateClass}>
       <span className="head-to-head-number">{item.shirt_number??item.player?.shirt_number??"—"}</span>
-      <div className="head-to-head-avatar">{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}<b className="lineup-rating-badge">{rating.toFixed(1)}</b></div>
-      <a href={item.player?.id?"/players/"+item.player.id:"#"}><strong>{item.player?.full_name||"Player"}</strong><small>{item.position||item.player?.position||"Player"}{cap?" · C":""}</small></a>
-      <div className="lineup-event-badges">{goals>0&&<i title="Goals">⚽{goals>1?goals:""}</i>}{assists>0&&<i title="Assists">A{assists>1?assists:""}</i>}{yellows>0&&<i title="Yellow card">🟨</i>}{reds>0&&<i title="Red card">🟥</i>}{subOut&&<i title="Substituted">↕</i>}</div>
-    </div>;
+      <div className="head-to-head-avatar">{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}<b className="lineup-rating-badge">{rating.toFixed(1)}</b>{cap&&<b className="lineup-captain-badge" title="Team captain">C</b>}{sentOff&&<b className="lineup-card-state red" title={hasSecondYellow?"Sent off after second yellow":"Sent off"}>RED</b>}{cautioned&&<b className="lineup-card-state yellow" title="Yellow card">YC</b>}</div>
+      <a href={item.player?.id?"/players/"+item.player.id:"#"}><strong>{item.player?.full_name||"Player"}</strong><small>{item.position||item.player?.position||"Player"}{cap?" · CAPTAIN":""}</small></a>
+      <div className="lineup-event-badges">{goals>0&&<i title="Goals">⚽{goals>1?goals:""}</i>}{assists>0&&<i title="Assists">A{assists>1?assists:""}</i>}{yellows>0&&<i title="Yellow card">🟨{yellows>1?yellows:""}</i>}{reds>0&&<i title="Red card">🟥</i>}{subOut&&<i title="Substituted">↕</i>}</div>    </div>;
   }
 
   const renderEvents=()=>events.length?<div className="live-event-list">{events.map(e=><div className="live-event" key={e.id}><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b><span className={"live-event-icon "+e.event_type}>{e.event_type==="goal"?"⚽":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":"•"}</span><div><strong>{e.event_type==="goal"?"Goal: "+(e.player?.full_name||"Unknown scorer"):e.event_type==="substitution"?"Substitution":eventLabel(e.event_type)}</strong><small>{e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.player?.full_name||e.team?.name||""}{e.details?" — "+e.details:""}</small></div></div>)}</div>:<div className="live-empty">No events recorded yet.</div>;
