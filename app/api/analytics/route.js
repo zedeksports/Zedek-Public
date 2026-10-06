@@ -80,7 +80,7 @@ export async function POST(request) {
   const referrer = referrerOrigin(request.headers.get("referer"));
 
   const events = [];
-  if (newSession && eventType === "page_view") {
+  if (newSession) {
     events.push({
       visitor_id: visitorId,
       session_id: sessionId,
