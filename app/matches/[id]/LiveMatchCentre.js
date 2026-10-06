@@ -37,6 +37,29 @@ function StatRow({ label, home, away, suffix = "" }) {
   </div>;
 }
 
+function formationNumbers(value){const nums=String(value||"").match(/\\d+/g)||[];return nums.map(Number).filter(Boolean)}
+function formationRows(formation,count){
+ const nums=formationNumbers(formation); if(nums.length!==3||nums.reduce((a,b)=>a+b,0)!==count-1)return null;
+ return [1,...nums];
+}
+function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\\bgk\\b/.test(v))return "GK";if(/def|back|\\b(cb|lb|rb|lwb|rwb)\\b/.test(v))return "DEF";if(/mid|\\b(dm|cm|am|lm|rm)\\b/.test(v))return "MID";if(/forward|striker|attack|wing|\\bfw\\b/.test(v))return "FWD";return "OTHER"}
+function playerSlot(item,index,groupCounts){
+ const group=roleGroup(item.position||item.player?.position||item.role);
+ const groupIndex=groupCounts[group]??0; groupCounts[group]=groupIndex+1;
+ const templates={GK:[[50,91]],DEF:[[18,72],[39,76],[61,76],[82,72],[29,67],[50,70],[71,67]],MID:[[18,48],[37,54],[50,47],[63,54],[82,48],[30,43],[70,43]],FWD:[[18,25],[38,31],[50,22],[62,31],[82,25],[35,20],[65,20]],OTHER:[[50,50]]};
+ const slots=templates[group]||templates.OTHER; return slots[Math.min(groupIndex,slots.length-1)]||[50,50];
+}
+function ratingForPlayer(item,events,match,teamId,stats){
+ if(!item)return 0;
+ if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
+ let rating=6.0; const pid=item.player_id||item.player?.id;
+ const own=events.filter(e=>e.player_id===pid), secondary=events.filter(e=>e.secondary_player_id===pid);
+ own.forEach(e=>{const t=String(e.event_type||"").toLowerCase();if(t==="goal")rating+=1.0;else if(t==="yellow_card")rating-=.4;else if(t==="red_card")rating-=1.2;else if(t==="penalty_missed")rating-=.7;else if(t==="own_goal")rating-=1.0;});
+ secondary.forEach(e=>{if(String(e.event_type||"").toLowerCase()==="goal")rating+=.5});
+ const group=roleGroup(item.position||item.player?.position||item.role);
+ if(group==="GK"&&stats){const saves=teamId===match.home_team_id?Number(stats.home_saves??0):Number(stats.away_saves??0);rating+=Math.min(saves*.12,1.2)}
+ return Math.max(0,Math.min(10,Number(rating.toFixed(1))));
+}
 function eventLabel(type) {
   return String(type || "event").replaceAll("_"," ");
 }
@@ -56,7 +79,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       const s=createSupabaseBrowserClient();
       const [m,e,st,l,pv,ch,sa]=await Promise.all([
         s.from("matches").select("id,scheduled_at,rescheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,interruption_reason,interruption_minute,outcome_note,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
-        s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(full_name,shirt_number),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
+        s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(id,full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
         s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
         s.from("match_previews").select("id,match_id,headline,summary,key_storylines,form_note,h2h_note,venue_note,status,published_at,updated_at").eq("match_id",initialMatch.id).eq("status","published").maybeSingle(),
@@ -177,13 +200,21 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     return Array.from({length:Math.max(h.length,a.length)},(_,i)=>({group,h:h[i],a:a[i]}));
   });
 
-  function PlayerCell({item,lineup,away}){
+  function PlayerCell({item,lineup,away,teamId}){
     if(!item)return <div className="head-to-head-empty">—</div>;
     const cap=item.player_id===lineup?.captain_player_id;
+    const rating=ratingForPlayer(item,events,match,teamId,stats);
+    const playerEvents=events.filter(e=>e.player_id===item.player_id||e.secondary_player_id===item.player_id);
+    const goals=playerEvents.filter(e=>e.event_type==="goal"&&e.player_id===item.player_id).length;
+    const assists=playerEvents.filter(e=>e.event_type==="goal"&&e.secondary_player_id===item.player_id).length;
+    const yellows=playerEvents.filter(e=>e.event_type==="yellow_card"&&e.player_id===item.player_id).length;
+    const reds=playerEvents.filter(e=>e.event_type==="red_card"&&e.player_id===item.player_id).length;
+    const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===item.player_id);
     return <div className={"head-to-head-player"+(away?" away":"")}>
       <span className="head-to-head-number">{item.shirt_number??item.player?.shirt_number??"—"}</span>
-      <div className="head-to-head-avatar">{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}</div>
+      <div className="head-to-head-avatar">{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}<b className="lineup-rating-badge">{rating.toFixed(1)}</b></div>
       <a href={item.player?.id?"/players/"+item.player.id:"#"}><strong>{item.player?.full_name||"Player"}</strong><small>{item.position||item.player?.position||"Player"}{cap?" · C":""}</small></a>
+      <div className="lineup-event-badges">{goals>0&&<i title="Goals">⚽{goals>1?goals:""}</i>}{assists>0&&<i title="Assists">A{assists>1?assists:""}</i>}{yellows>0&&<i title="Yellow card">🟨</i>}{reds>0&&<i title="Red card">🟥</i>}{subOut&&<i title="Substituted">↕</i>}</div>
     </div>;
   }
 
@@ -191,11 +222,19 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   const renderStats=()=> <div className="live-stats-content"><div className="live-stat-team-head"><span>{match?.home_team?.short_name||match?.home_team?.name||"Home"}</span><span>{match?.away_team?.short_name||match?.away_team?.name||"Away"}</span></div>{hasStats?<div className="live-stat-list">{statRows.map(([label,h,a,suffix])=><StatRow key={label} label={label} home={h} away={a} suffix={suffix}/>)}</div>:<div className="live-empty"><strong>Statistics are not available yet.</strong><span>Reporter statistics appear here automatically as they are recorded.</span></div>}</div>;
 
-  const renderLineups=()=>lineups.length?<div className="head-to-head-lineups">
-    <div className="head-to-head-team-head"><div>{homeLineup?.team?.logo_url?<img src={homeLineup.team.logo_url} alt=""/>:null}<strong>{homeLineup?.team?.short_name||homeLineup?.team?.name||"Home"}</strong></div><span>STARTING XI · HEAD TO HEAD</span><div><strong>{awayLineup?.team?.short_name||awayLineup?.team?.name||"Away"}</strong>{awayLineup?.team?.logo_url?<img src={awayLineup.team.logo_url} alt=""/>:null}</div></div>
-    <div className="head-to-head-label"><span>GK FIRST</span><small>Players aligned by position group</small><span>GK FIRST</span></div>
-    <div className="head-to-head-rows">{lineupRows.map(({group,h,a},i)=><div className="head-to-head-row-wrap" key={group+"-"+i}>{(i===0||lineupRows[i-1].group!==group)?<div className="head-to-head-position-label">{positionLabels[group]}</div>:null}<div className="head-to-head-row"><PlayerCell item={h} lineup={homeLineup}/><span className="head-to-head-vs">VS</span><PlayerCell item={a} lineup={awayLineup} away/></div></div>)}</div>
-    <div className="head-to-head-bench"><div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><span key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</span>)}</div><div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><span key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</span>)}</div></div>
+  const renderLineups=()=>lineups.length?<div className="zedek-lineup-layer">
+    <div className="zedek-lineup-head"><div><span>FORMATION</span><strong>{homeLineup?.formation||"Formation TBC"}</strong><small>{homeLineup?.team?.name||"Home"}</small></div><div className="zedek-lineup-head-score"><b>{match?.home_score??0} — {match?.away_score??0}</b><span>{live?status:official?"FULL-TIME":"PRE-MATCH"}</span></div><div><span>FORMATION</span><strong>{awayLineup?.formation||"Formation TBC"}</strong><small>{awayLineup?.team?.name||"Away"}</small></div></div>
+    <div className="zedek-pitch-wrap">
+      {[homeLineup,awayLineup].map((lineup,sideIndex)=>lineup?<div className={"zedek-pitch-side "+(sideIndex?"away-side":"")} key={lineup.id}>
+        <div className="zedek-pitch">
+          <div className="pitch-half-line"/><div className="pitch-centre-circle"/><div className="pitch-centre-dot"/><div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
+          {lineup.starters.map((item,i)=>{const groupCounts={};for(let j=0;j<i;j++)playerSlot(lineup.starters[j],j,groupCounts);const [x,y]=playerSlot(item,i,groupCounts);const pos=sideIndex?100-y:y;return <div className="zedek-pitch-player" style={{left:x+"%",top:pos+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={Boolean(sideIndex)} teamId={lineup.team_id}/></div>})}
+        </div>
+        <div className="zedek-pitch-team-label">{lineup.team?.short_name||lineup.team?.name||"Team"} <b>{lineup.formation||"—"}</b></div>
+      </div>:null)}
+    </div>
+    <div className="zedek-lineup-legend"><span><b>0.0</b> pre-match</span><span><b>6.0+</b> live calculated</span><span><b>Final</b> finished calculated</span></div>
+    <div className="head-to-head-bench"><div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div><div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div></div>
   </div>:<div className="live-empty"><strong>Lineups not available yet.</strong><span>Confirmed lineups will appear here when submitted.</span></div>;
 
   return <section className="live-centre-layer">
