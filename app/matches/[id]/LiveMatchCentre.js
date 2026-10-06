@@ -38,30 +38,76 @@ function StatRow({ label, home, away, suffix = "" }) {
 }
 
 function formationNumbers(value){const nums=String(value||"").match(/\d+/g)||[];return nums.map(Number).filter(Boolean)}
-function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\\bgk\\b/.test(v))return "GK";if(/def|back|\\b(cb|lb|rb|lwb|rwb)\\b/.test(v))return "DEF";if(/mid|\\b(dm|cm|am|lm|rm)\\b/.test(v))return "MID";if(/forward|striker|attack|wing|\\bfw\\b/.test(v))return "FWD";return "OTHER"}
+function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\bgk\b/.test(v))return "GK";if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";if(/forward|striker|attack|wing|\b(fw|lw|rw)\b/.test(v))return "FWD";return "OTHER"}
 
-function formationSlots(lineup){
- const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
+const FORMATION_SLOT_TEMPLATES={
+ "4-4-2":[["GK",50,92],["RB",82,82],["CB",61,82],["CB",39,82],["LB",18,82],["RM",84,70],["CM",61,70],["CM",39,70],["LM",16,70],["ST",59,58],["ST",41,58]],
+ "4-3-3":[["GK",50,92],["RB",82,82],["CB",61,82],["CB",39,82],["LB",18,82],["CM",72,70],["CM",50,67],["CM",28,70],["RW",82,58],["ST",50,55],["LW",18,58]],
+ "4-2-3-1":[["GK",50,92],["RB",82,82],["CB",61,82],["CB",39,82],["LB",18,82],["DM",63,71],["DM",37,71],["RW",82,60],["AM",50,61],["LW",18,60],["ST",50,52]],
+ "4-1-4-1":[["GK",50,92],["RB",82,82],["CB",61,82],["CB",39,82],["LB",18,82],["DM",50,72],["RM",84,62],["CM",61,63],["CM",39,63],["LM",16,62],["ST",50,53]],
+ "3-4-3":[["GK",50,92],["CB",70,82],["CB",50,82],["CB",30,82],["RM",84,70],["CM",61,70],["CM",39,70],["LM",16,70],["RW",82,57],["ST",50,54],["LW",18,57]],
+ "3-5-2":[["GK",50,92],["CB",70,82],["CB",50,82],["CB",30,82],["RM",86,70],["CM",67,70],["CM",50,68],["CM",33,70],["LM",14,70],["ST",59,56],["ST",41,56]],
+ "3-4-2-1":[["GK",50,92],["CB",70,82],["CB",50,82],["CB",30,82],["RM",84,70],["CM",61,70],["CM",39,70],["LM",16,70],["AM",63,58],["AM",37,58],["ST",50,53]],
+ "5-3-2":[["GK",50,92],["RWB",90,82],["CB",67,82],["CB",50,82],["CB",33,82],["LWB",10,82],["CM",70,69],["CM",50,68],["CM",30,69],["ST",59,55],["ST",41,55]],
+ "5-4-1":[["GK",50,92],["RWB",90,82],["CB",67,82],["CB",50,82],["CB",33,82],["LWB",10,82],["RM",84,69],["CM",61,69],["CM",39,69],["LM",16,69],["ST",50,54]],
+ "5-2-3":[["GK",50,92],["RWB",90,82],["CB",67,82],["CB",50,82],["CB",33,82],["LWB",10,82],["DM",63,69],["DM",37,69],["RW",82,56],["ST",50,53],["LW",18,56]],
+ "4-5-1":[["GK",50,92],["RB",82,82],["CB",61,82],["CB",39,82],["LB",18,82],["RM",88,70],["CM",68,68],["DM",50,67],["CM",32,68],["LM",12,70],["ST",50,54]]
+};
+
+const ROLE_ALIASES={GK:["GK"],RB:["RB"],LB:["LB"],CB:["CB"],RWB:["RWB","RB"],LWB:["LWB","LB"],DM:["DM"],CM:["CM"],AM:["AM"],RM:["RM","RW"],LM:["LM","LW"],RW:["RW","RM"],LW:["LW","LM"],ST:["ST","FW","CF"],FW:["FW","ST","LW","RW"]};
+
+function specificRole(value){
+ const v=String(value||"").toLowerCase().trim();
+ if(/goal|keeper|^gk$/.test(v))return "GK";
+ if(/right wing.?back|^rwb$/.test(v))return "RWB";
+ if(/left wing.?back|^lwb$/.test(v))return "LWB";
+ if(/right back|^rb$/.test(v))return "RB";
+ if(/left back|^lb$/.test(v))return "LB";
+ if(/centre.?back|center.?back|^cb$/.test(v))return "CB";
+ if(/defensive mid|^dm$/.test(v))return "DM";
+ if(/central mid|^cm$/.test(v))return "CM";
+ if(/attacking mid|^am$/.test(v))return "AM";
+ if(/right mid|^rm$/.test(v))return "RM";
+ if(/left mid|^lm$/.test(v))return "LM";
+ if(/right wing|^rw$/.test(v))return "RW";
+ if(/left wing|^lw$/.test(v))return "LW";
+ if(/striker|centre forward|center forward|^st$|^cf$/.test(v))return "ST";
+ if(/forward|^fw$/.test(v))return "FW";
+ return null;
+}
+
+function fallbackFormationSlots(lineup){
  const nums=formationNumbers(lineup?.formation);
- const valid=nums.length>=2&&nums.length<=5&&nums.reduce((a,b)=>a+b,0)===10;
- const gk=starters.find(p=>roleGroup(p.position||p.player?.position||p.role)==="GK")||starters[0];
- const out=[];
- if(gk) out.push({item:gk,row:0,rowCount:1,group:"GK"});
- const field=starters.filter(p=>p!==gk);
- const rows=valid?nums:[Math.max(0,field.filter(p=>roleGroup(p.position||p.player?.position||p.role)==="DEF").length),Math.max(0,field.filter(p=>roleGroup(p.position||p.player?.position||p.role)==="MID").length),Math.max(0,field.filter(p=>roleGroup(p.position||p.player?.position||p.role)==="FWD").length)].filter(Boolean);
- const assigned=new Set(gk?[gk.id]:[]);
- let cursor=0;
- rows.forEach((count,rowIndex)=>{
-   const expected=rowIndex===0?"DEF":rowIndex===rows.length-1?"FWD":"MID";
-   const preferred=field.filter(p=>!assigned.has(p.id)&&roleGroup(p.position||p.player?.position||p.role)===expected);
-   const fallback=field.filter(p=>!assigned.has(p.id));
-   const pool=[...preferred,...fallback];
-   for(let i=0;i<count&&pool.length;i++){
-     const item=pool.shift(); assigned.add(item.id);
-     out.push({item,row:rowIndex+1,rowCount:count,group:expected});
+ if(nums.length<2||nums.length>5||nums.reduce((a,b)=>a+b,0)!==10)return null;
+ const xFor=count=>count===1?[50]:count===2?[39,61]:count===3?[24,50,76]:count===4?[14,38,62,86]:[10,30,50,70,90];
+ const rows=[["DEF",nums[0]],...nums.slice(1).map((n,i)=>[i===nums.length-2?"FWD":"MID",n])];
+ const slots=[["GK",50,92]];
+ rows.forEach(([group,count],i)=>xFor(count).forEach(x=>slots.push([group,x,82-i*10])));
+ return slots;
+}
+
+function formationSlots(lineup,away=false){
+ const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
+ const formation=String(lineup?.formation||"").replace(/\s+/g,"");
+ const template=FORMATION_SLOT_TEMPLATES[formation]||fallbackFormationSlots(lineup)||[];
+ const remaining=[...starters],assigned=new Set();
+ const playerRole=p=>specificRole(p.position||p.player?.position||p.role)||roleGroup(p.position||p.player?.position||p.role);
+ const pick=(slotRole)=>{
+   const aliases=ROLE_ALIASES[slotRole]||[slotRole];
+   let index=remaining.findIndex(p=>aliases.includes(playerRole(p)));
+   if(index<0){
+     const broad=slotRole==="GK"?"GK":["DEF","RB","LB","CB","RWB","LWB"].includes(slotRole)?"DEF":["MID","DM","CM","AM","RM","LM"].includes(slotRole)?"MID":"FWD";
+     index=remaining.findIndex(p=>roleGroup(playerRole(p))===broad);
    }
- });
- return out;
+   if(index<0)index=remaining.findIndex(p=>!assigned.has(p.id));
+   if(index<0)return null;
+   const item=remaining[index];remaining.splice(index,1);assigned.add(item.id);return item;
+ };
+ return template.map(([slotRole,x,localY])=>{
+   const item=pick(slotRole); if(!item)return null;
+   const y=away?100-localY:localY;
+   return {item,row:slotRole,rowCount:1,group:roleGroup(item.position||item.player?.position||item.role),x,y,slotRole};
+ }).filter(Boolean);
 }
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
@@ -245,12 +291,11 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="pitch-centre-dot"/>
       <div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
       <div className="pitch-goal pitch-goal-top"/><div className="pitch-goal pitch-goal-bottom"/>
-      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>lineup?formationSlots(lineup).map(({item,row,rowCount,group})=>{
-        const rowY=[91,76,60,44,28,16][Math.min(row,5)];
-        const y=away?100-rowY:rowY;
-        const x=rowCount===1?50:18+(64*(formationSlots(lineup).filter(s=>s.row===row).findIndex(s=>s.item.id===item.id)/(rowCount-1)));
-        return <div className={"zedek-pitch-player "+(away?"away":"home")} style={{left:x+"%",top:y+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={away} teamId={lineup.team_id}/></div>;
-      }):null)}
+      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>lineup?formationSlots(lineup,away).map(({item,x,y})=>
+        <div className={"zedek-pitch-player "+(away?"away":"home")} style={{left:x+"%",top:y+"%"}} key={item.id}>
+          <PlayerCell item={item} lineup={lineup} away={away} teamId={lineup.team_id}/>
+        </div>
+      ):null)}
     </div>
     <div className="zedek-pitch-team-label"><span>{homeLineup?.team?.short_name||homeLineup?.team?.name||"Home"} <b>{homeLineup?.formation||"—"}</b></span><span><b>{awayLineup?.formation||"—"}</b> {awayLineup?.team?.short_name||awayLineup?.team?.name||"Away"}</span></div>
     <div className="zedek-lineup-legend"><span><b>0.0</b> pre-match</span><span><b>6.0+</b> live calculated</span><span><b>Final</b> finished calculated</span></div>
