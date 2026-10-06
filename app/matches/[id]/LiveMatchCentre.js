@@ -123,29 +123,6 @@ function fallbackFormationSlots(lineup){
  return slots;
 }
 
-function formationSlots(lineup,away=false){
- const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
- const formation=String(lineup?.formation||"").replace(/\s+/g,"");
- const template=FORMATION_SLOT_TEMPLATES[formation]||fallbackFormationSlots(lineup)||[];
- const remaining=[...starters],assigned=new Set();
- const playerRole=p=>specificRole(p.position||p.player?.position||p.role)||roleGroup(p.position||p.player?.position||p.role);
- const pick=(slotRole)=>{
-   const aliases=ROLE_ALIASES[slotRole]||[slotRole];
-   let index=remaining.findIndex(p=>aliases.includes(playerRole(p)));
-   if(index<0){
-     const broad=slotRole==="GK"?"GK":["DEF","RB","LB","CB","RWB","LWB"].includes(slotRole)?"DEF":["MID","DM","CM","AM","RM","LM"].includes(slotRole)?"MID":"FWD";
-     index=remaining.findIndex(p=>roleGroup(playerRole(p))===broad);
-   }
-   if(index<0)index=remaining.findIndex(p=>!assigned.has(p.id));
-   if(index<0)return null;
-   const item=remaining[index];remaining.splice(index,1);assigned.add(item.id);return item;
- };
- return template.map(([slotRole,x,localY])=>{
-   const item=pick(slotRole); if(!item)return null;
-   const y=away?100-localY:localY;
-   return {item,row:slotRole,rowCount:1,group:roleGroup(item.position||item.player?.position||item.role),x,y,slotRole};
- }).filter(Boolean);
-}
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
