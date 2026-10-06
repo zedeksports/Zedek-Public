@@ -1337,17 +1337,36 @@ html[data-zedek-theme="night"] .mc-form-team-card{
 .pitch-box{position:absolute;z-index:1;left:24%;width:52%;height:14%;border:1px solid rgba(255,255,255,.42)}.pitch-box-top{top:0;border-top:0}.pitch-box-bottom{bottom:0;border-bottom:0}
 .pitch-goal{position:absolute;z-index:1;left:42%;width:16%;height:3%;border:1px solid rgba(255,255,255,.5)}.pitch-goal-top{top:0;border-top:0}.pitch-goal-bottom{bottom:0;border-bottom:0}
 .zedek-pitch-player{position:absolute;transform:translate(-50%,-50%);width:82px;height:78px;z-index:3;display:grid;place-items:start center;pointer-events:auto;contain:layout paint}.zedek-pitch-player .head-to-head-player{display:grid;grid-template-columns:1fr;justify-items:center;gap:3px;width:100%;height:100%;align-content:start}
-.zedek-pitch-player .head-to-head-number{position:absolute;top:-5px;left:4px;z-index:4;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-size:8px}
+
 .zedek-pitch-player .head-to-head-avatar{position:relative;width:48px;height:48px;border-radius:50%;border:2px solid #fff;background:var(--cream);box-shadow:0 4px 10px rgba(0,0,0,.22);overflow:visible}
 .zedek-pitch-player .head-to-head-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.zedek-pitch-player .head-to-head-avatar>span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;font-size:13px;font-weight:900;color:var(--gold)}
-.zedek-pitch-player .head-to-head-player>a{display:grid;justify-items:center;max-width:82px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.65);min-width:0}
-.zedek-pitch-player .head-to-head-player>a strong{font-size:8px;line-height:1.1;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.zedek-pitch-player .head-to-head-player>a small{font-size:7px;opacity:.86;white-space:nowrap}
+.zedek-pitch-player .head-to-head-player>a{display:grid;justify-items:center;align-items:center;max-width:102px;width:100%;min-width:0;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.72);gap:2px;padding:2px 3px;border-radius:6px;background:rgba(8,22,35,.42);}
+.zedek-pitch-player .head-to-head-player>a strong{display:-webkit-box;font-size:10px;line-height:1.15;max-width:100%;font-weight:900;letter-spacing:-.01em;text-align:center;white-space:normal;overflow:hidden;text-overflow:clip;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}.zedek-pitch-player .head-to-head-player>a small{font-size:8px;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.lineup-shirt-number{
+  position:absolute;
+  left:-7px;
+  top:-7px;
+  z-index:8;
+  width:24px;
+  height:24px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#101b2b;
+  color:#fff;
+  border:2px solid #fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.34);
+  font-size:9px;
+  line-height:1;
+  font-weight:1000;
+  font-variant-numeric:tabular-nums;
+}
 .lineup-rating-badge{position:absolute;right:-5px;bottom:-4px;min-width:23px;height:18px;padding:0 4px;border-radius:8px;background:var(--gold);color:#fff;display:grid;place-items:center;font-size:8px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:4}
 .lineup-event-badges{display:flex;justify-content:center;gap:2px;min-height:12px}.lineup-event-badges i{font-style:normal;font-size:7px;line-height:12px;padding:0 3px;border-radius:5px;background:rgba(255,255,255,.94);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .zedek-pitch-team-label{display:flex;justify-content:space-between;gap:8px;padding:8px 2px;font-size:9px;font-weight:900;color:var(--oti-text)}.zedek-pitch-team-label b{color:var(--oti-blue)}
 .zedek-lineup-legend{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-size:9px;color:var(--oti-muted)}.zedek-lineup-legend b{color:var(--gold)}
-@media(max-width:680px){.zedek-head-to-head-pitch{width:100%;aspect-ratio:68/100}.zedek-pitch-player{width:68px;height:70px}.zedek-pitch-player .head-to-head-avatar{width:40px;height:40px}.zedek-pitch-player .head-to-head-player>a strong{font-size:7px}.zedek-pitch-player .head-to-head-player>a small{font-size:6px}.zedek-lineup-head{grid-template-columns:1fr 70px 1fr;gap:6px;padding:11px}.zedek-lineup-head strong{font-size:11px}.zedek-lineup-head-score b{font-size:14px}.zedek-lineup-head-score span{font-size:7px}}
-@media(max-width:400px){.zedek-pitch-player{width:57px;height:64px}.zedek-pitch-player .head-to-head-avatar{width:34px;height:34px}.lineup-rating-badge{min-width:21px;height:16px;font-size:7px}.zedek-pitch-player .head-to-head-number{width:17px;height:17px;font-size:7px}.zedek-pitch-player .head-to-head-player>a strong{font-size:6.5px}}
+@media(max-width:680px){.zedek-head-to-head-pitch{width:100%;aspect-ratio:68/100}.zedek-pitch-player{width:68px;height:70px}.zedek-pitch-player .head-to-head-avatar{width:40px;height:40px}.zedek-pitch-player .head-to-head-player>a strong{display:-webkit-box;font-size:10px;line-height:1.15;max-width:100%;font-weight:900;letter-spacing:-.01em;text-align:center;white-space:normal;overflow:hidden;text-overflow:clip;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}.zedek-pitch-player .head-to-head-player>a small{font-size:8px;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}.zedek-lineup-head{grid-template-columns:1fr 70px 1fr;gap:6px;padding:11px}.zedek-lineup-head strong{font-size:11px}.zedek-lineup-head-score b{font-size:14px}.zedek-lineup-head-score span{font-size:7px}}
+@media(max-width:400px){.zedek-pitch-player{width:57px;height:64px}.zedek-pitch-player .head-to-head-avatar{width:34px;height:34px}.lineup-rating-badge{min-width:21px;height:16px;font-size:7px}.zedek-pitch-player .head-to-head-player>a strong{display:-webkit-box;font-size:10px;line-height:1.15;max-width:100%;font-weight:900;letter-spacing:-.01em;text-align:center;white-space:normal;overflow:hidden;text-overflow:clip;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}}
 
 
 /* Lineup polish: readable player nodes, captain identity and live card states */
@@ -1361,31 +1380,10 @@ html[data-zedek-theme="night"] .mc-form-team-card{
   border-width:2px;
   transition:filter .2s ease,opacity .2s ease,transform .2s ease;
 }
-.zedek-pitch-player .head-to-head-player>a{
-  max-width:102px;
-  gap:2px;
-}
-.zedek-pitch-player .head-to-head-player>a strong{
-  font-size:10px;
-  line-height:1.15;
-  max-width:102px;
-  font-weight:900;
-  letter-spacing:-.01em;
-}
-.zedek-pitch-player .head-to-head-player>a small{
-  font-size:8px;
-  font-weight:700;
-  letter-spacing:.02em;
-}
-.zedek-pitch-player .head-to-head-number{
-  top:-3px;
-  left:3px;
-  width:23px;
-  height:23px;
-  font-size:9px;
-  border:1px solid rgba(255,255,255,.7);
-  box-shadow:0 2px 6px rgba(0,0,0,.3);
-}
+.zedek-pitch-player .head-to-head-player>a{display:grid;justify-items:center;align-items:center;max-width:102px;width:100%;min-width:0;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.72);gap:2px;padding:2px 3px;border-radius:6px;background:rgba(8,22,35,.42);}
+.zedek-pitch-player .head-to-head-player>a strong{display:-webkit-box;font-size:10px;line-height:1.15;max-width:100%;font-weight:900;letter-spacing:-.01em;text-align:center;white-space:normal;overflow:hidden;text-overflow:clip;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}
+.zedek-pitch-player .head-to-head-player>a small{font-size:8px;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+
 .lineup-rating-badge{
   right:-7px;
   bottom:-4px;
@@ -1466,19 +1464,10 @@ html[data-zedek-theme="night"] .mc-form-team-card{
     width:50px;
     height:50px;
   }
-  .zedek-pitch-player .head-to-head-player>a{
-    max-width:88px;
-  }
-  .zedek-pitch-player .head-to-head-player>a strong{
-    max-width:88px;
-    font-size:9px;
-  }
-  .zedek-pitch-player .head-to-head-player>a small{font-size:7px}
-  .zedek-pitch-player .head-to-head-number{
-    width:21px;
-    height:21px;
-    font-size:8px;
-  }
+  .zedek-pitch-player .head-to-head-player>a{display:grid;justify-items:center;align-items:center;max-width:102px;width:100%;min-width:0;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.72);gap:2px;padding:2px 3px;border-radius:6px;background:rgba(8,22,35,.42);}
+  .zedek-pitch-player .head-to-head-player>a strong{display:-webkit-box;font-size:10px;line-height:1.15;max-width:100%;font-weight:900;letter-spacing:-.01em;text-align:center;white-space:normal;overflow:hidden;text-overflow:clip;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}
+  .zedek-pitch-player .head-to-head-player>a small{font-size:8px;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  
   .lineup-rating-badge{min-width:25px;height:19px;font-size:8px}
 }
 @media(max-width:400px){
@@ -1490,18 +1479,9 @@ html[data-zedek-theme="night"] .mc-form-team-card{
     width:45px;
     height:45px;
   }
-  .zedek-pitch-player .head-to-head-player>a{
-    max-width:78px;
-  }
-  .zedek-pitch-player .head-to-head-player>a strong{
-    max-width:78px;
-    font-size:8px;
-  }
-  .zedek-pitch-player .head-to-head-player>a small{font-size:6.5px}
-  .zedek-pitch-player .head-to-head-number{
-    width:20px;
-    height:20px;
-    font-size:8px;
-  }
+  .zedek-pitch-player .head-to-head-player>a{display:grid;justify-items:center;align-items:center;max-width:102px;width:100%;min-width:0;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.72);gap:2px;padding:2px 3px;border-radius:6px;background:rgba(8,22,35,.42);}
+  .zedek-pitch-player .head-to-head-player>a strong{display:-webkit-box;font-size:10px;line-height:1.15;max-width:100%;font-weight:900;letter-spacing:-.01em;text-align:center;white-space:normal;overflow:hidden;text-overflow:clip;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}
+  .zedek-pitch-player .head-to-head-player>a small{font-size:8px;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  
   .lineup-captain-badge{width:18px;height:18px;font-size:8px}
 }
