@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 import { CollapsibleSection, FormSection, H2HPreview, MatchSummaryCard } from "./MatchCentreSections";
 
 const LIVE_STATUSES = new Set(["live","in_progress","halftime","paused"]);
-const OFFICIAL_STATUSES = new Set(["finished","verified"]);
+const OFFICIAL_STATUSES = new Set(["finished","verified"]);\nconst INTERRUPTION_STATUSES = new Set(["suspended","postponed","abandoned","cancelled"]);
 
 function minuteLabel(match, now) {
   if (!match || !LIVE_STATUSES.has(match.status)) return null;
@@ -54,7 +54,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     async function refresh(){
       const s=createSupabaseBrowserClient();
       const [m,e,st,l,pv,ch,sa]=await Promise.all([
-        s.from("matches").select("id,scheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
+        s.from("matches").select("id,scheduled_at,rescheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,interruption_reason,interruption_minute,outcome_note,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
         s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(full_name,shirt_number),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
         s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
@@ -125,7 +125,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const streamingAd=primaryAd ? [primaryAd.name,primaryAd.sponsor?.name].filter(Boolean).join(" · ") : (match?.streaming_ad_text||"Live streaming information will appear here when officially available.");
   const formData=(initialForm||[]).map((x,i)=>({...x,rank:x.rank||i+1,team:x.team||([match?.home_team,match?.away_team][i]),results:x.results||[]}));
   const minute=minuteLabel(match,now);
-  const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":String(match.status||"").toUpperCase();
+  const status=live?(match.status==="halftime"?"HALF-TIME":"LIVE"):official?"FULL-TIME":match.status==="suspended"?"SUSPENDED":match.status==="postponed"?"POSTPONED":match.status==="abandoned"?"ABANDONED":match.status==="cancelled"?"CANCELLED":String(match.status||"").toUpperCase();
 
   const hasStats=Boolean(stats)&&["home_possession","away_possession","home_shots","away_shots","home_shots_on_target","away_shots_on_target","home_corners","away_corners","home_fouls","away_fouls","home_offsides","away_offsides","home_saves","away_saves","home_passes","away_passes","home_pass_accuracy","away_pass_accuracy","home_crosses","away_crosses","home_free_kicks","away_free_kicks","home_goal_kicks","away_goal_kicks","home_throw_ins","away_throw_ins","home_xg","away_xg"].some(k=>stats?.[k]!==null&&stats?.[k]!==undefined);
 
@@ -201,7 +201,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{live||official?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
-      {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}
+      {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}\n      {interrupted?<div className="match-interruption-banner" role="status"><div><strong>{status}</strong>{match?.interruption_reason?<span>{match.interruption_reason}</span>:null}{match?.interruption_minute!=null?<small>{"Recorded at "+match.interruption_minute+"'"}</small>:null}</div>{match?.outcome_note?<p>{match.outcome_note}</p>:null}{match?.rescheduled_at?<div className="match-reschedule-note"><span>{match.status==="suspended"||match.status==="abandoned"?"CONFIRMED RESTART":"CONFIRMED RESCHEDULE"}</span><strong>{new Date(match.rescheduled_at).toLocaleString(undefined,{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false})}</strong></div>:<div className="match-reschedule-note"><span>RESCHEDULE</span><strong>No date confirmed yet</strong></div>}</div>:null}
       {primaryAd ? <a className="live-stream-ad" href={primaryAd.target_url||streamingUrl||"#"} target={primaryAd.target_url||streamingUrl?"_blank":undefined} rel={primaryAd.target_url||streamingUrl?"noreferrer":undefined} aria-label={primaryAd.name||"Live stream sponsor"}>{primaryAd.image_url?<img src={primaryAd.image_url} alt={primaryAd.name||"Live stream sponsor"} />:<span><strong>{primaryAd.name||"Live stream"}</strong>{primaryAd.sponsor?.name?<small>{primaryAd.sponsor.name}</small>:null}</span>}</a>:null}
     </div>
     {prematch?<div className="prematch-accordion-stack">
