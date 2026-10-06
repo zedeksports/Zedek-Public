@@ -1348,3 +1348,160 @@ html[data-zedek-theme="night"] .mc-form-team-card{
 .zedek-lineup-legend{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-size:9px;color:var(--oti-muted)}.zedek-lineup-legend b{color:var(--gold)}
 @media(max-width:680px){.zedek-head-to-head-pitch{width:100%;aspect-ratio:68/100}.zedek-pitch-player{width:68px;height:70px}.zedek-pitch-player .head-to-head-avatar{width:40px;height:40px}.zedek-pitch-player .head-to-head-player>a strong{font-size:7px}.zedek-pitch-player .head-to-head-player>a small{font-size:6px}.zedek-lineup-head{grid-template-columns:1fr 70px 1fr;gap:6px;padding:11px}.zedek-lineup-head strong{font-size:11px}.zedek-lineup-head-score b{font-size:14px}.zedek-lineup-head-score span{font-size:7px}}
 @media(max-width:400px){.zedek-pitch-player{width:57px;height:64px}.zedek-pitch-player .head-to-head-avatar{width:34px;height:34px}.lineup-rating-badge{min-width:21px;height:16px;font-size:7px}.zedek-pitch-player .head-to-head-number{width:17px;height:17px;font-size:7px}.zedek-pitch-player .head-to-head-player>a strong{font-size:6.5px}}
+
+
+/* Lineup polish: readable player nodes, captain identity and live card states */
+.zedek-pitch-player{
+  width:102px;
+  height:92px;
+}
+.zedek-pitch-player .head-to-head-avatar{
+  width:58px;
+  height:58px;
+  border-width:2px;
+  transition:filter .2s ease,opacity .2s ease,transform .2s ease;
+}
+.zedek-pitch-player .head-to-head-player>a{
+  max-width:102px;
+  gap:2px;
+}
+.zedek-pitch-player .head-to-head-player>a strong{
+  font-size:10px;
+  line-height:1.15;
+  max-width:102px;
+  font-weight:900;
+  letter-spacing:-.01em;
+}
+.zedek-pitch-player .head-to-head-player>a small{
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.02em;
+}
+.zedek-pitch-player .head-to-head-number{
+  top:-3px;
+  left:3px;
+  width:23px;
+  height:23px;
+  font-size:9px;
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.lineup-rating-badge{
+  right:-7px;
+  bottom:-4px;
+  min-width:27px;
+  height:20px;
+  padding:0 5px;
+  border-radius:9px;
+  font-size:9px;
+  font-weight:900;
+}
+.lineup-captain-badge{
+  position:absolute;
+  left:-7px;
+  bottom:-5px;
+  width:20px;
+  height:20px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#e7c15a;
+  color:#101b2b;
+  border:2px solid #fff;
+  font-size:9px;
+  font-weight:1000;
+  line-height:1;
+  z-index:5;
+  box-shadow:0 2px 7px rgba(0,0,0,.3);
+}
+.lineup-card-state{
+  position:absolute;
+  top:-6px;
+  right:-7px;
+  min-width:25px;
+  height:18px;
+  padding:0 4px;
+  display:grid;
+  place-items:center;
+  border-radius:6px;
+  border:2px solid #fff;
+  color:#fff;
+  font-size:7px;
+  font-weight:1000;
+  line-height:1;
+  z-index:6;
+  box-shadow:0 2px 7px rgba(0,0,0,.28);
+}
+.lineup-card-state.yellow{background:#e4b72e;color:#111}
+.lineup-card-state.red{background:#c72e3d}
+.zedek-pitch-player .head-to-head-player.cautioned .head-to-head-avatar{
+  border-color:#f1c62f;
+  box-shadow:0 0 0 2px rgba(241,198,47,.2),0 5px 12px rgba(0,0,0,.24);
+}
+.zedek-pitch-player .head-to-head-player.sent-off .head-to-head-avatar{
+  border-color:#d73545;
+  filter:saturate(.55);
+  opacity:.78;
+}
+.zedek-pitch-player .head-to-head-player.sent-off>a{
+  opacity:.72;
+}
+.lineup-event-badges{
+  min-height:15px;
+  gap:3px;
+}
+.lineup-event-badges i{
+  min-height:15px;
+  padding:0 4px;
+  font-size:8px;
+  line-height:15px;
+  font-weight:800;
+}
+@media(max-width:680px){
+  .zedek-pitch-player{
+    width:88px;
+    height:82px;
+  }
+  .zedek-pitch-player .head-to-head-avatar{
+    width:50px;
+    height:50px;
+  }
+  .zedek-pitch-player .head-to-head-player>a{
+    max-width:88px;
+  }
+  .zedek-pitch-player .head-to-head-player>a strong{
+    max-width:88px;
+    font-size:9px;
+  }
+  .zedek-pitch-player .head-to-head-player>a small{font-size:7px}
+  .zedek-pitch-player .head-to-head-number{
+    width:21px;
+    height:21px;
+    font-size:8px;
+  }
+  .lineup-rating-badge{min-width:25px;height:19px;font-size:8px}
+}
+@media(max-width:400px){
+  .zedek-pitch-player{
+    width:78px;
+    height:76px;
+  }
+  .zedek-pitch-player .head-to-head-avatar{
+    width:45px;
+    height:45px;
+  }
+  .zedek-pitch-player .head-to-head-player>a{
+    max-width:78px;
+  }
+  .zedek-pitch-player .head-to-head-player>a strong{
+    max-width:78px;
+    font-size:8px;
+  }
+  .zedek-pitch-player .head-to-head-player>a small{font-size:6.5px}
+  .zedek-pitch-player .head-to-head-number{
+    width:20px;
+    height:20px;
+    font-size:8px;
+  }
+  .lineup-captain-badge{width:18px;height:18px;font-size:8px}
+}
