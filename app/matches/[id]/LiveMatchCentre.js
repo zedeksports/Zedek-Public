@@ -230,16 +230,31 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const renderStats=()=> <div className="live-stats-content"><div className="live-stat-team-head"><span>{match?.home_team?.short_name||match?.home_team?.name||"Home"}</span><span>{match?.away_team?.short_name||match?.away_team?.name||"Away"}</span></div>{hasStats?<div className="live-stat-list">{statRows.map(([label,h,a,suffix])=><StatRow key={label} label={label} home={h} away={a} suffix={suffix}/>)}</div>:<div className="live-empty"><strong>Statistics are not available yet.</strong><span>Reporter statistics appear here automatically as they are recorded.</span></div>}</div>;
 
   const renderLineups=()=>lineups.length?<div className="zedek-lineup-layer">
-    <div className="zedek-lineup-head"><div><span>FORMATION</span><strong>{homeLineup?.formation||"Formation TBC"}</strong><small>{homeLineup?.team?.name||"Home"}</small></div><div className="zedek-lineup-head-score"><b>{match?.home_score??0} — {match?.away_score??0}</b><span>{live?status:official?"FULL-TIME":"PRE-MATCH"}</span></div><div><span>FORMATION</span><strong>{awayLineup?.formation||"Formation TBC"}</strong><small>{awayLineup?.team?.name||"Away"}</small></div></div>
-    <div className="zedek-pitch-wrap">
-      {[homeLineup,awayLineup].map((lineup,sideIndex)=>lineup?<div className={"zedek-pitch-side "+(sideIndex?"away-side":"")} key={lineup.id}>
-        <div className="zedek-pitch">
-          <div className="pitch-half-line"/><div className="pitch-centre-circle"/><div className="pitch-centre-dot"/><div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
-          {lineup.starters.map((item,i)=>{const groupCounts={};for(let j=0;j<i;j++)playerSlot(lineup.starters[j],j,groupCounts,lineup.formation);const [x,y]=playerSlot(item,i,groupCounts,lineup.formation);const pos=sideIndex?100-y:y;return <div className="zedek-pitch-player" style={{left:x+"%",top:pos+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={Boolean(sideIndex)} teamId={lineup.team_id}/></div>})}
-        </div>
-        <div className="zedek-pitch-team-label">{lineup.team?.short_name||lineup.team?.name||"Team"} <b>{lineup.formation||"—"}</b></div>
-      </div>:null)}
+    <div className="zedek-lineup-head"><div><span>HOME</span><strong>{homeLineup?.formation||"Formation TBC"}</strong><small>{homeLineup?.team?.name||"Home"}</small></div><div className="zedek-lineup-head-score"><b>{match?.home_score??0} — {match?.away_score??0}</b><span>{live?status:official?"FULL-TIME":"PRE-MATCH"}</span></div><div><span>AWAY</span><strong>{awayLineup?.formation||"Formation TBC"}</strong><small>{awayLineup?.team?.name||"Away"}</small></div></div>
+    <div className="zedek-head-to-head-pitch">
+      <div className="pitch-half pitch-half-away"><span>AWAY</span></div>
+      <div className="pitch-half pitch-half-home"><span>HOME</span></div>
+      <div className="pitch-centre-circle"/>
+      <div className="pitch-centre-dot"/>
+      <div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
+      <div className="pitch-goal pitch-goal-top"/><div className="pitch-goal pitch-goal-bottom"/>
+      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>lineup?lineup.starters.map((item,i)=>{
+        const slots={GK:[],DEF:[],MID:[],FWD:[],OTHER:[]};
+        lineup.starters.forEach(p=>slots[roleGroup(p.position||p.player?.position||p.role)].push(p));
+        const group=roleGroup(item.position||item.player?.position||item.role);
+        const list=slots[group];
+        const groupIndex=list.findIndex(p=>p.id===item.id);
+        const nums=formationNumbers(lineup.formation);
+        const lineCounts=nums.length===3&&nums.reduce((a,b)=>a+b,0)===10?nums:null;
+        const count=group==="DEF"?lineCounts?.[0]:group==="MID"?lineCounts?.[1]:group==="FWD"?lineCounts?.[2]:null;
+        const safeCount=count||Math.max(list.length,1);
+        const x=safeCount===1?50:18+(64*(groupIndex/(safeCount-1)));
+        const baseY=group==="GK"?91:group==="DEF"?72:group==="MID"?50:group==="FWD"?28:50;
+        const y=away?100-baseY:baseY;
+        return <div className={"zedek-pitch-player "+(away?"away":"home")} style={{left:x+"%",top:y+"%"}} key={item.id}><PlayerCell item={item} lineup={lineup} away={away} teamId={lineup.team_id}/></div>;
+      }):null)}
     </div>
+    <div className="zedek-pitch-team-label"><span>{homeLineup?.team?.short_name||homeLineup?.team?.name||"Home"} <b>{homeLineup?.formation||"—"}</b></span><span><b>{awayLineup?.formation||"—"}</b> {awayLineup?.team?.short_name||awayLineup?.team?.name||"Away"}</span></div>
     <div className="zedek-lineup-legend"><span><b>0.0</b> pre-match</span><span><b>6.0+</b> live calculated</span><span><b>Final</b> finished calculated</span></div>
     <div className="head-to-head-bench"><div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div><div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div></div>
   </div>:<div className="live-empty"><strong>Lineups not available yet.</strong><span>Confirmed lineups will appear here when submitted.</span></div>;
