@@ -5,7 +5,8 @@ import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 import { CollapsibleSection, FormSection, H2HPreview, MatchSummaryCard } from "./MatchCentreSections";
 
 const LIVE_STATUSES = new Set(["live","in_progress","halftime","paused"]);
-const OFFICIAL_STATUSES = new Set(["finished","verified"]);\nconst INTERRUPTION_STATUSES = new Set(["suspended","postponed","abandoned","cancelled"]);
+const OFFICIAL_STATUSES = new Set(["finished","verified"]);
+const INTERRUPTION_STATUSES = new Set(["suspended","postponed","abandoned","cancelled"]);
 
 function minuteLabel(match, now) {
   if (!match || !LIVE_STATUSES.has(match.status)) return null;
@@ -114,7 +115,8 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   const live=LIVE_STATUSES.has(match?.status);
   const official=OFFICIAL_STATUSES.has(match?.status);
-  const prematch=!live&&!official;
+  const interrupted=INTERRUPTION_STATUSES.has(match?.status);
+  const prematch=!live&&!official&&!interrupted;
   const resolvedVenue=match?.venue||match?.home_team?.home_venue||match?.away_team?.home_venue||"Venue TBC";
   const referee=match?.referee||"Referee TBC";
   const primaryChannel=channels.find(x=>x.is_primary)||channels[0]||null;
@@ -201,7 +203,8 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div className="live-centre-meta">{match?.season?.competition?.name||"Competition"} • {match?.season?.name||"Season"}</div>
       <div className="live-centre-status"><span className={live?"live-pulse":""}/>{status}{minute?<b>{minute}</b>:null}</div>
       <div className="live-centre-score"><TeamBlock team={match?.home_team} score={match?.home_score}/><div className="live-centre-middle"><strong>{(live||official||(interrupted&&(match?.kickoff_at||match?.interruption_minute!=null||Number(match?.home_score||0)>0||Number(match?.away_score||0)>0)))?(match?.home_score??0)+":"+(match?.away_score??0):"vs"}</strong></div><TeamBlock team={match?.away_team} score={match?.away_score}/></div>
-      {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}\n      {interrupted?<div className="match-interruption-banner" role="status"><div><strong>{status}</strong>{match?.interruption_reason?<span>{match.interruption_reason}</span>:null}{match?.interruption_minute!=null?<small>{"Recorded at "+match.interruption_minute+"'"}</small>:null}</div>{match?.outcome_note?<p>{match.outcome_note}</p>:null}{match?.rescheduled_at?<div className="match-reschedule-note"><span>{match.status==="suspended"||match.status==="abandoned"?"CONFIRMED RESTART":"CONFIRMED RESCHEDULE"}</span><strong>{new Date(match.rescheduled_at).toLocaleString(undefined,{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false})}</strong></div>:<div className="match-reschedule-note"><span>RESCHEDULE</span><strong>No date confirmed yet</strong></div>}</div>:null}
+      {goalAnimation?<div className="live-goal-alert" role="status" aria-live="polite"><span>⚽</span><strong>GOAL!</strong><small>{goalAnimation.team} • {goalAnimation.score}</small></div>:null}
+      {interrupted?<div className="match-interruption-banner" role="status"><div><strong>{status}</strong>{match?.interruption_reason?<span>{match.interruption_reason}</span>:null}{match?.interruption_minute!=null?<small>{"Recorded at "+match.interruption_minute+"'"}</small>:null}</div>{match?.outcome_note?<p>{match.outcome_note}</p>:null}{match?.rescheduled_at?<div className="match-reschedule-note"><span>{match.status==="suspended"||match.status==="abandoned"?"CONFIRMED RESTART":"CONFIRMED RESCHEDULE"}</span><strong>{new Date(match.rescheduled_at).toLocaleString(undefined,{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false})}</strong></div>:<div className="match-reschedule-note"><span>RESCHEDULE</span><strong>No date confirmed yet</strong></div>}</div>:null}
       {primaryAd ? <a className="live-stream-ad" href={primaryAd.target_url||streamingUrl||"#"} target={primaryAd.target_url||streamingUrl?"_blank":undefined} rel={primaryAd.target_url||streamingUrl?"noreferrer":undefined} aria-label={primaryAd.name||"Live stream sponsor"}>{primaryAd.image_url?<img src={primaryAd.image_url} alt={primaryAd.name||"Live stream sponsor"} />:<span><strong>{primaryAd.name||"Live stream"}</strong>{primaryAd.sponsor?.name?<small>{primaryAd.sponsor.name}</small>:null}</span>}</a>:null}
     </div>
     {prematch?<div className="prematch-accordion-stack">
