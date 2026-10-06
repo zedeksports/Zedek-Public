@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function PWAInstallPrompt() {
   const [installEvent, setInstallEvent] = useState(null);
   const [installed, setInstalled] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const onBeforeInstall = (event) => {
