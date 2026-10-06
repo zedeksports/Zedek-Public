@@ -5,6 +5,7 @@ import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 import PWAInstallPrompt from "./PWAInstallPrompt";
 import LiveNotificationAlerts from "./LiveNotificationAlerts";
 
+const logoUrl=""; // Paste the team/organization logo HTTPS image URL here.
 const primaryNav=[["Matches","/matches"],["Live","/matches?filter=live"]];
 const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/my-teams"]];
 
@@ -17,7 +18,7 @@ export default function PublicShell({children}){
  return <div className="public-site-shell">
   <header className="site-header zedek-score-header public-global-header">
    <div className="container public-nav-top">
-    <a className="public-brand" href="/" aria-label="Oti Football Network home"><span className="public-brand-mark">O</span><span><b>OTI</b> FOOTBALL <strong>NETWORK</strong></span></a>
+    <a className="public-brand" href="/" aria-label="Oti Football Network home"><span className="public-brand-mark" aria-label="Team or organization logo">{logoUrl?<img src={logoUrl} alt="" />:<span className="public-brand-placeholder" aria-hidden="true" />}</span><span><b>OTI</b> FOOTBALL <strong>NETWORK</strong></span></a>
     <nav className="public-main-nav" aria-label="Primary football navigation">
       {primaryNav.map(([label,href])=><a key={href} href={href} className={label==="Matches"?"active":""}>{label}</a>)}
     </nav>
