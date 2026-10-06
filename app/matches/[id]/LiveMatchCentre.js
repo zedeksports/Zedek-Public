@@ -37,87 +37,121 @@ function StatRow({ label, home, away, suffix = "" }) {
   </div>;
 }
 
-function formationNumbers(value){const nums=String(value||"").match(/\d+/g)||[];return nums.map(Number).filter(Boolean)}
-function roleGroup(value){const v=String(value||"").toLowerCase();if(/goal|keeper|\bgk\b/.test(v))return "GK";if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";if(/forward|striker|attack|wing|\b(fw|lw|rw)\b/.test(v))return "FWD";return "OTHER"}
 
-const FORMATION_SLOT_TEMPLATES={
- "4-4-2":[["GK",50,8],["RB",82,18],["CB",61,18],["CB",39,18],["LB",18,18],["RM",84,30],["CM",61,30],["CM",39,30],["LM",16,30],["ST",59,41],["ST",41,41]],
- "4-3-3":[["GK",50,8],["RB",82,18],["CB",61,18],["CB",39,18],["LB",18,18],["CM",72,30],["CM",50,29],["CM",28,30],["RW",82,41],["ST",50,40],["LW",18,41]],
- "4-2-3-1":[["GK",50,8],["RB",82,18],["CB",61,18],["CB",39,18],["LB",18,18],["DM",63,30],["DM",37,30],["RW",82,40],["AM",50,39],["LW",18,40],["ST",50,43]],
- "4-1-4-1":[["GK",50,8],["RB",82,18],["CB",61,18],["CB",39,18],["LB",18,18],["DM",50,30],["RM",84,40],["CM",61,40],["CM",39,40],["LM",16,40],["ST",50,43]],
- "3-4-3":[["GK",50,8],["CB",70,18],["CB",50,18],["CB",30,18],["RM",84,30],["CM",61,30],["CM",39,30],["LM",16,30],["RW",82,41],["ST",50,40],["LW",18,41]],
- "3-5-2":[["GK",50,8],["CB",70,18],["CB",50,18],["CB",30,18],["RM",86,30],["CM",67,30],["CM",50,29],["CM",33,30],["LM",14,30],["ST",59,41],["ST",41,41]],
- "3-4-2-1":[["GK",50,8],["CB",70,18],["CB",50,18],["CB",30,18],["RM",84,30],["CM",61,30],["CM",39,30],["LM",16,30],["AM",63,40],["AM",37,40],["ST",50,43]],
- "5-3-2":[["GK",50,8],["RWB",90,18],["CB",67,18],["CB",50,18],["CB",33,18],["LWB",10,18],["CM",70,30],["CM",50,29],["CM",30,30],["ST",59,41],["ST",41,41]],
- "5-4-1":[["GK",50,8],["RWB",90,18],["CB",67,18],["CB",50,18],["CB",33,18],["LWB",10,18],["RM",84,40],["CM",61,40],["CM",39,40],["LM",16,40],["ST",50,43]],
- "5-2-3":[["GK",50,8],["RWB",90,18],["CB",67,18],["CB",50,18],["CB",33,18],["LWB",10,18],["DM",63,30],["DM",37,30],["RW",82,41],["ST",50,40],["LW",18,41]],
- "4-5-1":[["GK",50,8],["RB",82,18],["CB",61,18],["CB",39,18],["LB",18,18],["RM",88,40],["CM",68,40],["DM",50,39],["CM",32,40],["LM",12,40],["ST",50,43]]
+function formationNumbers(value){
+  const nums=String(value||"").replace(/\s+/g,"").match(/\d+/g)||[];
+  return nums.map(Number).filter(Boolean);
+}
+
+function roleGroup(value){
+  const v=String(value||"").toLowerCase();
+  if(/goal|keeper|\bgk\b/.test(v))return "GK";
+  if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";
+  if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";
+  if(/forward|striker|attack|wing|\b(fw|lw|rw|cf|st)\b/.test(v))return "FWD";
+  return "OTHER";
+}
+
+function specificRole(value){
+  const v=String(value||"").toLowerCase().trim();
+  if(/goal|keeper|^gk$/.test(v))return "GK";
+  if(/right wing.?back|^rwb$/.test(v))return "RWB";
+  if(/left wing.?back|^lwb$/.test(v))return "LWB";
+  if(/right back|^rb$/.test(v))return "RB";
+  if(/left back|^lb$/.test(v))return "LB";
+  if(/centre.?back|center.?back|^cb$/.test(v))return "CB";
+  if(/defensive mid|^dm$/.test(v))return "DM";
+  if(/central mid|^cm$/.test(v))return "CM";
+  if(/attacking mid|^am$/.test(v))return "AM";
+  if(/right mid|^rm$/.test(v))return "RM";
+  if(/left mid|^lm$/.test(v))return "LM";
+  if(/right wing|^rw$/.test(v))return "RW";
+  if(/left wing|^lw$/.test(v))return "LW";
+  if(/striker|centre forward|center forward|^st$|^cf$/.test(v))return "ST";
+  if(/forward|^fw$/.test(v))return "FW";
+  return null;
+}
+
+const FORMATION_ROLE_ROWS={
+  "4-4-2":[["GK"],["RB","CB","CB","LB"],["RM","CM","CM","LM"],["ST","ST"]],
+  "4-3-3":[["GK"],["RB","CB","CB","LB"],["CM","CM","CM"],["RW","ST","LW"]],
+  "4-2-3-1":[["GK"],["RB","CB","CB","LB"],["DM","DM"],["RW","AM","LW"],["ST"]],
+  "4-1-4-1":[["GK"],["RB","CB","CB","LB"],["DM"],["RM","CM","CM","LM"],["ST"]],
+  "3-4-3":[["GK"],["CB","CB","CB"],["RM","CM","CM","LM"],["RW","ST","LW"]],
+  "3-5-2":[["GK"],["CB","CB","CB"],["RM","CM","CM","CM","LM"],["ST","ST"]],
+  "3-4-2-1":[["GK"],["CB","CB","CB"],["RM","CM","CM","LM"],["AM","AM"],["ST"]],
+  "5-3-2":[["GK"],["RWB","CB","CB","CB","LWB"],["CM","CM","CM"],["ST","ST"]],
+  "5-4-1":[["GK"],["RWB","CB","CB","CB","LWB"],["RM","CM","CM","LM"],["ST"]],
+  "5-2-3":[["GK"],["RWB","CB","CB","CB","LWB"],["DM","DM"],["RW","ST","LW"]],
+  "4-5-1":[["GK"],["RB","CB","CB","LB"],["RM","CM","DM","CM","LM"],["ST"]]
 };
 
-function fallbackFormationSlots(lineup){
- const nums=formationNumbers(lineup?.formation);
- if(nums.length<2||nums.length>5||nums.reduce((a,b)=>a+b,0)!==10)return null;
- const xFor=count=>count===1?[50]:count===2?[38,62]:count===3?[24,50,76]:count===4?[14,38,62,86]:[10,30,50,70,90];
- const rows=[["DEF",nums[0]],...nums.slice(1).map((n,i)=>[i===nums.length-2?"FWD":"MID",n])];
- const slots=[["GK",50,8]];
- rows.forEach(([group,count],i)=>{
-   const depth=Math.min(43,18+(i*Math.max(8,Math.min(12,24/Math.max(1,nums.length-1)))));
-   xFor(count).forEach(x=>slots.push([group,x,Number(depth.toFixed(1))]));
- });
- return slots;
+const FORMATION_LINE_DEPTHS=[9,22,34,43];
+
+function evenlySpacedX(count){
+  if(count<=1)return [50];
+  const edge=Math.min(44,Math.max(16,8+(count-1)*7));
+  const step=(edge*2)/(count-1);
+  return Array.from({length:count},(_,i)=>Number((50-edge+i*step).toFixed(2)));
 }
 
 function formationSlots(lineup,away=false){
- const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
- const formation=String(lineup?.formation||"").replace(/\s+/g,"");
- const template=FORMATION_SLOT_TEMPLATES[formation]||fallbackFormationSlots(lineup)||[];
- const remaining=[...starters],assigned=new Set();
- const playerRole=p=>specificRole(p.position||p.player?.position||p.role)||roleGroup(p.position||p.player?.position||p.role);
- const pick=(slotRole)=>{
-   const aliases=ROLE_ALIASES[slotRole]||[slotRole];
-   let index=remaining.findIndex(p=>aliases.includes(playerRole(p)));
-   if(index<0){
-     const broad=slotRole==="GK"?"GK":["DEF","RB","LB","CB","RWB","LWB"].includes(slotRole)?"DEF":["MID","DM","CM","AM","RM","LM"].includes(slotRole)?"MID":"FWD";
-     index=remaining.findIndex(p=>roleGroup(playerRole(p))===broad);
-   }
-   if(index<0)index=remaining.findIndex(p=>!assigned.has(p.id));
-   if(index<0)return null;
-   const item=remaining[index];remaining.splice(index,1);assigned.add(item.id);return item;
- };
- return template.map(([slotRole,x,depth])=>{
-   const item=pick(slotRole); if(!item)return null;
-   // Hard-lock each side to its own tactical half. The player node is centred on this
-   // coordinate, so keep the deepest slot safely away from the halfway line even on
-   // narrow mobile pitches where the node itself occupies a larger percentage of height.
-   const safeDepth=Math.max(7,Math.min(39,Number(depth)||0));
-   const y=away?safeDepth:100-safeDepth;
-   const safeX=Math.max(8,Math.min(92,Number(x)||50));
-   return {item,row:slotRole,rowCount:1,group:roleGroup(item.position||item.player?.position||item.role),x:safeX,y,slotRole};
- }).filter(Boolean);
+  const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
+  if(!starters.length)return [];
+
+  const formation=String(lineup?.formation||"").replace(/\s+/g,"");
+  let roleRows=FORMATION_ROLE_ROWS[formation];
+  if(!roleRows){
+    const nums=formationNumbers(formation);
+    if(nums.length>=2&&nums.length<=5&&nums.reduce((a,b)=>a+b,0)===10){
+      roleRows=[["GK"],...nums.map((count,index)=>Array.from({length:count},()=>index===nums.length-1?"FWD":"MID"))];
+      roleRows[1]=Array.from({length:nums[0]},()=> "DEF");
+    } else {
+      roleRows=[["GK"],["DEF","DEF","DEF","DEF"],["MID","MID","MID"],["FWD","FWD","FWD"]];
+    }
+  }
+
+  const remaining=[...starters];
+  const assigned=new Set();
+  const playerRole=p=>specificRole(p.position||p.player?.position||p.role)||roleGroup(p.position||p.player?.position||p.role);
+  const broadRole=role=>{
+    if(role==="GK")return "GK";
+    if(["RB","LB","CB","RWB","LWB"].includes(role))return "DEF";
+    if(["DM","CM","AM","RM","LM"].includes(role))return "MID";
+    return "FWD";
+  };
+  const aliases={
+    GK:["GK"],RB:["RB","RWB"],LB:["LB","LWB"],CB:["CB"],RWB:["RWB","RB"],LWB:["LWB","LB"],
+    DM:["DM","CM"],CM:["CM","DM"],AM:["AM","CM"],RM:["RM","RW"],LM:["LM","LW"],
+    RW:["RW","RM"],LW:["LW","LM"],ST:["ST","FW","CF"],FW:["FW","ST","CF"]
+  };
+  function pick(slotRole){
+    const desired=aliases[slotRole]||[slotRole];
+    let index=remaining.findIndex(p=>desired.includes(playerRole(p)));
+    if(index<0){
+      const broad=broadRole(slotRole);
+      index=remaining.findIndex(p=>roleGroup(playerRole(p))===broad);
+    }
+    if(index<0)index=remaining.findIndex(p=>!assigned.has(p.id));
+    if(index<0)return null;
+    const player=remaining.splice(index,1)[0];
+    assigned.add(player.id);
+    return player;
+  }
+
+  const slots=[];
+  roleRows.forEach((row,rowIndex)=>{
+    const depth=FORMATION_LINE_DEPTHS[Math.min(rowIndex,FORMATION_LINE_DEPTHS.length-1)];
+    const y=away?depth:100-depth;
+    const xs=evenlySpacedX(row.length);
+    row.forEach((slotRole,index)=>{
+      const item=pick(slotRole);
+      if(!item)return;
+      slots.push({item,slotRole,group:roleGroup(item.position||item.player?.position||item.role),x:xs[index],y});
+    });
+  });
+  return slots;
 }
-
-const ROLE_ALIASES={GK:["GK"],RB:["RB"],LB:["LB"],CB:["CB"],RWB:["RWB","RB"],LWB:["LWB","LB"],DM:["DM"],CM:["CM"],AM:["AM"],RM:["RM","RW"],LM:["LM","LW"],RW:["RW","RM"],LW:["LW","LM"],ST:["ST","FW","CF"],FW:["FW","ST","LW","RW"]};
-
-function specificRole(value){
- const v=String(value||"").toLowerCase().trim();
- if(/goal|keeper|^gk$/.test(v))return "GK";
- if(/right wing.?back|^rwb$/.test(v))return "RWB";
- if(/left wing.?back|^lwb$/.test(v))return "LWB";
- if(/right back|^rb$/.test(v))return "RB";
- if(/left back|^lb$/.test(v))return "LB";
- if(/centre.?back|center.?back|^cb$/.test(v))return "CB";
- if(/defensive mid|^dm$/.test(v))return "DM";
- if(/central mid|^cm$/.test(v))return "CM";
- if(/attacking mid|^am$/.test(v))return "AM";
- if(/right mid|^rm$/.test(v))return "RM";
- if(/left mid|^lm$/.test(v))return "LM";
- if(/right wing|^rw$/.test(v))return "RW";
- if(/left wing|^lw$/.test(v))return "LW";
- if(/striker|centre forward|center forward|^st$|^cf$/.test(v))return "ST";
- if(/forward|^fw$/.test(v))return "FW";
- return null;
-}
-
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
@@ -272,25 +306,48 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     return Array.from({length:Math.max(h.length,a.length)},(_,i)=>({group,h:h[i],a:a[i]}));
   });
 
-  function PlayerCell({item,lineup,away,teamId}){
-    if(!item)return <div className="head-to-head-empty">—</div>;
-    const cap=item.player_id===lineup?.captain_player_id;
+
+  function PlayerNode({item,lineup,away,teamId}){
+    if(!item)return null;
+    const player=item.player||{};
+    const playerId=item.player_id||player.id;
+    const playerName=player.full_name||"Player";
+    const position=item.position||player.position||item.role||"Player";
+    const shirtNumber=item.shirt_number??player.shirt_number??"—";
+    const captain=item.player_id===lineup?.captain_player_id;
     const rating=ratingForPlayer(item,events,match,teamId,stats);
-    const playerEvents=events.filter(e=>e.player_id===item.player_id||e.secondary_player_id===item.player_id);
-    const goals=playerEvents.filter(e=>e.event_type==="goal"&&e.player_id===item.player_id).length;
-    const assists=playerEvents.filter(e=>e.event_type==="goal"&&e.secondary_player_id===item.player_id).length;
-    const cardEvents=playerEvents.filter(e=>e.player_id===item.player_id);
+
+    const playerEvents=events.filter(e=>e.player_id===playerId||e.secondary_player_id===playerId);
+    const goals=playerEvents.filter(e=>e.event_type==="goal"&&e.player_id===playerId).length;
+    const assists=playerEvents.filter(e=>e.event_type==="goal"&&e.secondary_player_id===playerId).length;
+    const cardEvents=playerEvents.filter(e=>e.player_id===playerId);
     const yellows=cardEvents.filter(e=>e.event_type==="yellow_card"||e.event_type==="second_yellow").length;
     const reds=cardEvents.filter(e=>e.event_type==="red_card"||e.event_type==="second_yellow").length;
-    const hasSecondYellow=cardEvents.some(e=>e.event_type==="second_yellow");
     const sentOff=reds>0;
     const cautioned=yellows>0&&!sentOff;
-    const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===item.player_id);
+    const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===playerId);
     const stateClass=sentOff?" sent-off":cautioned?" cautioned":"";
-    return <div className={"head-to-head-player"+(away?" away":"")+stateClass}>
-      <div className="head-to-head-avatar"><b className="lineup-shirt-number">{item.shirt_number??item.player?.shirt_number??"—"}</b>{item.player?.photo_url?<img src={item.player.photo_url} alt=""/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}<b className="lineup-rating-badge">{rating.toFixed(1)}</b>{cap&&<b className="lineup-captain-badge" title="Team captain">C</b>}{sentOff&&<b className="lineup-card-state red" title={hasSecondYellow?"Sent off after second yellow":"Sent off"}>RED</b>}{cautioned&&<b className="lineup-card-state yellow" title="Yellow card">YC</b>}</div>
-      <a href={item.player?.id?"/players/"+item.player.id:"#"} aria-label={item.player?.full_name||"Player"}><strong>{item.player?.full_name||"Player"}</strong><small>{item.position||item.player?.position||"Player"}{cap?" · CAPTAIN":""}</small></a>
-      <div className="lineup-event-badges">{goals>0&&<i title="Goals">⚽{goals>1?goals:""}</i>}{assists>0&&<i title="Assists">A{assists>1?assists:""}</i>}{yellows>0&&<i title="Yellow card">🟨{yellows>1?yellows:""}</i>}{reds>0&&<i title="Red card">🟥</i>}{subOut&&<i title="Substituted">↕</i>}</div>    </div>;
+
+    return <article className={"zedek-player-node"+(away?" away":" home")+stateClass} data-player-id={playerId}>
+      <a className="zedek-player-node-link" href={playerId?"/players/"+playerId:"#"} aria-label={"Open "+playerName+" profile"}>
+        <span className="zedek-player-avatar">
+          <b className="zedek-player-number">{shirtNumber}</b>
+          {player.photo_url?<img src={player.photo_url} alt={playerName}/>:<span aria-hidden="true">{playerName.slice(0,1).toUpperCase()}</span>}
+          <b className="zedek-player-rating">{rating.toFixed(1)}</b>
+          {captain?<b className="zedek-player-captain" title="Team captain">C</b>:null}
+          {sentOff?<b className="zedek-player-card red" title="Sent off">RED</b>:null}
+          {cautioned?<b className="zedek-player-card yellow" title="Yellow card">YC</b>:null}
+        </span>
+        <span className="zedek-player-identity"><strong>{playerName}</strong><small>{position}</small></span>
+        {(goals||assists||yellows||reds||subOut)?<span className="zedek-player-events" aria-label="Player match events">
+          {goals>0?<i title="Goals">⚽{goals>1?goals:""}</i>:null}
+          {assists>0?<i title="Assists">A{assists>1?assists:""}</i>:null}
+          {yellows>0?<i title="Yellow cards">🟨{yellows>1?yellows:""}</i>:null}
+          {reds>0?<i title="Red cards">🟥</i>:null}
+          {subOut?<i title="Substituted">↕</i>:null}
+        </span>:null}
+      </a>
+    </article>;
   }
 
   const renderEvents=()=>events.length?<div className="live-event-list">{events.map(e=><div className="live-event" key={e.id}><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b><span className={"live-event-icon "+e.event_type}>{e.event_type==="goal"?"⚽":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":"•"}</span><div><strong>{e.event_type==="goal"?"Goal: "+(e.player?.full_name||"Unknown scorer"):e.event_type==="substitution"?"Substitution":eventLabel(e.event_type)}</strong><small>{e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.player?.full_name||e.team?.name||""}{e.details?" — "+e.details:""}</small></div></div>)}</div>:<div className="live-empty">No events recorded yet.</div>;
@@ -298,23 +355,49 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   const renderStats=()=> <div className="live-stats-content"><div className="live-stat-team-head"><span>{match?.home_team?.short_name||match?.home_team?.name||"Home"}</span><span>{match?.away_team?.short_name||match?.away_team?.name||"Away"}</span></div>{hasStats?<div className="live-stat-list">{statRows.map(([label,h,a,suffix])=><StatRow key={label} label={label} home={h} away={a} suffix={suffix}/>)}</div>:<div className="live-empty"><strong>Statistics are not available yet.</strong><span>Reporter statistics appear here automatically as they are recorded.</span></div>}</div>;
 
   const renderLineups=()=>lineups.length?<div className="zedek-lineup-layer">
-    <div className="zedek-lineup-head"><div><span>HOME</span><strong>{homeLineup?.formation||"Formation TBC"}</strong><small>{homeLineup?.team?.name||"Home"}</small></div><div className="zedek-lineup-head-score"><b>{match?.home_score??0} — {match?.away_score??0}</b><span>{live?status:official?"FULL-TIME":"PRE-MATCH"}</span></div><div><span>AWAY</span><strong>{awayLineup?.formation||"Formation TBC"}</strong><small>{awayLineup?.team?.name||"Away"}</small></div></div>
-    <div className="zedek-head-to-head-pitch">
-      <div className="pitch-half pitch-half-away"><span>AWAY</span></div>
-      <div className="pitch-half pitch-half-home"><span>HOME</span></div>
-      <div className="pitch-centre-circle"/>
-      <div className="pitch-centre-dot"/>
-      <div className="pitch-box pitch-box-top"/><div className="pitch-box pitch-box-bottom"/>
-      <div className="pitch-goal pitch-goal-top"/><div className="pitch-goal pitch-goal-bottom"/>
-      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>lineup?formationSlots(lineup,away).map(({item,x,y})=>
-        <div className={"zedek-pitch-player "+(away?"away":"home")} style={{left:x+"%",top:y+"%"}} key={item.id}>
-          <PlayerCell item={item} lineup={lineup} away={away} teamId={lineup.team_id}/>
-        </div>
-      ):null)}
+    <div className="zedek-lineup-head">
+      <div><span>HOME</span><strong>{homeLineup?.formation||"Formation TBC"}</strong><small>{homeLineup?.team?.name||"Home"}</small></div>
+      <div className="zedek-lineup-head-score"><b>{match?.home_score??0} — {match?.away_score??0}</b><span>{live?status:official?"FULL-TIME":"PRE-MATCH"}</span></div>
+      <div><span>AWAY</span><strong>{awayLineup?.formation||"Formation TBC"}</strong><small>{awayLineup?.team?.name||"Away"}</small></div>
     </div>
-    <div className="zedek-pitch-team-label"><span>{homeLineup?.team?.short_name||homeLineup?.team?.name||"Home"} <b>{homeLineup?.formation||"—"}</b></span><span><b>{awayLineup?.formation||"—"}</b> {awayLineup?.team?.short_name||awayLineup?.team?.name||"Away"}</span></div>
-    <div className="zedek-lineup-legend"><span><b>0.0</b> pre-match</span><span><b>6.0+</b> live calculated</span><span><b>Final</b> finished calculated</span></div>
-    <div className="head-to-head-bench"><div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div><div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div></div>
+
+    <div className="zedek-formation-board" aria-label="Match lineups">
+      <div className="zedek-pitch-markings" aria-hidden="true">
+        <span className="zedek-pitch-half-label away">AWAY</span>
+        <span className="zedek-pitch-half-label home">HOME</span>
+        <span className="zedek-pitch-centre-line"/>
+        <span className="zedek-pitch-centre-circle"/>
+        <span className="zedek-pitch-centre-dot"/>
+        <span className="zedek-pitch-box top"/>
+        <span className="zedek-pitch-box bottom"/>
+        <span className="zedek-pitch-goal top"/>
+        <span className="zedek-pitch-goal bottom"/>
+      </div>
+
+      {[{lineup:awayLineup,away:true},{lineup:homeLineup,away:false}].map(({lineup,away})=>(
+        lineup?<div className={"zedek-formation-team "+(away?"away":"home")} key={lineup.team_id}>
+          {formationSlots(lineup,away).map(({item,x,y,slotRole})=>(
+            <div className="zedek-formation-slot" key={item.id} style={{left:x+"%",top:y+"%"}} data-role={slotRole}>
+              <PlayerNode item={item} lineup={lineup} away={away} teamId={lineup.team_id}/>
+            </div>
+          ))}
+        </div>:null
+      ))}
+    </div>
+
+    <div className="zedek-pitch-team-label">
+      <span>{homeLineup?.team?.short_name||homeLineup?.team?.name||"Home"} <b>{homeLineup?.formation||"—"}</b></span>
+      <span><b>{awayLineup?.formation||"—"}</b> {awayLineup?.team?.short_name||awayLineup?.team?.name||"Away"}</span>
+    </div>
+
+    <div className="zedek-lineup-legend">
+      <span><b>0.0</b> pre-match</span><span><b>Live</b> calculated rating</span><span><b>Final</b> calculated rating</span>
+    </div>
+
+    <div className="head-to-head-bench">
+      <div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div>
+      <div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div>
+    </div>
   </div>:<div className="live-empty"><strong>Lineups not available yet.</strong><span>Confirmed lineups will appear here when submitted.</span></div>;
 
   return <section className="live-centre-layer">
