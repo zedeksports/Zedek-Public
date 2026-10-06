@@ -553,3 +553,396 @@ html[data-zedek-theme="night"] .score-topbar h2,html[data-zedek-theme="night"] .
 @media(prefers-reduced-motion:reduce){
   .score-match-card,.header-search button,.header-search>a,.public-global-header *{transition:none!important}.score-status.live i{animation:none!important}
 }
+
+
+/* =========================================================
+   OTI HOMEPAGE — FOOTBALL-FIRST MATCHDAY ARCHITECTURE
+   Inspired by the information hierarchy of leading score apps,
+   while preserving Zedek's own Oti identity, copy and colours.
+   ========================================================= */
+.oti-home-shell{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 82% 8%,rgba(214,173,79,.10),transparent 22%),
+    linear-gradient(180deg,#f6f3ec 0%,#f0f3f5 42%,#eef1f4 100%);
+  color:var(--oti-ink,var(--ink));
+}
+html[data-zedek-theme="night"] .oti-home-shell{
+  background:
+    radial-gradient(circle at 82% 8%,rgba(214,173,79,.10),transparent 22%),
+    linear-gradient(180deg,#071522 0%,#081724 52%,#0b1927 100%);
+}
+
+/* The brand statement remains, but behaves like a compact football identity bar
+   instead of a marketing hero. */
+.oti-home-identity{
+  border-bottom:1px solid var(--oti-border);
+  background:
+    radial-gradient(circle at 78% 20%,rgba(22,119,255,.10),transparent 24%),
+    linear-gradient(110deg,rgba(255,255,255,.82),rgba(248,246,239,.66));
+}
+html[data-zedek-theme="night"] .oti-home-identity{
+  background:linear-gradient(110deg,rgba(13,31,48,.92),rgba(9,25,40,.72));
+}
+.oti-home-identity-inner{
+  min-height:250px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:40px;
+  padding:34px 0 30px;
+}
+.oti-home-identity h1{
+  margin:8px 0 12px;
+  font-size:clamp(2.2rem,5.2vw,4.25rem);
+  line-height:.94;
+  letter-spacing:-.06em;
+  color:var(--oti-ink);
+}
+.oti-home-identity h1 em{
+  color:var(--oti-gold);
+  font-style:normal;
+}
+.oti-home-identity p{
+  max-width:680px;
+  margin:0;
+  color:var(--oti-muted);
+  font-size:14px;
+  line-height:1.65;
+}
+.oti-home-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--oti-gold);
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+.oti-live-pip{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#20c98b;
+  box-shadow:0 0 0 4px rgba(32,201,139,.10);
+}
+.oti-home-identity-meta{
+  flex:0 0 220px;
+  padding:18px 19px;
+  border:1px solid var(--oti-border);
+  border-radius:15px;
+  background:var(--oti-surface);
+  box-shadow:var(--oti-shadow);
+  backdrop-filter:blur(18px);
+}
+.oti-home-identity-meta span,
+.oti-home-identity-meta strong,
+.oti-home-identity-meta small{display:block}
+.oti-home-identity-meta span{font-size:8px;font-weight:900;letter-spacing:.14em;color:var(--oti-muted)}
+.oti-home-identity-meta strong{margin:7px 0 3px;font-size:18px}
+.oti-home-identity-meta small{font-size:10px;color:var(--oti-muted)}
+
+/* Top-league strip */
+.oti-home-leagues{padding:18px 0 12px}
+.oti-home-section-label{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:8px;
+}
+.oti-home-section-label>a,.oti-home-section-label>span:last-child{
+  color:var(--oti-muted);
+  font-size:10px;
+  font-weight:800;
+}
+.oti-league-strip{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:3px 1px 8px;
+  scrollbar-width:none;
+}
+.oti-league-strip::-webkit-scrollbar{display:none}
+.oti-league-chip{
+  min-width:max-content;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-height:35px;
+  padding:0 12px;
+  border:1px solid var(--oti-border);
+  border-radius:9px;
+  background:var(--oti-surface-strong);
+  color:var(--oti-ink);
+  box-shadow:0 5px 16px rgba(8,25,43,.04);
+  font-size:10px;
+}
+.oti-league-chip span{color:var(--oti-gold);font-size:11px}
+.oti-league-chip strong{font-size:10px}
+
+/* Matchday controls */
+.oti-home-board{padding:12px 0 46px}
+.oti-home-board-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:18px;
+  margin:6px 0 13px;
+}
+.oti-home-board-head h2{margin:4px 0 0;font-size:28px;letter-spacing:-.045em}
+.oti-home-board-head>a{color:var(--oti-gold);font-size:10px;font-weight:900}
+.oti-date-strip,.oti-filter-strip{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.oti-date-strip{padding:2px 1px 8px}
+.oti-filter-strip{padding:1px 1px 14px}
+.oti-date-strip::-webkit-scrollbar,.oti-filter-strip::-webkit-scrollbar{display:none}
+.oti-date{
+  flex:0 0 76px;
+  min-height:43px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:2px;
+  padding:6px 9px;
+  border:1px solid var(--oti-border);
+  border-radius:9px;
+  background:var(--oti-surface);
+  color:var(--oti-ink);
+  cursor:pointer;
+  text-align:left;
+  font:inherit;
+}
+.oti-date b{font-size:9px;font-weight:950}
+.oti-date span{font-size:9px;color:var(--oti-muted)}
+.oti-date.active{background:var(--oti-ink);border-color:var(--oti-ink);color:#fff}
+.oti-date.active span{color:rgba(255,255,255,.65)}
+.oti-date-picker{min-width:104px}
+.oti-date-picker input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  font-size:9px;
+}
+.oti-filter{
+  flex:0 0 auto;
+  min-height:29px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 10px;
+  border:1px solid var(--oti-border);
+  border-radius:999px;
+  background:transparent;
+  color:var(--oti-muted);
+  cursor:pointer;
+  font-size:9px;
+  font-weight:900;
+}
+.oti-filter.active{
+  background:var(--oti-gold);
+  border-color:var(--oti-gold);
+  color:#101b2b;
+}
+.oti-filter .oti-live-pip{width:6px;height:6px}
+
+/* Main two-column score-app layout */
+.oti-home-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.75fr) minmax(280px,.85fr);
+  gap:15px;
+  align-items:start;
+}
+.oti-home-match-column{min-width:0}
+.oti-home-match-column>.section{
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0!important;
+}
+.oti-home-match-column>.section>.section-heading{display:none}
+.oti-home-match-column .home-dashboard{width:100%}
+.oti-home-match-column .dashboard-card{
+  border-radius:14px!important;
+  overflow:hidden;
+  background:var(--oti-surface-strong)!important;
+  border:1px solid var(--oti-border)!important;
+  box-shadow:var(--oti-shadow)!important;
+  backdrop-filter:blur(18px);
+}
+.oti-home-match-column .card-heading{
+  min-height:52px;
+  padding:10px 13px!important;
+}
+.oti-home-match-column .card-heading h3{font-size:13px!important}
+.oti-home-match-column .score-match-list{padding:5px!important}
+.oti-home-match-column .score-match-card{
+  margin:5px 0!important;
+  border-radius:10px!important;
+  padding:10px!important;
+  background:rgba(255,255,255,.62)!important;
+  border-color:var(--oti-border)!important;
+}
+html[data-zedek-theme="night"] .oti-home-match-column .score-match-card{
+  background:rgba(12,29,45,.72)!important;
+}
+.oti-home-match-column .score-match-card:hover{
+  border-color:rgba(214,173,79,.55)!important;
+}
+.oti-home-match-column .score-match-head{padding-bottom:7px!important}
+.oti-home-match-column .score-match-body{padding:11px 2px!important}
+.oti-home-match-column .score-side strong{font-size:11px!important}
+.oti-home-match-column .score-team-crest{width:38px!important;height:38px!important;border-radius:11px!important}
+.oti-home-match-column .score-numbers b{font-size:21px!important}
+.oti-home-match-column .score-match-foot{padding-top:8px!important;font-size:9px!important}
+.oti-home-match-column .stats-strip{display:none!important}
+.oti-home-match-column .empty-state{padding:28px 14px!important}
+
+/* Right rail */
+.oti-home-sidebar{display:grid;gap:12px;min-width:0}
+.oti-home-card{
+  border:1px solid var(--oti-border);
+  border-radius:14px;
+  background:var(--oti-surface-strong);
+  box-shadow:var(--oti-shadow);
+  overflow:hidden;
+  backdrop-filter:blur(18px);
+}
+.oti-home-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 13px;
+  border-bottom:1px solid var(--oti-border);
+}
+.oti-home-card-head h3{margin:3px 0 0;font-size:14px;letter-spacing:-.02em}
+.oti-home-card-head>a{font-size:9px;font-weight:900;color:var(--oti-gold)}
+.oti-news-lead{display:block}
+.oti-news-image{
+  height:145px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#0a1c2c,#17334b);
+  overflow:hidden;
+  color:#d6ad4f;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.12em;
+  text-align:center;
+}
+.oti-news-image img{width:100%;height:100%;object-fit:cover;display:block}
+.oti-news-copy{padding:11px 12px 12px}
+.oti-news-copy>span,.oti-news-list span{
+  display:block;
+  color:var(--oti-muted);
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+.oti-news-copy strong{
+  display:block;
+  margin:5px 0;
+  font-size:14px;
+  line-height:1.25;
+}
+.oti-news-copy p{
+  margin:0;
+  color:var(--oti-muted);
+  font-size:10px;
+  line-height:1.45;
+}
+.oti-news-list{border-top:1px solid var(--oti-border)}
+.oti-news-list a{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:3px 8px;
+  padding:9px 12px;
+  border-bottom:1px solid var(--oti-border);
+}
+.oti-news-list a:last-child{border-bottom:0}
+.oti-news-list strong{font-size:10px;line-height:1.35}
+.oti-news-list b{grid-column:2;grid-row:1/3;align-self:center;color:var(--oti-gold);font-size:16px}
+.oti-home-empty-card{padding:16px}
+.oti-home-empty-card h3{margin:7px 0;font-size:15px}
+.oti-home-empty-card p,.oti-home-brand-card p{margin:0 0 12px;color:var(--oti-muted);font-size:10px;line-height:1.55}
+.oti-home-empty-card>a,.oti-home-brand-card>a{color:var(--oti-gold);font-size:10px;font-weight:900}
+.oti-competition-list a{
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  min-height:39px;
+  padding:0 12px;
+  border-bottom:1px solid var(--oti-border);
+  font-size:10px;
+}
+.oti-competition-list a:last-child{border-bottom:0}
+.oti-competition-list a>b{color:var(--oti-gold)}
+.oti-competition-rank{
+  color:var(--oti-muted);
+  font-size:8px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+.oti-home-muted{padding:12px;color:var(--oti-muted);font-size:10px}
+.oti-home-brand-card{
+  padding:16px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(214,173,79,.16),transparent 45%),
+    var(--oti-surface-strong);
+}
+.oti-home-brand-card strong{display:block;margin:6px 0 7px;font-size:17px;line-height:1.15;letter-spacing:-.025em}
+
+/* Partners stay useful, but no longer dominate the homepage */
+.oti-home-sponsor-section{padding:0 0 45px}
+.oti-sponsor-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.oti-sponsor-strip a{
+  min-height:58px;
+  display:grid;
+  place-items:center;
+  padding:8px;
+  border:1px solid var(--oti-border);
+  border-radius:10px;
+  background:var(--oti-surface);
+  color:var(--oti-muted);
+  font-size:9px;
+  text-align:center;
+}
+.oti-sponsor-strip img{max-width:100%;max-height:42px;object-fit:contain}
+
+/* Responsive: desktop keeps the score-app hierarchy; mobile becomes one clean feed. */
+@media(max-width:900px){
+  .oti-home-identity-inner{min-height:0;padding:28px 0}
+  .oti-home-identity-meta{display:none}
+  .oti-home-grid{grid-template-columns:1fr}
+  .oti-home-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .oti-home-brand-card{grid-column:1/-1}
+}
+@media(max-width:600px){
+  .oti-home-identity-inner{padding:24px 0 22px}
+  .oti-home-identity h1{font-size:clamp(2rem,10.5vw,3rem)}
+  .oti-home-identity p{font-size:12px;line-height:1.55}
+  .oti-home-leagues{padding-top:13px}
+  .oti-home-board{padding-bottom:32px}
+  .oti-home-board-head h2{font-size:24px}
+  .oti-home-sidebar{grid-template-columns:1fr}
+  .oti-home-brand-card{grid-column:auto}
+  .oti-date{flex-basis:69px;min-height:41px}
+  .oti-date-picker{min-width:92px}
+  .oti-sponsor-strip{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:390px){
+  .oti-home-identity h1{font-size:2rem}
+  .oti-home-identity p{font-size:11px}
+  .oti-filter{padding:0 8px;font-size:8px}
+}
