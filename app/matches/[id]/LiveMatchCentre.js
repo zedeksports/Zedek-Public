@@ -86,8 +86,13 @@ function formationSlots(lineup,away=false){
  };
  return template.map(([slotRole,x,depth])=>{
    const item=pick(slotRole); if(!item)return null;
-   const y=away?depth:100-depth;
-   return {item,row:slotRole,rowCount:1,group:roleGroup(item.position||item.player?.position||item.role),x,y,slotRole};
+   // Hard-lock each side to its own tactical half. The player node is centred on this
+   // coordinate, so keep the deepest slot safely away from the halfway line even on
+   // narrow mobile pitches where the node itself occupies a larger percentage of height.
+   const safeDepth=Math.max(7,Math.min(39,Number(depth)||0));
+   const y=away?safeDepth:100-safeDepth;
+   const safeX=Math.max(8,Math.min(92,Number(x)||50));
+   return {item,row:slotRole,rowCount:1,group:roleGroup(item.position||item.player?.position||item.role),x:safeX,y,slotRole};
  }).filter(Boolean);
 }
 
@@ -255,8 +260,11 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     });
   },[lineups]);
 
-  const homeLineup=lineupByTeam.find(l=>l.team_id===match?.home_team?.id)||lineupByTeam[0];
-  const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id)||lineupByTeam[1];
+  // Never infer a lineup by array order. A team sheet belongs to a side only when
+  // its team_id matches the match home/away team id; this prevents a reversed or
+  // reordered Supabase response from putting players on the wrong half.
+  const homeLineup=lineupByTeam.find(l=>l.team_id===match?.home_team?.id);
+  const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id);
   const positionGroups=["GK","DEF","MID","FWD","OTHER"];
   const positionLabels={GK:"GOALKEEPER",DEF:"DEFENDERS",MID:"MIDFIELDERS",FWD:"FORWARDS",OTHER:"OTHER"};
   const lineupRows=positionGroups.flatMap(group=>{
