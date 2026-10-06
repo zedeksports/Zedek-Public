@@ -81,7 +81,7 @@ function lineupPosition(lineup,item,away){
   if(!row)return {left:50,top:away?50:50};
   const rowCount=rows.length;
   const outfieldRows=Math.max(1,rowCount-1);
-  const rowTop=row.index===0?(away?9:91):(away?26+(row.index-1)*(20/outfieldRows):74-(row.index-1)*(20/outfieldRows));
+  const rowTop=row.index===0?(away?9:91):(away?26+(row.index-1)*(18/Math.max(1,outfieldRows-1)):74-(row.index-1)*(18/Math.max(1,outfieldRows-1)));
   const margin=18;
   const left=row.count===1?50:margin+(100-margin*2)*(row.items.findIndex(p=>p.id===item.id)/Math.max(1,row.count-1));
   return {left,top:Math.max(8,Math.min(92,rowTop))};
@@ -221,7 +221,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   },[lineups]);
 
   const homeLineup=lineupByTeam.find(l=>l.team_id===match?.home_team?.id)||lineupByTeam[0];
-  const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id)||lineupByTeam[1];
+  const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id)||lineupByTeam[1];\n  const motmId=useMemo(()=>{\n    if(!official)return null;\n    const starters=lineupByTeam.flatMap(l=>l.starters||[]);\n    const ranked=starters.map(item=>({id:item.player_id||item.player?.id,rating:ratingForPlayer(item,events,match,item.team_id||lineupByTeam.find(l=>l.starters?.some(s=>s.id===item.id))?.team_id,stats)})).filter(x=>x.id);\n    return ranked.sort((a,b)=>b.rating-a.rating)[0]?.id||null;\n  },[official,lineupByTeam,events,match,stats]);
 
   function PlayerCell({item,lineup,away,teamId}){
     if(!item)return null;
@@ -238,7 +238,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const node=<div className={"zedek-player-node"+(away?" is-away":" is-home")}>
       <div className="zedek-player-top">
         <span className="zedek-player-number">{item.shirt_number??item.player?.shirt_number??"—"}</span>
-        <span className="zedek-player-rating">{rating.toFixed(1)}</span>
+        <span className="zedek-player-rating">{rating.toFixed(1)}{official&&playerId===motmId?<em>MOTM</em>:null}</span>
       </div>
       <div className="zedek-player-photo">{item.player?.photo_url?<img src={item.player.photo_url} alt="" loading="lazy"/>:<span>{(item.player?.full_name||"P").slice(0,1).toUpperCase()}</span>}</div>
       <div className="zedek-player-name" title={item.player?.full_name||"Player"}>{item.player?.full_name||"Player"}</div>
