@@ -14,38 +14,44 @@ export default async function StatisticsPage({ searchParams }) {
   ]);
 
   const error = officialError || eventError;
-  const map = new Map();
-  const ensure = (id, player, team) => {
-    if (!id) return null;
-    if (!map.has(id)) map.set(id, { id, name: player?.full_name || "Player", team: team?.short_name || team?.name || "Team", position: player?.position || "", matches: 0, goals: 0, assists: 0, yellow: 0, red: 0 });
-    return map.get(id);
-  };
+  let rows = [];
 
-  for (const row of official || []) {
-    const r = ensure(row.player_id, row.player, row.team);
-    if (!r) continue;
-    r.matches = Math.max(r.matches, row.matches_played || 0);
-    r.goals = Math.max(r.goals, row.goals || 0);
-    r.assists = Math.max(r.assists, row.assists || 0);
-    r.yellow = Math.max(r.yellow, row.yellow_cards || 0);
-    r.red = Math.max(r.red, row.red_cards || 0);
+  if (official?.length) {
+    rows = official.map(x => ({
+      id: x.player_id,
+      name: x.player?.full_name || "Player",
+      team: x.team?.short_name || x.team?.name || "Team",
+      position: x.player?.position || "",
+      matches: x.matches_played || 0,
+      goals: x.goals || 0,
+      assists: x.assists || 0,
+      yellow: x.yellow_cards || 0,
+      red: x.red_cards || 0,
+      minutes: x.minutes_played || 0,
+    }));
+  } else if (!officialError) {
+    const map = new Map();
+    const ensure = (id, player, team) => {
+      if (!id) return null;
+      if (!map.has(id)) map.set(id, { id, name: player?.full_name || "Player", team: team?.short_name || team?.name || "Team", position: player?.position || "", matches: 0, goals: 0, assists: 0, yellow: 0, red: 0, minutes: 0 });
+      return map.get(id);
+    };
+    for (const e of (events || []).filter(x => x.match?.status === "verified")) {
+      if (e.event_type !== "own_goal") {
+        const r = ensure(e.player_id, e.player, e.team);
+        if (r && e.event_type === "goal") r.goals++;
+        if (r && e.event_type === "yellow_card") r.yellow++;
+        if (r && e.event_type === "red_card") r.red++;
+      }
+      if (e.event_type === "goal" && e.secondary_player_id) {
+        const r = ensure(e.secondary_player_id, null, e.team);
+        if (r) r.assists++;
+      }
+    }
+    rows = [...map.values()];
   }
 
-  const verifiedEvents = (events || []).filter(e => e.match?.status === "verified");
-  for (const e of verifiedEvents) {
-    if (e.event_type !== "own_goal") {
-      const r = ensure(e.player_id, e.player, e.team);
-      if (r && e.event_type === "goal") r.goals += 1;
-      if (r && e.event_type === "yellow_card") r.yellow += 1;
-      if (r && e.event_type === "red_card") r.red += 1;
-    }
-    if (e.event_type === "goal" && e.secondary_player_id) {
-      const r = ensure(e.secondary_player_id, null, e.team);
-      if (r) r.assists += 1;
-    }
-  }
-
-  const rows = [...map.values()].sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name));
+  rows.sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name));
   const top = rows.slice(0, 10);
 
   return <ExplorePage>
