@@ -384,12 +384,13 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           {cautioned?<b className="zedek-player-card yellow" title="Yellow card">YC</b>:null}
         </span>
         <span className="zedek-player-identity"><strong>{playerName}</strong><small>{position}</small></span>
-        {(goals||assists||yellows||reds||subOut)?<span className="zedek-player-events" aria-label="Player match events">
+        {(goals||assists||yellows||reds||subOut||subIn)?<span className="zedek-player-events" aria-label="Player match events">
           {goals>0?<i title="Goals">⚽{goals>1?goals:""}</i>:null}
           {assists>0?<i title="Assists">A{assists>1?assists:""}</i>:null}
           {yellows>0?<i title="Yellow cards">🟨{yellows>1?yellows:""}</i>:null}
           {reds>0?<i title="Red cards">🟥</i>:null}
-          {subOut?<i title="Substituted">↕</i>:null}
+          {subOut?<i className="substitution-out" title={"Substituted off"+(subOutMinute!=null?" · "+subOutMinute+"'":"")}>↓{subOutMinute!=null?<small>{subOutMinute}'</small>:null}</i>:null}
+          {subIn?<i className="substitution-in" title={"Substituted on"+(subInMinute!=null?" · "+subInMinute+"'":"")}>↑{subInMinute!=null?<small>{subInMinute}'</small>:null}</i>:null}
         </span>:null}
       </a>
     </article>;
