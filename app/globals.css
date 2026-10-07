@@ -1397,3 +1397,6 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 :root{--layer-shadow:0 3px 12px rgba(16,27,43,.06),0 0 0 1px rgba(16,27,43,.03)}
 .page.theme-night{--layer-shadow:0 3px 12px rgba(0,0,0,.06),0 0 0 1px rgba(255,255,255,.03)}
 .site-header,.site-footer,.hero-panel,.feature-card,.button,.icon-button,.theme-button,.mc-tab,.mc-day,.mc-calendar,.mc-match,.match-detail-card,.event-row,.match-notes,.competition-card,.competition-match,.standings-filters select,.standings-table-wrap,.team-directory-card,.team-profile-meta,.team-panel,.coach-row,.player-card,.team-matches-section,.team-head-coach,.player-profile-hero,.player-stat-strip,.player-season-row,.public-player-card,.search-field-wrap,.search-intro,.search-result,.hero-hub-mark{box-shadow:var(--layer-shadow)}
+
+/* Player movement history surface. */
+.movement-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.movement-item{display:grid;gap:3px;margin-top:8px;padding:9px;border:1px solid rgba(30,40,60,.08);border-radius:10px;background:rgba(255,255,255,.6)}.movement-item strong{font-size:12px}.movement-item span,.movement-item small{font-size:10px;color:#747b88}.movement-item small{line-height:1.4}@media(max-width:650px){.movement-grid{grid-template-columns:1fr}}
