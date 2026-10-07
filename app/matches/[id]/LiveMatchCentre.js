@@ -349,7 +349,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   });
 
 
-  function PlayerNode({item,lineup,away,teamId}){
+  function PlayerNode({item,lineup,away,teamId,compact=false}){
     if(!item)return null;
     const player=item.player||{};
     const playerId=item.player_id||player.id;
@@ -370,7 +370,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===playerId);
     const stateClass=sentOff?" sent-off":cautioned?" cautioned":"";
 
-    return <article className={"zedek-player-node"+(away?" away":" home")+stateClass} data-player-id={playerId}>
+    return <article className={"zedek-player-node"+(away?" away":" home")+(compact?" compact":"")+stateClass} data-player-id={playerId}>
       <a className="zedek-player-node-link" href={playerId?"/players/"+playerId:"#"} aria-label={"Open "+playerName+" profile"}>
         <span className="zedek-player-avatar">
           <b className="zedek-player-number">{shirtNumber}</b>
@@ -436,10 +436,29 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <span><b>0.0</b> pre-match</span><span><b>Live</b> calculated rating</span><span><b>Final</b> calculated rating</span>
     </div>
 
-    <div className="head-to-head-bench">
-      <div><b>SUBSTITUTES</b>{(homeLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div>
-      <div><b>SUBSTITUTES</b>{(awayLineup?.bench||[]).map(p=><a href={"/players/"+p.player_id} key={p.id}>{p.player?.full_name||"Player"}{p.shirt_number?" #"+p.shirt_number:""}</a>)}</div>
-    </div>
+    {(() => {
+      const awayBench=awayLineup?.bench||[];
+      const homeBench=homeLineup?.bench||[];
+      const substituteRows=Array.from({length:Math.max(awayBench.length,homeBench.length)},(_,i)=>({away:awayBench[i]||null,home:homeBench[i]||null}));
+      return <div className="head-to-head-bench">
+        <div className="head-to-head-bench-head">
+          <span>AWAY</span>
+          <b>SUBSTITUTES</b>
+          <span>HOME</span>
+        </div>
+        <div className="head-to-head-bench-rows">
+          {substituteRows.map((row,i)=><div className="head-to-head-bench-row" key={(row.away?.id||"away-empty")+"-"+(row.home?.id||"home-empty")+"-"+i}>
+            <div className="head-to-head-sub-side away">
+              {row.away?<PlayerNode item={row.away} lineup={awayLineup} away={true} teamId={awayLineup?.team_id} compact />:<span className="head-to-head-sub-empty">—</span>}
+            </div>
+            <span className="head-to-head-sub-vs">VS</span>
+            <div className="head-to-head-sub-side home">
+              {row.home?<PlayerNode item={row.home} lineup={homeLineup} away={false} teamId={homeLineup?.team_id} compact />:<span className="head-to-head-sub-empty">—</span>}
+            </div>
+          </div>)}
+        </div>
+      </div>;
+    })()}
   </div>:<div className="live-empty"><strong>Lineups not available yet.</strong><span>Confirmed lineups will appear here when submitted.</span></div>;
 
   return <section className="live-centre-layer">
