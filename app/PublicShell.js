@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 import PWAInstallPrompt from "./PWAInstallPrompt";
 import LiveNotificationAlerts from "./LiveNotificationAlerts";
 
-const logoUrl=""; // Paste the team/organization logo HTTPS image URL here.
+const logoUrl="/images/zedek-logo.png"; // Paste the team/organization logo HTTPS image URL here.
 const primaryNav=[["Matches","/matches"],["Live","/matches?filter=live"]];
 const exploreNav=[["News","/news"],["Community","/community"],["Competitions","/competitions"],["Teams","/teams"],["Standings","/standings"],["Top Scorers","/statistics?view=scorers"],["Player Stats","/statistics?view=players"],["Search","/search"],["My Teams","/my-teams"]];
 
