@@ -367,7 +367,10 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const reds=cardEvents.filter(e=>e.event_type==="red_card"||e.event_type==="second_yellow").length;
     const sentOff=reds>0;
     const cautioned=yellows>0&&!sentOff;
-    const subOut=playerEvents.find(e=>e.event_type==="substitution"&&e.player_id===playerId);
+    const subOut=events.find(e=>e.event_type==="substitution"&&e.player_id===playerId);
+    const subIn=events.find(e=>e.event_type==="substitution"&&e.secondary_player_id===playerId);
+    const subOutMinute=subOut?.minute;
+    const subInMinute=subIn?.minute;
     const stateClass=sentOff?" sent-off":cautioned?" cautioned":"";
 
     return <article className={"zedek-player-node"+(away?" away":" home")+(compact?" compact":"")+stateClass} data-player-id={playerId}>
