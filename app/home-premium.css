@@ -973,3 +973,7 @@ html[data-zedek-theme="night"] .oti-home-identity{background:#5f2639!important}
 .oti-home-identity{background:#f3f0ea!important}
 html[data-zedek-theme="night"] .oti-home-identity{background:#f3f0ea!important}
 .oti-home-identity p{color:#fff!important}
+
+
+/* Homepage hero supporting copy: dark blue for clear contrast on the cream layer. */
+.oti-home-identity p{color:#0b1a2b!important}
