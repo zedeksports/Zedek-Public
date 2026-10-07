@@ -18,7 +18,7 @@ export default function PublicShell({children}){
  return <div className="public-site-shell">
   <header className="site-header zedek-score-header public-global-header">
    <div className="container public-nav-top">
-    <a className="public-brand" href="/" aria-label="Oti Football Network home"><span className="public-brand-mark" aria-label="Team or organization logo">{logoUrl?<img src={logoUrl} alt="" />:<span className="public-brand-placeholder" aria-hidden="true" />}</span><span><b>OTI</b> FOOTBALL <strong>NETWORK</strong></span></a>
+    <a className="public-brand" href="/" aria-label="Ghana Trusted Score home"><span className="public-brand-mark" aria-label="Team or organization logo">{logoUrl?<img src={logoUrl} alt="" />:<span className="public-brand-placeholder" aria-hidden="true" />}</span><span><b>GHANA</b> <strong>TRUSTED SCORE</strong></span></a>
     <nav className="public-main-nav" aria-label="Primary football navigation">
       {primaryNav.map(([label,href])=><a key={href} href={href} className={label==="Matches"?"active":""}>{label}</a>)}
     </nav>
