@@ -1366,3 +1366,12 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 
 /* Football menu — match the new Football Hub surface */
 .zedek-drawer{background:#fff;border-left:1px solid rgba(30,40,60,.09);box-shadow:-18px 0 50px rgba(20,25,40,.14);padding:16px}.zedek-drawer-head{padding:5px 2px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between}.drawer-kicker{display:block;color:#8a5b68;font-size:9px;font-weight:900;letter-spacing:.12em}.zedek-drawer-head strong{display:block;color:#252d3a;font-size:18px;margin-top:3px}.drawer-close{width:34px;height:34px;border:1px solid #ddd4d4;border-radius:10px;background:#fff;color:#5f2639;font-size:20px;cursor:pointer}.drawer-primary,.drawer-section{display:grid;gap:4px;margin-top:14px}.zedek-drawer .drawer-primary a,.zedek-drawer .drawer-section a{display:flex;align-items:center;justify-content:space-between;border-radius:10px;padding:10px 11px;color:#596170;font-size:12px;font-weight:800}.zedek-drawer .drawer-primary a{background:#f5efed;color:#5f2639}.zedek-drawer .drawer-section a:hover,.zedek-drawer .drawer-section a:focus-visible{background:#f5efed;color:#5f2639}.drawer-note{margin-top:16px;padding:11px;border-radius:10px;background:#faf7f5;color:#7b8290;font-size:10px;line-height:1.5}.zedek-drawer-backdrop{background:rgba(20,25,40,.28);backdrop-filter:blur(2px)}
+
+
+/* Header logo watermark — uses the uploaded logo without altering its design. */
+.public-global-header{position:sticky;isolation:isolate;overflow:hidden}
+.public-global-header::before{content:"";position:absolute;inset:0;z-index:0;background-image:url("/images/zedek-logo.png");background-repeat:no-repeat;background-position:center;background-size:auto 180%;opacity:.12;pointer-events:none}
+.public-global-header>.container,.public-global-header>.public-nav-top,.public-global-header>.public-nav-bottom{position:relative;z-index:1}
+.public-global-header .public-brand-mark{display:none}
+@media(max-width:760px){.public-global-header::before{background-size:auto 150%;background-position:center}.public-global-header .public-brand-mark{display:none}}
+@media(max-width:430px){.public-global-header::before{background-size:auto 135%}}
