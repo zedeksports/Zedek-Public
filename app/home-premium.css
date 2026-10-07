@@ -977,3 +977,8 @@ html[data-zedek-theme="night"] .oti-home-identity{background:#f3f0ea!important}
 
 /* Homepage hero supporting copy: dark blue for clear contrast on the cream layer. */
 .oti-home-identity p{color:#0b1a2b!important}
+
+
+/* Authorized homepage hero text colors only: dark blue-black headline and black supporting copy. */
+.oti-home-identity h1{color:#0b1a2b!important}
+.oti-home-identity p{color:#000!important}
