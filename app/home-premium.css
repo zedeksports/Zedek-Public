@@ -961,3 +961,9 @@ html[data-zedek-theme="night"] .oti-home-match-column .score-match-card{
 
 /* Homepage 6% drop shadow across Public layers. */
 .public-global-header,.zedek-drawer,.drawer-note,.oti-home-identity,.oti-home-board,.oti-home-card,.oti-home-match-column,.oti-home-brand-card,.oti-date,.oti-date-picker,.oti-filter,.oti-sponsor-strip a{box-shadow:0 3px 12px rgba(16,27,43,.06),0 0 0 1px rgba(16,27,43,.03)!important}
+
+
+/* Homepage hero identity: dark red layer with white supporting copy. */
+.oti-home-identity{background:#5f2639!important}
+html[data-zedek-theme="night"] .oti-home-identity{background:#5f2639!important}
+.oti-home-identity p{color:#fff!important}
