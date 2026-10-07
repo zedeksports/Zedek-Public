@@ -1372,6 +1372,6 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 .public-global-header{position:sticky;isolation:isolate;overflow:hidden}
 .public-global-header::before{content:"";position:absolute;inset:0;z-index:0;background-image:url("/images/zedek-cover-logo.png");background-repeat:no-repeat;background-position:center;background-size:auto 180%;opacity:.12;pointer-events:none}
 .public-global-header>.container,.public-global-header>.public-nav-top,.public-global-header>.public-nav-bottom{position:relative;z-index:1}
-.public-global-header .public-brand-mark{display:none}
-@media(max-width:760px){.public-global-header::before{background-size:auto 150%;background-position:center}.public-global-header .public-brand-mark{display:none}}
+.public-global-header .public-brand-mark{display:grid;place-items:center;width:42px;height:42px;min-width:42px;border:1px solid var(--gold);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.08);flex:0 0 42px}.public-global-header .public-brand-mark img{width:100%;height:100%;object-fit:contain;display:block}
+@media(max-width:760px){.public-global-header::before{background-size:auto 150%;background-position:center}.public-global-header .public-brand-mark{display:grid;place-items:center;width:42px;height:42px;min-width:42px;border:1px solid var(--gold);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.08);flex:0 0 42px}.public-global-header .public-brand-mark img{width:100%;height:100%;object-fit:contain;display:block}}
 @media(max-width:430px){.public-global-header::before{background-size:auto 135%}}
