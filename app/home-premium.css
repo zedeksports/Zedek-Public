@@ -946,3 +946,8 @@ html[data-zedek-theme="night"] .oti-home-match-column .score-match-card{
   .oti-home-identity p{font-size:11px}
   .oti-filter{padding:0 8px;font-size:8px}
 }
+
+
+/* Matchday date highlight: keep the same deep blue-black selection in both Day and Night modes. */
+.oti-date.active{background:#0b1a2b!important;border-color:#0b1a2b!important;color:#fff!important}
+.oti-date.active span{color:rgba(255,255,255,.65)!important}
