@@ -86,13 +86,51 @@ const FORMATION_ROLE_ROWS={
   "4-5-1":[["GK"],["RB","CB","CB","LB"],["RM","CM","DM","CM","LM"],["ST"]]
 };
 
-const FORMATION_LINE_DEPTHS=[9,22,34,43];
+const ROLE_Y={
+  GK:92,
+  DEF:86,
+  WIDE_DEF:84,
+  DM:73,
+  MID:68,
+  WIDE_MID:66,
+  AM:59,
+  WIDE_FWD:56,
+  ST:54
+};
 
-function evenlySpacedX(count){
-  if(count<=1)return [50];
-  const edge=Math.min(44,Math.max(16,8+(count-1)*7));
-  const step=(edge*2)/(count-1);
-  return Array.from({length:count},(_,i)=>Number((50-edge+i*step).toFixed(2)));
+function roleX(slotRole,index,count){
+  if(slotRole==="GK")return 50;
+  if(slotRole==="RB")return 82;
+  if(slotRole==="LB")return 18;
+  if(slotRole==="RWB")return 90;
+  if(slotRole==="LWB")return 10;
+  if(slotRole==="CB"){
+    if(count===1)return 50;
+    if(count===2)return [42,58][Math.min(index,1)];
+    if(count===3)return [33,50,67][Math.min(index,2)];
+  }
+  if(slotRole==="RW")return 84;
+  if(slotRole==="LW")return 16;
+  if(slotRole==="RM")return 84;
+  if(slotRole==="LM")return 16;
+  if(slotRole==="DM")return count===1?50:[42,58][Math.min(index,1)];
+  if(slotRole==="CM")return count===1?50:[35,50,65][Math.min(index,2)];
+  if(slotRole==="AM")return count===1?50:[40,60][Math.min(index,1)];
+  if(slotRole==="ST")return count===1?50:[42,58][Math.min(index,1)];
+  return count<=1?50:Number((50+((index-(count-1)/2)*18)).toFixed(2));
+}
+
+function roleY(slotRole){
+  if(slotRole==="GK")return ROLE_Y.GK;
+  if(["RB","LB","CB"].includes(slotRole))return ROLE_Y.DEF;
+  if(["RWB","LWB"].includes(slotRole))return ROLE_Y.WIDE_DEF;
+  if(slotRole==="DM")return ROLE_Y.DM;
+  if(slotRole==="CM")return ROLE_Y.MID;
+  if(["RM","LM"].includes(slotRole))return ROLE_Y.WIDE_MID;
+  if(slotRole==="AM")return ROLE_Y.AM;
+  if(["RW","LW"].includes(slotRole))return ROLE_Y.WIDE_FWD;
+  if(slotRole==="ST")return ROLE_Y.ST;
+  return 62;
 }
 
 function formationSlots(lineup,away=false){
@@ -140,14 +178,18 @@ function formationSlots(lineup,away=false){
   }
 
   const slots=[];
-  roleRows.forEach((row,rowIndex)=>{
-    const depth=FORMATION_LINE_DEPTHS[Math.min(rowIndex,FORMATION_LINE_DEPTHS.length-1)];
-    const y=away?depth:100-depth;
-    const xs=evenlySpacedX(row.length);
-    row.forEach((slotRole,index)=>{
+  roleRows.forEach(row=>{
+    const counts={};
+    row.forEach(role=>{counts[role]=(counts[role]||0)+1});
+    const indexes={};
+    row.forEach(slotRole=>{
+      const index=indexes[slotRole]||0;
+      indexes[slotRole]=index+1;
       const item=pick(slotRole);
       if(!item)return;
-      slots.push({item,slotRole,group:roleGroup(item.position||item.player?.position||item.role),x:xs[index],y});
+      const localY=roleY(slotRole);
+      const y=away?100-localY:localY;
+      slots.push({item,slotRole,group:roleGroup(item.position||item.player?.position||item.role),x:roleX(slotRole,index,counts[slotRole]),y});
     });
   });
   return slots;
