@@ -967,3 +967,9 @@ html[data-zedek-theme="night"] .oti-home-match-column .score-match-card{
 .oti-home-identity{background:#5f2639!important}
 html[data-zedek-theme="night"] .oti-home-identity{background:#5f2639!important}
 .oti-home-identity p{color:#fff!important}
+
+
+/* Homepage hero identity: cream-grey-white layer with white supporting copy. */
+.oti-home-identity{background:#f3f0ea!important}
+html[data-zedek-theme="night"] .oti-home-identity{background:#f3f0ea!important}
+.oti-home-identity p{color:#fff!important}
