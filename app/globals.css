@@ -1391,3 +1391,9 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 .zedek-drawer .drawer-account-menu{display:grid;gap:4px;margin-top:4px;padding:4px;border-radius:10px;background:#fff}
 .zedek-drawer .drawer-account-menu a,.zedek-drawer .drawer-account-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;background:transparent;border-radius:8px;padding:9px 8px;color:#596170;font:inherit;font-size:11px;font-weight:800;text-align:left;cursor:pointer}
 .zedek-drawer .drawer-account-menu a:hover,.zedek-drawer .drawer-account-menu button:hover{background:#f5efed;color:#5f2639}
+
+
+/* Global 6% drop shadow across Public site layers. */
+:root{--layer-shadow:0 3px 12px rgba(16,27,43,.06),0 0 0 1px rgba(16,27,43,.03)}
+.page.theme-night{--layer-shadow:0 3px 12px rgba(0,0,0,.06),0 0 0 1px rgba(255,255,255,.03)}
+.site-header,.site-footer,.hero-panel,.feature-card,.button,.icon-button,.theme-button,.mc-tab,.mc-day,.mc-calendar,.mc-match,.match-detail-card,.event-row,.match-notes,.competition-card,.competition-match,.standings-filters select,.standings-table-wrap,.team-directory-card,.team-profile-meta,.team-panel,.coach-row,.player-card,.team-matches-section,.team-head-coach,.player-profile-hero,.player-stat-strip,.player-season-row,.public-player-card,.search-field-wrap,.search-intro,.search-result,.hero-hub-mark{box-shadow:var(--layer-shadow)}
