@@ -137,7 +137,7 @@ function formationSlots(lineup,away=false){
   const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
   if(!starters.length)return [];
 
-  const formation=String(lineup?.formation||"").replace(/\\s+/g,"");
+  const formation=String(lineup?.formation||"").replace(/\s+/g,"");
   let roleRows=FORMATION_ROLE_ROWS[formation];
   if(!roleRows){
     const nums=formationNumbers(formation);
