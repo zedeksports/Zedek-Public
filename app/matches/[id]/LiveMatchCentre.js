@@ -442,9 +442,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       const substituteRows=Array.from({length:Math.max(awayBench.length,homeBench.length)},(_,i)=>({away:awayBench[i]||null,home:homeBench[i]||null}));
       return <div className="head-to-head-bench">
         <div className="head-to-head-bench-head">
-          <span>AWAY</span>
+          <span>{(awayLineup?.team?.short_name||awayLineup?.team?.name||"AWAY")+" · AWAY"}</span>
           <b>SUBSTITUTES</b>
-          <span>HOME</span>
+          <span>{"HOME · "+(homeLineup?.team?.short_name||homeLineup?.team?.name||"HOME")}</span>
         </div>
         <div className="head-to-head-bench-rows">
           {substituteRows.map((row,i)=><div className="head-to-head-bench-row" key={(row.away?.id||"away-empty")+"-"+(row.home?.id||"home-empty")+"-"+i}>
