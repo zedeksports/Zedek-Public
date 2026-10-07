@@ -982,3 +982,9 @@ html[data-zedek-theme="night"] .oti-home-identity{background:#f3f0ea!important}
 /* Authorized homepage hero text colors only: dark blue-black headline and black supporting copy. */
 .oti-home-identity h1{color:#0b1a2b!important}
 .oti-home-identity p{color:#000!important}
+
+
+/* Authorized night-mode fixes: keep hero headline dark blue-black; use elegant gold for active Matchday date. */
+html[data-zedek-theme="night"] .oti-home-identity h1{color:#0b1a2b!important}
+html[data-zedek-theme="night"] .oti-date.active{background:#d6ad4f!important;border-color:#d6ad4f!important;color:#0b1a2b!important}
+html[data-zedek-theme="night"] .oti-date.active span{color:rgba(11,26,43,.72)!important}
