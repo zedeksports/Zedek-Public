@@ -209,8 +209,8 @@ function eventLabel(type) {
   return String(type || "event").replaceAll("_"," ");
 }
 
-export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialH2H, initialForm, initialPreview, initialChannels, initialStreamAds }) {
-  const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[h2h]=useState(initialH2H||[]),[preview,setPreview]=useState(initialPreview||null),[channels,setChannels]=useState(initialChannels||[]),[streamAds,setStreamAds]=useState(initialStreamAds||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
+export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialHeadCoaches, initialH2H, initialForm, initialPreview, initialChannels, initialStreamAds }) {
+  const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[headCoaches,setHeadCoaches]=useState(initialHeadCoaches||[]),[h2h]=useState(initialH2H||[]),[preview,setPreview]=useState(initialPreview||null),[channels,setChannels]=useState(initialChannels||[]),[streamAds,setStreamAds]=useState(initialStreamAds||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
   const matchRef=useRef(initialMatch),eventsRef=useRef(initialEvents||[]);
   matchRef.current=match; eventsRef.current=events;
   const pendingMatchRef=useRef(null),pendingEventsRef=useRef(new Map()),initialCutoffRef=useRef(Date.now()-5000),goalTimerRef=useRef(null);
@@ -222,11 +222,12 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     let cancelled=false;
     async function refresh(){
       const s=createSupabaseBrowserClient();
-      const [m,e,st,l,pv,ch,sa]=await Promise.all([
+      const [m,e,st,l,hc,pv,ch,sa]=await Promise.all([
         s.from("matches").select("id,scheduled_at,rescheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,interruption_reason,interruption_minute,outcome_note,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
         s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(id,full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number),coach:coaches!match_events_coach_id_fkey(id,full_name,role),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
-        s.from("match_lineups").select("id,team_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
+        s.from("team_coaches").select("team_id,coach_id,role,coach:coaches(id,full_name,role,photo_url)").eq("is_current",true).eq("role","Head Coach"),
+        s.from("match_lineups").select("id,team_id,coach_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),coach:coaches(id,full_name,role,photo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
         s.from("match_previews").select("id,match_id,headline,summary,key_storylines,form_note,h2h_note,venue_note,status,published_at,updated_at").eq("match_id",initialMatch.id).eq("status","published").maybeSingle(),
         s.from("match_channels").select("id,match_id,channel_type,name,provider,url,is_primary,active,starts_at,ends_at,updated_at").eq("match_id",initialMatch.id).eq("active",true).order("is_primary",{ascending:false}).order("updated_at",{ascending:false}),
         s.from("match_stream_ads").select("id,match_id,ad_slot_id,position,active,ad_slot:ad_slots(id,name,placement,format,image_url,target_url,active,sponsor:sponsors(id,name,logo_url,website_url))").eq("match_id",initialMatch.id).eq("active",true).order("priority").order("created_at",{ascending:false})
@@ -272,6 +273,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       }
       if(!st.error)setStats(st.data||null);
       if(!l.error)setLineups(l.data||[]);
+      if(!hc.error)setHeadCoaches(hc.data||[]);
       if(!pv.error)setPreview(pv.data||null);
       if(!ch.error)setChannels(ch.data||[]);
       if(!sa.error)setStreamAds(sa.data||[]);
@@ -341,6 +343,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
   // reordered Supabase response from putting players on the wrong half.
   const homeLineup=lineupByTeam.find(l=>l.team_id===match?.home_team?.id);
   const awayLineup=lineupByTeam.find(l=>l.team_id===match?.away_team?.id);
+  const headCoachFor=(lineup,teamId)=>lineup?.coach||headCoaches.find(x=>x.team_id===teamId)?.coach||null;
+  const homeHeadCoach=headCoachFor(homeLineup,match?.home_team?.id);
+  const awayHeadCoach=headCoachFor(awayLineup,match?.away_team?.id);
   const positionGroups=["GK","DEF","MID","FWD","OTHER"];
   const positionLabels={GK:"GOALKEEPER",DEF:"DEFENDERS",MID:"MIDFIELDERS",FWD:"FORWARDS",OTHER:"OTHER"};
   const lineupRows=positionGroups.flatMap(group=>{
@@ -373,12 +378,12 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const yellows=cardEvents.filter(e=>e.event_type==="yellow_card"||e.event_type==="second_yellow").length;
     const reds=cardEvents.filter(e=>e.event_type==="red_card"||e.event_type==="second_yellow").length;
     const sentOff=reds>0;
-    const cautioned=yellows>0&&!sentOff;
+    const cautioned=yellows>0;
     const subOut=events.find(e=>e.event_type==="substitution"&&e.player_id===playerId);
     const subIn=events.find(e=>e.event_type==="substitution"&&e.secondary_player_id===playerId);
     const subOutMinute=subOut?.minute;
     const subInMinute=subIn?.minute;
-    const stateClass=sentOff?" sent-off":cautioned?" cautioned":"";
+    const stateClass=(sentOff?" sent-off":"")+(cautioned?" cautioned":"")+(subOut?" substituted-out":"")+(subIn?" substituted-in":"");
 
     return <article className={"zedek-player-node"+(away?" away":" home")+(compact?" compact":"")+stateClass} data-player-id={playerId}>
       <a className="zedek-player-node-link" href={playerId?"/players/"+playerId:"#"} aria-label={"Open "+playerName+" profile"}>
@@ -387,8 +392,10 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           {player.photo_url?<img src={player.photo_url} alt={playerName}/>:<span aria-hidden="true">{playerName.slice(0,1).toUpperCase()}</span>}
           <b className="zedek-player-rating">{rating.toFixed(1)}</b>
           {captain?<b className="zedek-player-captain" title="Team captain">C</b>:null}
-          {sentOff?<b className="zedek-player-card red" title="Sent off">RED</b>:null}
           {cautioned?<b className="zedek-player-card yellow" title="Yellow card">YC</b>:null}
+          {sentOff?<b className="zedek-player-card red" title="Sent off">RED</b>:null}
+          {subOut?<b className="zedek-player-card substitution-out-badge" title={"Substituted off"+(subOutMinute!=null?" · "+subOutMinute+"'":"")}>OFF{subOutMinute!=null?" "+subOutMinute+"'":""}</b>:null}
+          {subIn?<b className="zedek-player-card substitution-in-badge" title={"Substituted on"+(subInMinute!=null?" · "+subInMinute+"'":"")}>ON{subInMinute!=null?" "+subInMinute+"'":""}</b>:null}
         </span>
         <span className="zedek-player-identity"><strong>{lineupPlayerName}</strong><small>{position}</small></span>
         {(goals||assists||yellows||reds||subOut||subIn)?<span className="zedek-player-events" aria-label="Player match events">
@@ -432,6 +439,15 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       <div><span>HOME</span><strong>{homeLineup?.formation||"Formation TBC"}</strong><small>{homeLineup?.team?.name||"Home"}</small></div>
       <div className="zedek-lineup-head-score"><b>{match?.home_score??0} — {match?.away_score??0}</b><span>{live?status:official?"FULL-TIME":"PRE-MATCH"}</span></div>
       <div><span>AWAY</span><strong>{awayLineup?.formation||"Formation TBC"}</strong><small>{awayLineup?.team?.name||"Away"}</small></div>
+    </div>
+
+    <div className="zedek-lineup-coaches" aria-label="Head coaches">
+      <div className="zedek-lineup-coach-card away">
+        <span>HEAD COACH</span><strong>{awayHeadCoach?.full_name||"Head coach TBC"}</strong><small>{awayHeadCoach?.role||"Head Coach"}</small>
+      </div>
+      <div className="zedek-lineup-coach-card home">
+        <span>HEAD COACH</span><strong>{homeHeadCoach?.full_name||"Head coach TBC"}</strong><small>{homeHeadCoach?.role||"Head Coach"}</small>
+      </div>
     </div>
 
     <div className="zedek-formation-board" aria-label="Match lineups">
@@ -480,11 +496,11 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         <div className="head-to-head-bench-rows">
           {substituteRows.map((row,i)=><div className="head-to-head-bench-row" key={(row.away?.id||"away-empty")+"-"+(row.home?.id||"home-empty")+"-"+i}>
             <div className="head-to-head-sub-side away">
-              {row.away?<PlayerNode item={row.away} lineup={awayLineup} away={true} teamId={awayLineup?.team_id} compact />:<span className="head-to-head-sub-empty">—</span>}
+              {row.away?<div className="zedek-sub-player-wrap"><PlayerNode item={row.away} lineup={awayLineup} away={true} teamId={awayLineup?.team_id} compact />{events.some(e=>e.event_type==="substitution"&&e.secondary_player_id===(row.away.player_id||row.away.player?.id))?<span className="zedek-sub-status incoming">IN · {events.find(e=>e.event_type==="substitution"&&e.secondary_player_id===(row.away.player_id||row.away.player?.id))?.minute??""}'</span>:null}</div>:<span className="head-to-head-sub-empty">—</span>}
             </div>
             <span className="head-to-head-sub-vs">VS</span>
             <div className="head-to-head-sub-side home">
-              {row.home?<PlayerNode item={row.home} lineup={homeLineup} away={false} teamId={homeLineup?.team_id} compact />:<span className="head-to-head-sub-empty">—</span>}
+              {row.home?<div className="zedek-sub-player-wrap"><PlayerNode item={row.home} lineup={homeLineup} away={false} teamId={homeLineup?.team_id} compact />{events.some(e=>e.event_type==="substitution"&&e.secondary_player_id===(row.home.player_id||row.home.player?.id))?<span className="zedek-sub-status incoming">IN · {events.find(e=>e.event_type==="substitution"&&e.secondary_player_id===(row.home.player_id||row.home.player?.id))?.minute??""}'</span>:null}</div>:<span className="head-to-head-sub-empty">—</span>}
             </div>
           </div>)}
         </div>
