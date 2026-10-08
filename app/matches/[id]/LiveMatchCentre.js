@@ -151,26 +151,21 @@ function formationSlots(lineup,away=false){
 
   const remaining=[...starters];
   const assigned=new Set();
-  const playerRole=p=>specificRole(p.position||p.player?.position||p.role)||roleGroup(p.position||p.player?.position||p.role);
-  const broadRole=role=>{
-    if(role==="GK")return "GK";
-    if(["RB","LB","CB","RWB","LWB"].includes(role))return "DEF";
-    if(["DM","CM","AM","RM","LM"].includes(role))return "MID";
-    return "FWD";
-  };
-  const aliases={
-    GK:["GK"],RB:["RB","RWB"],LB:["LB","LWB"],CB:["CB"],RWB:["RWB","RB"],LWB:["LWB","LB"],
-    DM:["DM","CM"],CM:["CM","DM"],AM:["AM","CM"],RM:["RM","RW"],LM:["LM","LW"],
-    RW:["RW","RM"],LW:["LW","LM"],ST:["ST","FW","CF"],FW:["FW","ST","CF"]
-  };
+
+  // Formation coordinates describe where the players are rendered, not what
+  // position they must be registered as. Injuries and tactical changes can
+  // leave a team without the nominal player for a slot, so every outfield
+  // starter is eligible for every outfield slot. The only hard restriction is
+  // the goalkeeper slot: it must use a registered goalkeeper.
+  function isGoalkeeper(player){
+    return roleGroup(player.position||player.player?.position||player.role)==="GK";
+  }
+
   function pick(slotRole){
-    const desired=aliases[slotRole]||[slotRole];
-    let index=remaining.findIndex(p=>desired.includes(playerRole(p)));
-    if(index<0){
-      const broad=broadRole(slotRole);
-      index=remaining.findIndex(p=>roleGroup(playerRole(p))===broad);
-    }
-    if(index<0)index=remaining.findIndex(p=>!assigned.has(p.id));
+    const isGKSlot=slotRole==="GK";
+    const index=remaining.findIndex(player =>
+      isGKSlot ? isGoalkeeper(player) : !isGoalkeeper(player)
+    );
     if(index<0)return null;
     const player=remaining.splice(index,1)[0];
     assigned.add(player.id);
