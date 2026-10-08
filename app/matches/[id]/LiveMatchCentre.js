@@ -136,6 +136,27 @@ const FORMATION_COORDINATES={
     [60,67,"DM"],[40,67,"DM"],
     [82,50,"RW"],[50,46,"ST"],[18,50,"LW"]
   ],
+  "4-3-2-1":[
+    [50,92,"GK"],
+    [82,78,"RB"],[58,80,"CB"],[42,80,"CB"],[18,78,"LB"],
+    [65,65,"CM"],[50,68,"CM"],[35,65,"CM"],
+    [62,53,"AM"],[38,53,"AM"],
+    [50,44,"ST"]
+  ],
+  "4-3-1-2":[
+    [50,92,"GK"],
+    [82,78,"RB"],[58,80,"CB"],[42,80,"CB"],[18,78,"LB"],
+    [65,65,"CM"],[50,68,"CM"],[35,65,"CM"],
+    [50,54,"AM"],
+    [58,45,"ST"],[42,45,"ST"]
+  ],
+  "4-2-2-2":[
+    [50,92,"GK"],
+    [82,78,"RB"],[58,80,"CB"],[42,80,"CB"],[18,78,"LB"],
+    [60,67,"DM"],[40,67,"DM"],
+    [65,54,"AM"],[35,54,"AM"],
+    [58,45,"ST"],[42,45,"ST"]
+  ],
   "4-5-1":[
     [50,92,"GK"],
     [82,78,"RB"],[58,80,"CB"],[42,80,"CB"],[18,78,"LB"],
@@ -162,80 +183,97 @@ const FALLBACK_FORMATION_COORDINATES=[
  *   to an unused outfield player without moving the slot.
  */
 function formationSlots(lineup,away=false){
+  /*
+   * FotMob-style architecture:
+   * 1. The submitted formation is the single source of truth.
+   * 2. Every formation has exactly 11 fixed positional slots.
+   * 3. Control Room now stores the selected position on each starter.
+   * 4. A player is bound to the slot whose position matches that stored
+   *    position. Duplicate positions (CB, CM, etc.) are consumed in order.
+   * 5. Coordinates never depend on player name, shirt number, card width,
+   *    image dimensions, or array sorting, so players cannot scatter or
+   *    collapse into another line.
+   * 6. Away players use the same slot map mirrored across the centre line.
+   */
   const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
-  if(!starters.length)return [];
+  if(starters.length===0)return [];
 
   const formation=String(lineup?.formation||"").replace(/\s+/g,"");
-  let coordinates=FORMATION_COORDINATES[formation];
-
-  if(!coordinates){
-    const nums=formationNumbers(formation);
-    if(nums.length>=2&&nums.length<=5&&nums.reduce((a,b)=>a+b,0)===10){
-      const dynamic=[[50,92,"GK"]];
-      const rowGap=44/(nums.length);
-      nums.forEach((count,rowIndex)=>{
-        const role=rowIndex===0?"DEF":rowIndex===nums.length-1?"FWD":"MID";
-        const y=78-(rowIndex*rowGap);
-        for(let i=0;i<count;i++){
-          const x=count===1?50:12+(76*i/(count-1));
-          dynamic.push([Number(x.toFixed(2)),Number(y.toFixed(2)),role]);
-        }
-      });
-      coordinates=dynamic.length===11?dynamic:FALLBACK_FORMATION_COORDINATES;
-    }else{
-      coordinates=FALLBACK_FORMATION_COORDINATES;
-    }
+  const coordinates=FORMATION_COORDINATES[formation];
+  if(!coordinates||coordinates.length!==11){
+    return [];
   }
 
-  const remaining=[...starters];
+  const remaining=starters.map((player,index)=>({player,index}));
 
-  function playerRole(player){
-    return specificRole(player.position||player.player?.position||player.role)
-      || roleGroup(player.position||player.player?.position||player.role);
-  }
-
-  function isGoalkeeper(player){
-    return roleGroup(player.position||player.player?.position||player.role)==="GK";
-  }
-
-  const aliases={
-    GK:["GK"],RB:["RB","RWB"],LB:["LB","LWB"],CB:["CB"],
-    RWB:["RWB","RB"],LWB:["LWB","LB"],
-    DM:["DM","CM"],CM:["CM","DM","AM"],AM:["AM","CM","DM"],
-    RM:["RM","RW"],LM:["LM","LW"],RW:["RW","RM","LW"],LW:["LW","LM","RW"],
-    ST:["ST","CF","FW"],FW:["FW","ST","CF"],DEF:["DEF","CB","RB","LB","RWB","LWB"],
-    MID:["MID","DM","CM","AM","RM","LM"],FWD:["FWD","ST","CF","FW","RW","LW"]
+  const normalizePosition=value=>{
+    const v=String(value||"").toLowerCase().trim();
+    if(!v)return null;
+    if(/goal|keeper|^gk$/.test(v))return "GK";
+    if(/right wing.?back|^rwb$/.test(v))return "RWB";
+    if(/left wing.?back|^lwb$/.test(v))return "LWB";
+    if(/right back|^rb$/.test(v))return "RB";
+    if(/left back|^lb$/.test(v))return "LB";
+    if(/centre.?back|center.?back|^cb$/.test(v))return "CB";
+    if(/defensive mid|^dm$/.test(v))return "DM";
+    if(/central mid|^cm$/.test(v))return "CM";
+    if(/attacking mid|^am$/.test(v))return "AM";
+    if(/right mid|^rm$/.test(v))return "RM";
+    if(/left mid|^lm$/.test(v))return "LM";
+    if(/right wing|^rw$/.test(v))return "RW";
+    if(/left wing|^lw$/.test(v))return "LW";
+    if(/striker|centre forward|center forward|^st$|^cf$/.test(v))return "ST";
+    if(/forward|^fw$/.test(v))return "FW";
+    return null;
   };
 
-  function pickForSlot(slotRole){
-    const isGKSlot=slotRole==="GK";
-    const eligible=remaining.filter(player=>isGKSlot?isGoalkeeper(player):!isGoalkeeper(player));
-    if(!eligible.length)return null;
+  const compatible={
+    GK:["GK"],
+    RB:["RB","RWB"],
+    LB:["LB","LWB"],
+    CB:["CB"],
+    RWB:["RWB","RB"],
+    LWB:["LWB","LB"],
+    DM:["DM","CM"],
+    CM:["CM","DM","AM"],
+    AM:["AM","CM","DM"],
+    RM:["RM","RW"],
+    LM:["LM","LW"],
+    RW:["RW","RM","LW"],
+    LW:["LW","LM","RW"],
+    ST:["ST","CF","FW"],
+    FW:["FW","ST","CF"]
+  };
 
-    const desired=aliases[slotRole]||[slotRole];
-    let index=remaining.findIndex(player=>{
-      if(isGKSlot)return isGoalkeeper(player);
-      return !isGoalkeeper(player)&&desired.includes(playerRole(player));
+  const pick=(slotRole)=>{
+    const allowed=compatible[slotRole]||[slotRole];
+    let foundIndex=remaining.findIndex(({player})=>{
+      const position=normalizePosition(player.position||player.player?.position||player.role);
+      return position&&allowed.includes(position);
     });
-    if(index<0)index=remaining.findIndex(player=>isGKSlot?isGoalkeeper(player):!isGoalkeeper(player));
-    if(index<0)return null;
-    return remaining.splice(index,1)[0];
-  }
+    if(foundIndex<0){
+      // Safe compatibility fallback only within the same broad line. This
+      // protects older records that have no exact position while preserving
+      // the fixed slot coordinates.
+      const broad=roleGroup(slotRole);
+      foundIndex=remaining.findIndex(({player})=>roleGroup(player.position||player.player?.position||player.role)===broad);
+    }
+    if(foundIndex<0)return null;
+    return remaining.splice(foundIndex,1)[0]?.player||null;
+  };
 
   return coordinates.map(([x,localY,slotRole])=>{
-    const item=pickForSlot(slotRole);
+    const item=pick(slotRole);
     if(!item)return null;
-    const y=away?100-localY:localY;
     return {
       item,
       slotRole,
       group:roleGroup(item.position||item.player?.position||item.role),
       x,
-      y
+      y:away?100-localY:localY
     };
   }).filter(Boolean);
 }
-
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
