@@ -1454,3 +1454,10 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
   .zedek-lineup-layer .head-to-head-sub-side .zedek-player-identity small{font-size:7px;}
   .zedek-lineup-layer .head-to-head-sub-vs{width:24px;height:24px;font-size:6px;}
 }
+
+
+/* Live stats — compact default feed with expandable full statistics. */
+.match-centre-page .live-stat-feed{display:grid;gap:10px;}
+.match-centre-page .live-stats-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:11px;background:var(--cream-2);color:var(--ink);font:inherit;font-size:11px;font-weight:900;cursor:pointer;}
+.match-centre-page .live-stats-toggle b{color:var(--gold);font-size:13px;line-height:1;}
+.match-centre-page .live-stats-toggle:hover{background:var(--gold-soft);border-color:var(--gold-soft);}
