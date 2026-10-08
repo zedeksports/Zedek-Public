@@ -354,6 +354,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     const player=item.player||{};
     const playerId=item.player_id||player.id;
     const playerName=player.full_name||"Player";
+    const lineupPlayerName=(()=>{\n      const parts=String(playerName).trim().split(/\\s+/).filter(Boolean);\n      if(parts.length<2)return playerName;\n      const first=parts[0];\n      const last=parts[parts.length-1];\n      return first.slice(0,1).toUpperCase()+". "+last;\n    })();
     const position=item.position||player.position||item.role||"Player";
     const shirtNumber=item.shirt_number??player.shirt_number??"—";
     const captain=item.player_id===lineup?.captain_player_id;
@@ -383,7 +384,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           {sentOff?<b className="zedek-player-card red" title="Sent off">RED</b>:null}
           {cautioned?<b className="zedek-player-card yellow" title="Yellow card">YC</b>:null}
         </span>
-        <span className="zedek-player-identity"><strong>{playerName}</strong><small>{position}</small></span>
+        <span className="zedek-player-identity"><strong>{lineupPlayerName}</strong><small>{position}</small></span>
         {(goals||assists||yellows||reds||subOut||subIn)?<span className="zedek-player-events" aria-label="Player match events">
           {goals>0?<i title="Goals">⚽{goals>1?goals:""}</i>:null}
           {assists>0?<i title="Assists">A{assists>1?assists:""}</i>:null}
