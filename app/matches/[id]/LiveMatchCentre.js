@@ -151,26 +151,51 @@ function formationSlots(lineup,away=false){
 
   const remaining=[...starters];
   const assigned=new Set();
-  const playerRole=p=>specificRole(p.position||p.player?.position||p.role)||roleGroup(p.position||p.player?.position||p.role);
-  const broadRole=role=>{
-    if(role==="GK")return "GK";
-    if(["RB","LB","CB","RWB","LWB"].includes(role))return "DEF";
-    if(["DM","CM","AM","RM","LM"].includes(role))return "MID";
-    return "FWD";
-  };
+
+  // FotMob-style assignment: formation slots define visual coordinates.
+  // Prefer a player whose registered position matches the slot, but allow any
+  // available outfield player when the nominal position is unavailable.
+  // Goalkeeper remains the only hard positional restriction.
+  function isGoalkeeper(player){
+    return roleGroup(player.position||player.player?.position||player.role)==="GK";
+  }
+
   const aliases={
-    GK:["GK"],RB:["RB","RWB"],LB:["LB","LWB"],CB:["CB"],RWB:["RWB","RB"],LWB:["LWB","LB"],
-    DM:["DM","CM"],CM:["CM","DM"],AM:["AM","CM"],RM:["RM","RW"],LM:["LM","LW"],
-    RW:["RW","RM"],LW:["LW","LM"],ST:["ST","FW","CF"],FW:["FW","ST","CF"]
+    GK:["GK"],
+    RB:["RB","RWB"],LB:["LB","LWB"],CB:["CB"],
+    RWB:["RWB","RB"],LWB:["LWB","LB"],
+    DM:["DM","CM"],CM:["CM","DM","AM"],AM:["AM","CM","DM"],
+    RM:["RM","RW"],LM:["LM","LW"],
+    RW:["RW","RM","LW"],LW:["LW","LM","RW"],
+    ST:["ST","CF","FW"],FW:["FW","ST","CF"]
   };
+
+  function playerRole(player){
+    return specificRole(player.position||player.player?.position||player.role)
+      || roleGroup(player.position||player.player?.position||player.role);
+  }
+
   function pick(slotRole){
-    const desired=aliases[slotRole]||[slotRole];
-    let index=remaining.findIndex(p=>desired.includes(playerRole(p)));
-    if(index<0){
-      const broad=broadRole(slotRole);
-      index=remaining.findIndex(p=>roleGroup(playerRole(p))===broad);
+    const isGKSlot=slotRole==="GK";
+    const eligible=remaining.filter(player =>
+      isGKSlot ? isGoalkeeper(player) : !isGoalkeeper(player)
+    );
+    if(!eligible.length)return null;
+
+    let index=-1;
+    if(isGKSlot){
+      index=remaining.findIndex(player=>isGoalkeeper(player));
+    }else{
+      const desired=aliases[slotRole]||[slotRole];
+      index=remaining.findIndex(player =>
+        !isGoalkeeper(player) && desired.includes(playerRole(player))
+      );
+      // No exact/compatible position available: use any unused outfield starter.
+      if(index<0){
+        index=remaining.findIndex(player=>!isGoalkeeper(player));
+      }
     }
-    if(index<0)index=remaining.findIndex(p=>!assigned.has(p.id));
+
     if(index<0)return null;
     const player=remaining.splice(index,1)[0];
     assigned.add(player.id);
