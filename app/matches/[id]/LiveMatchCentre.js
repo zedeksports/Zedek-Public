@@ -405,6 +405,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   const [eventsExpanded,setEventsExpanded]=useState(false);
   const [statsExpanded,setStatsExpanded]=useState(false);
+  const [h2hExpanded,setH2hExpanded]=useState(false);
 
   const renderEvents=()=>{
     if(!events.length)return <div className="live-empty">No events recorded yet.</div>;
