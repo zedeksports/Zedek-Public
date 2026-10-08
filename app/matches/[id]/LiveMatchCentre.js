@@ -72,93 +72,156 @@ function specificRole(value){
   return null;
 }
 
-const FORMATION_ROLE_ROWS={
-  "4-4-2":[["GK"],["RB","CB","CB","LB"],["RM","CM","CM","LM"],["ST","ST"]],
-  "4-3-3":[["GK"],["RB","CB","CB","LB"],["CM","CM","CM"],["RW","ST","LW"]],
-  "4-2-3-1":[["GK"],["RB","CB","CB","LB"],["DM","DM"],["RW","AM","LW"],["ST"]],
-  "4-1-4-1":[["GK"],["RB","CB","CB","LB"],["DM"],["RM","CM","CM","LM"],["ST"]],
-  "3-4-3":[["GK"],["CB","CB","CB"],["RM","CM","CM","LM"],["RW","ST","LW"]],
-  "3-5-2":[["GK"],["CB","CB","CB"],["RM","CM","CM","CM","LM"],["ST","ST"]],
-  "3-4-2-1":[["GK"],["CB","CB","CB"],["RM","CM","CM","LM"],["AM","AM"],["ST"]],
-  "5-3-2":[["GK"],["RWB","CB","CB","CB","LWB"],["CM","CM","CM"],["ST","ST"]],
-  "5-4-1":[["GK"],["RWB","CB","CB","CB","LWB"],["RM","CM","CM","LM"],["ST"]],
-  "5-2-3":[["GK"],["RWB","CB","CB","CB","LWB"],["DM","DM"],["RW","ST","LW"]],
-  "4-5-1":[["GK"],["RB","CB","CB","LB"],["RM","CM","DM","CM","LM"],["ST"]]
+const FORMATION_COORDINATES={
+  "4-4-2":[
+    [50,92],
+    [82,78],[58,80],[42,80],[18,78],
+    [82,62],[58,65],[42,65],[18,62],
+    [58,48],[42,48]
+  ],
+  "4-3-3":[
+    [50,92],
+    [82,78],[58,80],[42,80],[18,78],
+    [65,65],[50,68],[35,65],
+    [82,50],[50,46],[18,50]
+  ],
+  "4-2-3-1":[
+    [50,92],
+    [82,78],[58,80],[42,80],[18,78],
+    [60,67],[40,67],
+    [82,54],[50,56],[18,54],
+    [50,44]
+  ],
+  "4-1-4-1":[
+    [50,92],
+    [82,78],[58,80],[42,80],[18,78],
+    [50,69],
+    [82,59],[58,62],[42,62],[18,59],
+    [50,45]
+  ],
+  "3-4-3":[
+    [50,92],
+    [68,80],[50,81],[32,80],
+    [82,63],[58,66],[42,66],[18,63],
+    [82,49],[50,45],[18,49]
+  ],
+  "3-5-2":[
+    [50,92],
+    [68,80],[50,81],[32,80],
+    [86,63],[68,65],[50,67],[32,65],[14,63],
+    [58,47],[42,47]
+  ],
+  "3-4-2-1":[
+    [50,92],
+    [68,80],[50,81],[32,80],
+    [82,63],[58,66],[42,66],[18,63],
+    [62,53],[38,53],
+    [50,44]
+  ],
+  "5-3-2":[
+    [50,92],
+    [90,78],[68,80],[50,81],[32,80],[10,78],
+    [65,64],[50,67],[35,64],
+    [58,47],[42,47]
+  ],
+  "5-4-1":[
+    [50,92],
+    [90,78],[68,80],[50,81],[32,80],[10,78],
+    [82,62],[58,65],[42,65],[18,62],
+    [50,45]
+  ],
+  "5-2-3":[
+    [50,92],
+    [90,78],[68,80],[50,81],[32,80],[10,78],
+    [60,67],[40,67],
+    [82,50],[50,46],[18,50]
+  ],
+  "4-5-1":[
+    [50,92],
+    [82,78],[58,80],[42,80],[18,78],
+    [84,60],[64,64],[50,66],[36,64],[16,60],
+    [50,45]
+  ]
 };
 
-const ROLE_Y={
-  GK:92,
-  DEF:86,
-  WIDE_DEF:84,
-  DM:73,
-  MID:68,
-  WIDE_MID:66,
-  AM:59,
-  WIDE_FWD:56,
-  ST:54
-};
+const FALLBACK_FORMATION_COORDINATES=[
+  [50,92],
+  [82,78],[58,80],[42,80],[18,78],
+  [68,64],[50,67],[32,64],
+  [72,50],[50,46],[28,50]
+];
 
-function roleX(slotRole,index,count){
-  if(slotRole==="GK")return 50;
-  if(slotRole==="RB")return 82;
-  if(slotRole==="LB")return 18;
-  if(slotRole==="RWB")return 90;
-  if(slotRole==="LWB")return 10;
-  if(slotRole==="CB"){
-    if(count===1)return 50;
-    if(count===2)return [42,58][Math.min(index,1)];
-    if(count===3)return [33,50,67][Math.min(index,2)];
-  }
-  if(slotRole==="RW")return 84;
-  if(slotRole==="LW")return 16;
-  if(slotRole==="RM")return 84;
-  if(slotRole==="LM")return 16;
-  if(slotRole==="DM")return count===1?50:[42,58][Math.min(index,1)];
-  if(slotRole==="CM")return count===1?50:[35,50,65][Math.min(index,2)];
-  if(slotRole==="AM")return count===1?50:[40,60][Math.min(index,1)];
-  if(slotRole==="ST")return count===1?50:[42,58][Math.min(index,1)];
-  return count<=1?50:Number((50+((index-(count-1)/2)*18)).toFixed(2));
+function formationNumbers(value){
+  const nums=String(value||"").replace(/\s+/g,"").match(/\d+/g)||[];
+  return nums.map(Number).filter(Boolean);
 }
 
-function roleY(slotRole){
-  if(slotRole==="GK")return ROLE_Y.GK;
-  if(["RB","LB","CB"].includes(slotRole))return ROLE_Y.DEF;
-  if(["RWB","LWB"].includes(slotRole))return ROLE_Y.WIDE_DEF;
-  if(slotRole==="DM")return ROLE_Y.DM;
-  if(slotRole==="CM")return ROLE_Y.MID;
-  if(["RM","LM"].includes(slotRole))return ROLE_Y.WIDE_MID;
-  if(slotRole==="AM")return ROLE_Y.AM;
-  if(["RW","LW"].includes(slotRole))return ROLE_Y.WIDE_FWD;
-  if(slotRole==="ST")return ROLE_Y.ST;
-  return 62;
+function roleGroup(value){
+  const v=String(value||"").toLowerCase();
+  if(/goal|keeper|\bgk\b/.test(v))return "GK";
+  if(/def|back|\b(cb|lb|rb|lwb|rwb)\b/.test(v))return "DEF";
+  if(/mid|\b(dm|cm|am|lm|rm)\b/.test(v))return "MID";
+  if(/forward|striker|attack|wing|\b(fw|lw|rw|cf|st)\b/.test(v))return "FWD";
+  return "OTHER";
 }
 
+function specificRole(value){
+  const v=String(value||"").toLowerCase().trim();
+  if(/goal|keeper|^gk$/.test(v))return "GK";
+  if(/right wing.?back|^rwb$/.test(v))return "RWB";
+  if(/left wing.?back|^lwb$/.test(v))return "LWB";
+  if(/right back|^rb$/.test(v))return "RB";
+  if(/left back|^lb$/.test(v))return "LB";
+  if(/centre.?back|center.?back|^cb$/.test(v))return "CB";
+  if(/defensive mid|^dm$/.test(v))return "DM";
+  if(/central mid|^cm$/.test(v))return "CM";
+  if(/attacking mid|^am$/.test(v))return "AM";
+  if(/right mid|^rm$/.test(v))return "RM";
+  if(/left mid|^lm$/.test(v))return "LM";
+  if(/right wing|^rw$/.test(v))return "RW";
+  if(/left wing|^lw$/.test(v))return "LW";
+  if(/striker|centre forward|center forward|^st$|^cf$/.test(v))return "ST";
+  if(/forward|^fw$/.test(v))return "FW";
+  return null;
+}
+
+/*
+ * FotMob-style lineup architecture:
+ * - The pitch is a single normalized 0..100 coordinate system.
+ * - Each formation owns its 11 positional slots.
+ * - Player assignment chooses the best positional match for each slot,
+ *   but the slot coordinate never moves because of the player's name,
+ *   number, image or text width.
+ * - Away coordinates are mirrored vertically around the centre line.
+ * This keeps the tactical geometry stable across mobile/tablet/desktop.
+ */
 function formationSlots(lineup,away=false){
   const starters=Array.isArray(lineup?.starters)?lineup.starters.slice(0,11):[];
   if(!starters.length)return [];
 
   const formation=String(lineup?.formation||"").replace(/\s+/g,"");
-  let roleRows=FORMATION_ROLE_ROWS[formation];
-  if(!roleRows){
+  let coordinates=FORMATION_COORDINATES[formation];
+
+  if(!coordinates){
     const nums=formationNumbers(formation);
     if(nums.length>=2&&nums.length<=5&&nums.reduce((a,b)=>a+b,0)===10){
-      roleRows=[["GK"],...nums.map((count,index)=>Array.from({length:count},()=>index===nums.length-1?"FWD":"MID"))];
-      roleRows[1]=Array.from({length:nums[0]},()=> "DEF");
-    } else {
-      roleRows=[["GK"],["DEF","DEF","DEF","DEF"],["MID","MID","MID"],["FWD","FWD","FWD"]];
+      const rows=[["GK"],...nums.map((count,index)=>Array.from({length:count},()=>index===nums.length-1?"FWD":index===0?"DEF":"MID"))];
+      const dynamic=[[50,92]];
+      const rowGap=44/(rows.length-1);
+      rows.slice(1).forEach((row,rowIndex)=>{
+        const y=78-(rowIndex*rowGap);
+        row.forEach((_,i)=>{
+          const x=row.length===1?50:12+(76*i/(row.length-1));
+          dynamic.push([Number(x.toFixed(2)),Number(y.toFixed(2))]);
+        });
+      });
+      coordinates=dynamic.length===11?dynamic:FALLBACK_FORMATION_COORDINATES;
+    }else{
+      coordinates=FALLBACK_FORMATION_COORDINATES;
     }
   }
 
   const remaining=[...starters];
-  const assigned=new Set();
-
-  // FotMob-style assignment: formation slots define visual coordinates.
-  // Prefer a player whose registered position matches the slot, but allow any
-  // available outfield player when the nominal position is unavailable.
-  // Goalkeeper remains the only hard positional restriction.
-  function isGoalkeeper(player){
-    return roleGroup(player.position||player.player?.position||player.role)==="GK";
-  }
 
   const aliases={
     GK:["GK"],
@@ -175,50 +238,43 @@ function formationSlots(lineup,away=false){
       || roleGroup(player.position||player.player?.position||player.role);
   }
 
-  function pick(slotRole){
-    const isGKSlot=slotRole==="GK";
-    const eligible=remaining.filter(player =>
-      isGKSlot ? isGoalkeeper(player) : !isGoalkeeper(player)
-    );
+  function isGoalkeeper(player){
+    return roleGroup(player.position||player.player?.position||player.role)==="GK";
+  }
+
+  function pickForSlot(slotIndex){
+    const [x,y]=coordinates[slotIndex]||[50,50];
+    const isGKSlot=slotIndex===0;
+    const eligible=remaining.filter(player=>isGKSlot?isGoalkeeper(player):!isGoalkeeper(player));
     if(!eligible.length)return null;
 
     let index=-1;
     if(isGKSlot){
-      index=remaining.findIndex(player=>isGoalkeeper(player));
+      index=remaining.findIndex(isGoalkeeper);
     }else{
-      const desired=aliases[slotRole]||[slotRole];
-      index=remaining.findIndex(player =>
-        !isGoalkeeper(player) && desired.includes(playerRole(player))
+      const rowStarts=coordinates.map((_,i)=>i);
+      const desired=slotIndex===0?["GK"]:(
+        slotIndex===1||slotIndex===2||slotIndex===3||slotIndex===4?["RB","RWB","LB","LWB","CB","DEF"]:
+        slotIndex>=9?["ST","CF","FW","RW","LW","FWD"]:
+        ["DM","CM","AM","RM","LM","MID"]
       );
-      // No exact/compatible position available: use any unused outfield starter.
-      if(index<0){
-        index=remaining.findIndex(player=>!isGoalkeeper(player));
-      }
+      index=remaining.findIndex(player=>!isGoalkeeper(player)&&desired.includes(playerRole(player)));
+      if(index<0)index=remaining.findIndex(player=>!isGoalkeeper(player));
     }
 
     if(index<0)return null;
-    const player=remaining.splice(index,1)[0];
-    assigned.add(player.id);
-    return player;
+    return remaining.splice(index,1)[0];
   }
 
-  const slots=[];
-  roleRows.forEach(row=>{
-    const counts={};
-    row.forEach(role=>{counts[role]=(counts[role]||0)+1});
-    const indexes={};
-    row.forEach(slotRole=>{
-      const index=indexes[slotRole]||0;
-      indexes[slotRole]=index+1;
-      const item=pick(slotRole);
-      if(!item)return;
-      const localY=roleY(slotRole);
-      const y=away?100-localY:localY;
-      slots.push({item,slotRole,group:roleGroup(item.position||item.player?.position||item.role),x:roleX(slotRole,index,counts[slotRole]),y});
-    });
-  });
-  return slots;
+  return coordinates.map((coord,index)=>{
+    const item=pickForSlot(index);
+    if(!item)return null;
+    const x=coord[0];
+    const y=away?100-coord[1]:coord[1];
+    return {item,slotRole:playerRole(item),group:roleGroup(item.position||item.player?.position||item.role),x,y};
+  }).filter(Boolean);
 }
+
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
