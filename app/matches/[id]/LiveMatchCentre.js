@@ -331,8 +331,8 @@ function formationSlots(lineup,away=false){
     // Open up the vertical bands so the lines read as a formation rather
     // than a tight cluster, while keeping both teams on their own half.
     if(slotRole==="GK"){
-      // Set the goalkeeper a little deeper toward the goal, opening a clearer gap from the centre-backs.
-      homeY=96;
+      // Anchor the goalkeeper deeper inside the six-yard-box area for a more natural FotMob-style formation.
+      homeY=98;
     }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
       homeY=83+(localY-78)*0.7;
     }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
