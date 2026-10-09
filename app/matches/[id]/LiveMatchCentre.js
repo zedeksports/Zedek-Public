@@ -340,8 +340,11 @@ function formationSlots(lineup,away=false){
       homeY=66.5+(localY-59)*0.7;
     }else{
       homeY=58+(localY-44)*0.7;
+      // Push the striker a little closer to the halfway line for a more
+      // natural attacking position without disturbing the other forwards.
+      if(slotRole==="ST")homeY-=2.5;
     }
-    homeY=Math.max(57,Math.min(93,homeY));
+    homeY=Math.max(54.5,Math.min(93,homeY));
     // Give neighbouring cards more horizontal breathing room. Clamp the
     // outer slots so player cards stay inside the touch-screen pitch edges.
     const horizontalSpread=["DM","CM","AM","RM","LM","MID"].includes(slotRole)?1.32:slotRole==="CB"?1.22:1.12;
