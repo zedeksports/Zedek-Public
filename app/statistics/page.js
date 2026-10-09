@@ -21,7 +21,7 @@ export default async function StatisticsPage({ searchParams }) {
     ? requestedCompetition
     : (competitions?.[0]?.id || "");
   const selectedCompetitionName = competitions?.find(c => c.id === selectedCompetition)?.name || "All competitions";
-  const error = competitionError || officialError || eventError;
+  const error = competitionError || (officialError && eventError ? officialError : null);
   const belongsToCompetition = row => !selectedCompetition || row?.season?.competition?.id === selectedCompetition;
 
   const grouped = new Map();
@@ -43,7 +43,7 @@ export default async function StatisticsPage({ searchParams }) {
     return row;
   };
 
-  if (!error && official?.some(belongsToCompetition)) {
+  if (!competitionError && !officialError && official?.some(belongsToCompetition)) {
     for (const x of official.filter(belongsToCompetition)) {
       const row = ensure(x.player_id, x.player, x.team);
       if (!row) continue;
@@ -54,7 +54,7 @@ export default async function StatisticsPage({ searchParams }) {
       row.red += number(x.red_cards);
       row.minutes += number(x.minutes_played);
     }
-  } else if (!error) {
+  } else if (!competitionError && !eventError) {
     for (const e of (events || []).filter(x => x.match?.status === "verified" && (!selectedCompetition || x.match?.season?.competition?.id === selectedCompetition))) {
       if (e.event_type !== "own_goal") {
         const row = ensure(e.player_id, e.player, e.team);
