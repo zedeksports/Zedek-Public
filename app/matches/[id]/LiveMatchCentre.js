@@ -165,6 +165,52 @@ const FORMATION_COORDINATES={
   ]
 };
 
+
+function generatedFormationCoordinates(formation){
+  // Support any valid 10-outfield-player formation selected in Control Room,
+  // not only the curated formations above. Each row has its own evenly
+  // distributed fixed slots, so player cards cannot collapse into a cluster.
+  const parsed=formationNumbers(formation);
+  const rows=parsed.length && parsed.reduce((sum,n)=>sum+n,0)===10 && parsed.every(n=>n>0)
+    ? parsed
+    : [4,3,3];
+  const slots=[[50,92,"GK"]];
+  const rowCount=rows.length;
+  rows.forEach((count,rowIndex)=>{
+    const xPositions=Array.from({length:count},(_,i)=>((i+1)*100)/(count+1));
+    const isDefence=rowIndex===0;
+    const isAttack=rowIndex===rowCount-1;
+    const roles=xPositions.map((x,i)=>{
+      if(isDefence){
+        if(count>=5 && i===0)return "LWB";
+        if(count>=5 && i===count-1)return "RWB";
+        if(i===0)return "LB";
+        if(i===count-1)return "RB";
+        return "CB";
+      }
+      if(isAttack){
+        if(count===1)return "ST";
+        if(i===0)return "LW";
+        if(i===count-1)return "RW";
+        return "ST";
+      }
+      if(count>=4){
+        if(i===0)return "LM";
+        if(i===count-1)return "RM";
+        return i===Math.floor(count/2)?"DM":"CM";
+      }
+      if(count===2)return "DM";
+      if(count===3)return i===1?"CM":(i===0?"LM":"RM");
+      return "CM";
+    });
+    // Values are normalized later into dedicated defence/midfield/forward
+    // bands; distinct values preserve row spacing across formations.
+    const localY=isDefence?80:isAttack?47:(rowCount===2?63:67-rowIndex*2);
+    xPositions.forEach((x,i)=>slots.push([x,localY,roles[i]]));
+  });
+  return slots;
+}
+
 const FALLBACK_FORMATION_COORDINATES=[
   [50,92,"GK"],
   [82,78,"DEF"],[58,80,"DEF"],[42,80,"DEF"],[18,78,"DEF"],
@@ -201,7 +247,7 @@ function formationSlots(lineup,away=false){
   const formation=String(lineup?.formation||"").replace(/\s+/g,"");
   // Keep the pitch populated even when Control Room submits a valid but
   // not-yet-mapped formation. The fallback still uses 11 fixed slots.
-  const coordinates=FORMATION_COORDINATES[formation]||FALLBACK_FORMATION_COORDINATES;
+  const coordinates=FORMATION_COORDINATES[formation]||generatedFormationCoordinates(formation);
 
   const remaining=starters.map((player,index)=>({player,index}));
 
@@ -257,7 +303,11 @@ function formationSlots(lineup,away=false){
       const broad=roleGroup(slotRole);
       foundIndex=remaining.findIndex(({player})=>roleGroup(player.position||player.player?.position||player.role)===broad);
     }
-    if(foundIndex<0)return null;
+    if(foundIndex<0){
+      // Every formation slot remains occupied and fixed even when legacy
+      // player records have missing or mismatched position labels.
+      foundIndex=0;
+    }
     return remaining.splice(foundIndex,1)[0]?.player||null;
   };
 
@@ -285,7 +335,9 @@ function formationSlots(lineup,away=false){
     }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
       homeY=83+(localY-78)*0.7;
     }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
-      homeY=70+(localY-59)*0.75;
+      // Lift midfield slightly closer to the attacking half while retaining
+      // a clear gap from the defensive line across every formation.
+      homeY=66.5+(localY-59)*0.7;
     }else{
       homeY=58+(localY-44)*0.7;
     }
