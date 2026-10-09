@@ -364,6 +364,12 @@ function formationSlots(lineup,away=false){
 function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
+ // Control Room now persists submitted ratings on match_lineup_players.rating.
+ // Prefer that canonical value so the public lineup reflects the actual reporter/admin rating.
+ if(item.rating!==null&&item.rating!==undefined&&String(item.rating).trim()!==""){
+   const stored=Number(item.rating);
+   if(Number.isFinite(stored))return Math.max(0,Math.min(10,Number(stored.toFixed(1))));
+ }
  let rating=6.0; const pid=item.player_id||item.player?.id;
  const manual=events.filter(e=>e.event_type==="player_rating"&&e.player_id===pid).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0)).at(-1);
  if(manual){const matchRating=String(manual.details||"").match(/rating\s*:\s*(\d+(?:\.\d+)?)/i);if(matchRating){const value=Number(matchRating[1]);if(Number.isFinite(value))return Math.max(0,Math.min(10,Number(value.toFixed(1))));}}
@@ -373,6 +379,13 @@ function ratingForPlayer(item,events,match,teamId,stats){
  const group=roleGroup(item.position||item.player?.position||item.role);
  if(group==="GK"&&stats){const saves=teamId===match.home_team_id?Number(stats.home_saves??0):Number(stats.away_saves??0);rating+=Math.min(saves*.12,1.2)}
  return Math.max(0,Math.min(10,Number(rating.toFixed(1))));
+}
+function ratingBand(value){
+ const rating=Number(value);
+ if(!Number.isFinite(rating)||rating<5)return "poor";
+ if(rating<6.5)return "average";
+ if(rating<7.5)return "good";
+ return "excellent";
 }
 function eventLabel(type) {
   return String(type || "event").replaceAll("_"," ");
@@ -396,7 +409,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         s.from("match_events").select("id,event_type,team_id,player_id,secondary_player_id,coach_id,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(id,full_name,shirt_number,photo_url),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number,photo_url),coach:coaches!match_events_coach_id_fkey(id,full_name,role,photo_url),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
         s.from("team_coaches").select("team_id,coach_id,role,coach:coaches(id,full_name,role,photo_url)").eq("is_current",true).eq("role","Head Coach"),
-        s.from("match_lineups").select("id,team_id,coach_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),coach:coaches(id,full_name,role,photo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
+        s.from("match_lineups").select("id,team_id,coach_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),coach:coaches(id,full_name,role,photo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,rating,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
         s.from("match_previews").select("id,match_id,headline,summary,key_storylines,form_note,h2h_note,venue_note,status,published_at,updated_at").eq("match_id",initialMatch.id).eq("status","published").maybeSingle(),
         s.from("match_channels").select("id,match_id,channel_type,name,provider,url,is_primary,active,starts_at,ends_at,updated_at").eq("match_id",initialMatch.id).eq("active",true).order("is_primary",{ascending:false}).order("updated_at",{ascending:false}),
         s.from("match_stream_ads").select("id,match_id,ad_slot_id,position,active,ad_slot:ad_slots(id,name,placement,format,image_url,target_url,active,sponsor:sponsors(id,name,logo_url,website_url))").eq("match_id",initialMatch.id).eq("active",true).order("priority").order("created_at",{ascending:false})
@@ -561,7 +574,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         <span className="zedek-player-avatar">
           <b className="zedek-player-number">{shirtNumber}</b>
           {player.photo_url?<img src={player.photo_url} alt={playerName}/>:<span aria-hidden="true">{playerName.slice(0,1).toUpperCase()}</span>}
-          <b className="zedek-player-rating">{rating.toFixed(1)}</b>
+          <b className={"zedek-player-rating "+ratingBand(rating)} aria-label={"Player rating "+rating.toFixed(1)+" out of 10"}>{rating.toFixed(1)}</b>
           {captain?<b className="zedek-player-captain" title="Team captain">C</b>:null}
           {cautioned?<b className="zedek-player-card yellow" title="Yellow card">YC</b>:null}
           {sentOff?<b className="zedek-player-card red" title="Sent off">RED</b>:null}
