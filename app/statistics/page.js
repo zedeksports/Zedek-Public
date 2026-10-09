@@ -70,7 +70,7 @@ export default async function StatisticsPage({ searchParams }) {
   }
 
   const rows = [...grouped.values()].sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name));
-  const top = rows.slice(0, 10);
+  const top = view === "players" ? rows : rows.slice(0, 10);
   const totalGoals = rows.reduce((n, x) => n + x.goals, 0);
   const totalAssists = rows.reduce((n, x) => n + x.assists, 0);
 
@@ -87,7 +87,7 @@ export default async function StatisticsPage({ searchParams }) {
       </form>
       <div className="explore-statbar"><div><b>{rows.length}</b><span>Players tracked</span></div><div><b>{totalGoals}</b><span>Goals</span></div><div><b>{totalAssists}</b><span>Assists</span></div></div>
       <div className="explore-filter"><a className="explore-card" href={"/statistics?view=scorers&competition="+encodeURIComponent(selectedCompetition)}>Top Scorers</a><a className="explore-card" href={"/statistics?view=players&competition="+encodeURIComponent(selectedCompetition)}>Player Stats</a></div>
-      {error ? <EmptyState>{error.message}</EmptyState> : rows.length ? <section className="explore-section"><span className="explore-section-kicker">{selectedCompetitionName.toUpperCase()}</span><h2>{view === "players" ? "Player statistics" : "Top 10 scorers"}</h2>{top.map((r, i) => <a className="explore-rank" href={"/players/" + r.id} key={r.id}><span className="explore-rank-num">{i + 1}</span><div className="explore-rank-main"><strong>{r.name}</strong><span>{r.team} · {r.position || "Player"} · {r.goals} goals · {r.assists} assists{view === "players" ? " · " + r.yellow + "Y · " + r.red + "R" : ""}</span></div><span className="explore-rank-value">{r.goals}</span></a>)}</section> : <EmptyState>No player statistics are available for {selectedCompetitionName} yet.</EmptyState>}
+      {error ? <EmptyState>{error.message}</EmptyState> : rows.length ? <section className="explore-section"><span className="explore-section-kicker">{selectedCompetitionName.toUpperCase()}</span><h2>{view === "players" ? "Player statistics" : "Top 10 scorers"}</h2>{top.map((r, i) => <a className="explore-rank" href={"/players/" + r.id} key={r.id}><span className="explore-rank-num">{i + 1}</span><div className="explore-rank-main"><strong>{r.name}</strong><span>{r.team} · {r.position || "Player"} · {r.goals} goals · {r.assists} assists{view === "players" ? " · " + r.matches + " matches · " + r.minutes + " mins · " + r.yellow + "Y · " + r.red + "R" : ""}</span></div><span className="explore-rank-value">{r.goals}</span></a>)}</section> : <EmptyState>No player statistics are available for {selectedCompetitionName} yet.</EmptyState>}
     </section>
   </ExplorePage>;
 }
