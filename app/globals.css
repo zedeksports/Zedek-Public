@@ -1497,3 +1497,17 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 .zedek-lineup-coach-card.away{text-align:right;}
 .zedek-lineup-coach-card.home{text-align:left;}
 @media(max-width:520px){.zedek-lineup-coach-card{grid-template-columns:34px minmax(0,1fr);padding:8px;column-gap:7px}.zedek-lineup-coach-portrait,.zedek-lineup-coach-portrait-fallback{width:34px;height:34px;}}
+
+/* FLOW controls: inherit theme tokens so selectors and sound controls remain legible in day and night modes. */
+.statistics-competition-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px;margin-bottom:14px;color:var(--ink);background:var(--cream-2);border:1px solid var(--line);border-radius:14px;}
+.statistics-competition-picker label{font-weight:800;font-size:12px;}
+.statistics-competition-picker select{flex:1;min-width:180px;max-width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--cream);color:var(--ink);}
+.statistics-competition-picker button,.hub-custom-sound button{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--ink);color:var(--cream-2);font-weight:800;cursor:pointer;}
+.hub-custom-sound{display:grid;gap:8px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--cream);color:var(--ink);}
+.hub-custom-sound label{display:grid;gap:8px;font-weight:800;}
+.hub-custom-sound input[type=file]{max-width:100%;color:var(--ink);}
+.hub-custom-sound small,.hub-custom-sound p{margin:0;color:var(--muted);font-size:12px;line-height:1.5;}
+.hub-custom-sound>div{display:flex;gap:8px;flex-wrap:wrap;}
+.hub-custom-sound button:disabled{opacity:.45;cursor:not-allowed;}
+html[data-zedek-theme="night"] .statistics-competition-picker,html[data-zedek-theme="night"] .hub-custom-sound{background:var(--cream-2);color:var(--ink);}
+html[data-zedek-theme="night"] .statistics-competition-picker select{background:var(--cream);color:var(--ink);}
