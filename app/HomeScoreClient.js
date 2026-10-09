@@ -116,7 +116,7 @@ export default function HomeScoreClient({ initialData }) {
         <div className="container">
           <div className="oti-home-identity-inner">
             <div>
-              <span className="oti-home-kicker"><i className="oti-live-pip" /> OTI FOOTBALL NETWORK</span>
+              <span className="oti-home-kicker"><i className="oti-live-pip" /> ZEDEK FOOTBALL NETWORK 🇬🇭</span>
               <h1>GRASS ROOT FOOTBALL.<br /><em>WHERE YOU GROW.</em></h1>
               <p>Live scores, fixtures, results, stories and the people behind the game — all from the grassroots pitches of Oti.</p>
             </div>

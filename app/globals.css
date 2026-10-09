@@ -1485,3 +1485,132 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 
 /* Bronze batch: two-sided, team-mapped live event timeline with player thumbnails. */
 .match-centre-page .live-event.home{grid-template-columns:minmax(0,1fr) 32px 42px;text-align:left}.match-centre-page .live-event.away{grid-template-columns:42px 32px minmax(0,1fr);text-align:right}.match-centre-page .live-event.neutral{grid-template-columns:42px 32px minmax(0,1fr)}.match-centre-page .live-event-person{min-width:0;display:flex;align-items:center;gap:8px}.match-centre-page .live-event.home .live-event-person{justify-content:flex-start}.match-centre-page .live-event.away .live-event-person{justify-content:flex-end;flex-direction:row-reverse}.match-centre-page .live-event-person>img,.match-centre-page .live-event-person>span{width:34px;height:34px;flex:0 0 34px;border-radius:50%;object-fit:cover;background:#f0ece2;display:grid;place-items:center;font-size:12px;font-weight:900}.match-centre-page .live-event-person>div{display:grid;gap:3px;min-width:0}.match-centre-page .live-event-person strong,.match-centre-page .live-event-person small{overflow-wrap:anywhere}.match-centre-page .live-event-side{font-size:8px;font-weight:950;letter-spacing:.1em;color:var(--gold)}.match-centre-page .live-event.home>b{text-align:right}.match-centre-page .live-event.away .live-event-person>div{text-align:right}.match-centre-page .live-event-icon{display:grid;place-items:center}.match-centre-page .zedek-player-events i{white-space:nowrap}
+
+/* FLOW: portraits are contained inside their circular event frame so heads are not clipped by the white mask. */
+.match-centre-page .live-event-person>img.live-event-portrait{object-fit:contain;object-position:center center;padding:1px;overflow:hidden;border-radius:50%;background:#f0ece2;}
+.match-centre-page .live-event-person>img.live-event-portrait.coach{object-fit:contain;object-position:center center;padding:1px;}
+.match-centre-page .live-event-person>.live-event-portrait-fallback{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;background:#f0ece2;font-size:12px;font-weight:900;}
+.zedek-lineup-coach-card{grid-template-columns:42px minmax(0,1fr);align-items:center;column-gap:9px;}
+.zedek-lineup-coach-card>span:not(.zedek-lineup-coach-portrait-fallback),.zedek-lineup-coach-card>strong,.zedek-lineup-coach-card>small{grid-column:2;}
+.zedek-lineup-coach-portrait,.zedek-lineup-coach-portrait-fallback{grid-column:1;grid-row:1 / span 3;width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:contain;object-position:center center;background:#f0ece2;overflow:hidden;}
+.zedek-lineup-coach-portrait-fallback{display:grid;place-items:center;font-weight:900;color:var(--ink);}
+.zedek-lineup-coach-card.away{text-align:right;}
+.zedek-lineup-coach-card.home{text-align:left;}
+@media(max-width:520px){.zedek-lineup-coach-card{grid-template-columns:34px minmax(0,1fr);padding:8px;column-gap:7px}.zedek-lineup-coach-portrait,.zedek-lineup-coach-portrait-fallback{width:34px;height:34px;}}
+
+/* FLOW controls: inherit theme tokens so selectors and sound controls remain legible in day and night modes. */
+.statistics-competition-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px;margin-bottom:14px;color:var(--ink);background:var(--cream-2);border:1px solid var(--line);border-radius:14px;}
+.statistics-competition-picker label{font-weight:800;font-size:12px;}
+.statistics-competition-picker select{flex:1;min-width:180px;max-width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--cream);color:var(--ink);}
+.statistics-competition-picker button,.hub-custom-sound button{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--ink);color:var(--cream-2);font-weight:800;cursor:pointer;}
+.hub-custom-sound{display:grid;gap:8px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--cream);color:var(--ink);}
+.hub-custom-sound label{display:grid;gap:8px;font-weight:800;}
+.hub-custom-sound input[type=file]{max-width:100%;color:var(--ink);}
+.hub-custom-sound small,.hub-custom-sound p{margin:0;color:var(--muted);font-size:12px;line-height:1.5;}
+.hub-custom-sound>div{display:flex;gap:8px;flex-wrap:wrap;}
+.hub-custom-sound button:disabled{opacity:.45;cursor:not-allowed;}
+html[data-zedek-theme="night"] .statistics-competition-picker,html[data-zedek-theme="night"] .hub-custom-sound{background:var(--cream-2);color:var(--ink);}
+html[data-zedek-theme="night"] .statistics-competition-picker select{background:var(--cream);color:var(--ink);}
+
+/* FLOW theme audit: keep nested menus, match-centre layers, form controls and transfer surfaces on shared theme tokens. */
+html[data-zedek-theme="night"] .zedek-drawer,html[data-zedek-theme="night"] .drawer-account-menu,html[data-zedek-theme="night"] .zedek-drawer-head,html[data-zedek-theme="night"] .drawer-section,html[data-zedek-theme="night"] .settings-hub-nav,html[data-zedek-theme="night"] .settings-hub-content,html[data-zedek-theme="night"] .hub-setting-card,html[data-zedek-theme="night"] .live-centre-panel,html[data-zedek-theme="night"] .live-centre-content,html[data-zedek-theme="night"] .live-event,html[data-zedek-theme="night"] .live-stats-content,html[data-zedek-theme="night"] .zedek-lineup-layer,html[data-zedek-theme="night"] .zedek-lineup-coach-card,html[data-zedek-theme="night"] .head-to-head-bench,html[data-zedek-theme="night"] .transfer-detail-card,html[data-zedek-theme="night"] .transfer-detail-inner,html[data-zedek-theme="night"] .transfer-season-bar,html[data-zedek-theme="night"] .transfer-profile-page .team-transfer-card,html[data-zedek-theme="night"] .modal-layer,html[data-zedek-theme="night"] .dialog-panel,html[data-zedek-theme="night"] .dropdown-menu,html[data-zedek-theme="night"] .popover-panel{background:var(--z-surface,var(--cream-2))!important;color:var(--z-text,var(--ink))!important;border-color:var(--z-line,var(--line))!important;}
+html[data-zedek-theme="night"] .live-centre-panel p,html[data-zedek-theme="night"] .live-centre-panel small,html[data-zedek-theme="night"] .live-event small,html[data-zedek-theme="night"] .zedek-lineup-coach-card small,html[data-zedek-theme="night"] .transfer-detail-inner small,html[data-zedek-theme="night"] .settings-hub-content small{color:var(--z-muted,var(--muted));}
+html[data-zedek-theme="night"] input,html[data-zedek-theme="night"] select,html[data-zedek-theme="night"] textarea{color:var(--z-text,var(--ink));border-color:var(--z-line,var(--line));}
+html[data-zedek-theme="night"] .settings-hub-content input,html[data-zedek-theme="night"] .settings-hub-content select,html[data-zedek-theme="night"] .settings-hub-content textarea,html[data-zedek-theme="night"] .transfer-profile-page input,html[data-zedek-theme="night"] .transfer-profile-page select{background:var(--z-surface-2,var(--cream));color:var(--z-text,var(--ink));}
+html[data-zedek-theme="night"] .live-event-icon,html[data-zedek-theme="night"] .zedek-lineup-coach-portrait-fallback{color:var(--z-text,var(--ink));}
+html[data-zedek-theme="night"] .live-event-person>img,html[data-zedek-theme="night"] .live-event-person>span,html[data-zedek-theme="night"] .zedek-lineup-coach-portrait,html[data-zedek-theme="night"] .zedek-lineup-coach-portrait-fallback{background:var(--z-surface-2,var(--cream));}
+
+
+/* FLOW theme audit follow-up: bring legacy page panels and nested settings controls into the shared day/night palette. */
+html[data-zedek-theme="night"] .page-hero,
+html[data-zedek-theme="night"] .competition-hero,
+html[data-zedek-theme="night"] .competition-detail,
+html[data-zedek-theme="night"] .detail-section,
+html[data-zedek-theme="night"] .team-panel,
+html[data-zedek-theme="night"] .team-profile-card,
+html[data-zedek-theme="night"] .player-profile-card,
+html[data-zedek-theme="night"] .coach-profile-card,
+html[data-zedek-theme="night"] .intelligence-metrics>div,
+html[data-zedek-theme="night"] .metric-list,
+html[data-zedek-theme="night"] .competition-overview-stats>div,
+html[data-zedek-theme="night"] .competition-season-bar,
+html[data-zedek-theme="night"] .competition-quick-links button,
+html[data-zedek-theme="night"] .embedded-note,
+html[data-zedek-theme="night"] .embedded-stat-list,
+html[data-zedek-theme="night"] .embedded-player-table,
+html[data-zedek-theme="night"] .form-table,
+html[data-zedek-theme="night"] .team-transfer-logo,
+html[data-zedek-theme="night"] .transfer-detail-team,
+html[data-zedek-theme="night"] .transfer-detail-player,
+html[data-zedek-theme="night"] .transfer-detail-info>div,
+html[data-zedek-theme="night"] .transfer-detail-notes,
+html[data-zedek-theme="night"] .hub-toggle,
+html[data-zedek-theme="night"] .hub-form-grid label,
+html[data-zedek-theme="night"] .hub-alert-tools,
+html[data-zedek-theme="night"] .hub-save {
+  background:var(--z-surface,var(--cream-2))!important;
+  color:var(--z-text,var(--ink))!important;
+  border-color:var(--z-line,var(--line))!important;
+}
+html[data-zedek-theme="night"] .page-hero p,
+html[data-zedek-theme="night"] .competition-hero p,
+html[data-zedek-theme="night"] .team-panel p,
+html[data-zedek-theme="night"] .embedded-note,
+html[data-zedek-theme="night"] .transfer-detail-info span,
+html[data-zedek-theme="night"] .transfer-detail-notes p,
+html[data-zedek-theme="night"] .hub-toggle small,
+html[data-zedek-theme="night"] .hub-card-heading small,
+html[data-zedek-theme="night"] .hub-card-heading p {
+  color:var(--z-muted,var(--muted))!important;
+}
+html[data-zedek-theme="night"] .competition-match,
+html[data-zedek-theme="night"] .embedded-stat-row,
+html[data-zedek-theme="night"] .embedded-player-table>a,
+html[data-zedek-theme="night"] .form-table>div,
+html[data-zedek-theme="night"] .transfer-detail-info>div,
+html[data-zedek-theme="night"] .hub-toggle {
+  border-color:var(--z-line,var(--line))!important;
+}
+html[data-zedek-theme="night"] .competition-quick-links button,
+html[data-zedek-theme="night"] .hub-save {
+  background:var(--ink)!important;
+  color:var(--cream-2)!important;
+}
+
+/* FLOW portrait alignment: keep event portraits fully inside their circular frames, independent of legacy cover rules. */
+.match-centre-page .live-event-person>img.live-event-portrait{width:38px;height:38px;min-width:38px;flex:0 0 38px;object-fit:contain!important;object-position:center center!important;padding:0!important;display:block;align-self:center;overflow:hidden;border-radius:50%;}
+.match-centre-page .live-event-person>.live-event-portrait-fallback{width:38px;height:38px;min-width:38px;flex:0 0 38px;align-self:center;}
+html[data-zedek-theme="night"] .match-centre-page .live-event-person>img.live-event-portrait,html[data-zedek-theme="night"] .match-centre-page .live-event-person>.live-event-portrait-fallback{background:var(--z-surface-2,var(--cream));}
+
+
+/* FLOW audit: keep the match-date strip readable in night mode. */
+html[data-zedek-theme="night"] .mc-day:not(.active),
+html[data-zedek-theme="night"] .mc-calendar {
+  color: var(--ink);
+  background: var(--white);
+  border-color: var(--line);
+}
+html[data-zedek-theme="night"] .mc-day:not(.active) span,
+html[data-zedek-theme="night"] .mc-calendar input {
+  color: var(--muted);
+}
+html[data-zedek-theme="night"] .mc-calendar input {
+  color-scheme: dark;
+}
+
+
+/* FLOW audit: fix remaining legacy date and notification controls in night mode. */
+html[data-zedek-theme="night"] .hub-day,
+html[data-zedek-theme="night"] .hub-calendar,
+html[data-zedek-theme="night"] .hub-filter,
+html[data-zedek-theme="night"] .hub-notification {
+  background: var(--z-surface, var(--cream-2)) !important;
+  color: var(--z-text, var(--ink)) !important;
+  border-color: var(--z-line, var(--line)) !important;
+}
+html[data-zedek-theme="night"] .hub-day small,
+html[data-zedek-theme="night"] .hub-calendar small,
+html[data-zedek-theme="night"] .hub-notification small,
+html[data-zedek-theme="night"] .hub-notification p {
+  color: var(--z-muted, var(--muted)) !important;
+}
