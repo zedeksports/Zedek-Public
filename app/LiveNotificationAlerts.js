@@ -80,12 +80,24 @@ export default function LiveNotificationAlerts({ onUnreadChange }) {
 
             if (localStorage.getItem("zedek-alert-sound") === "enabled") playAlertSound();
             if ("Notification" in window && Notification.permission === "granted") {
+              const notificationOptions = {
+                body: row.body || "New football update",
+                tag: String(row.id || "zedek-football-update"),
+                icon: "/icon-192.png",
+                data: { url: row.url || row.link || "/notifications" }
+              };
+              // Prefer the service-worker notification API for installed PWAs/mobile browsers.
+              // Fall back to a page notification where service workers are unavailable.
               try {
-                new Notification(row.title || "ZEDEK SPORTS", {
-                  body: row.body || "New football update",
-                  tag: row.id,
-                  icon: "/icon-192.png"
-                });
+                if ("serviceWorker" in navigator) {
+                  navigator.serviceWorker.ready
+                    .then((registration) => registration.showNotification(row.title || "ZEDEK FOOTBALL NETWORK 🇬🇭", notificationOptions))
+                    .catch(() => {
+                      try { new Notification(row.title || "ZEDEK FOOTBALL NETWORK 🇬🇭", notificationOptions); } catch {}
+                    });
+                } else {
+                  new Notification(row.title || "ZEDEK FOOTBALL NETWORK 🇬🇭", notificationOptions);
+                }
               } catch {}
             }
           }
