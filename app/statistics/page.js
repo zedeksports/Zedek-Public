@@ -14,7 +14,7 @@ export default async function StatisticsPage({ searchParams }) {
   const [{ data: competitions, error: competitionError }, { data: official, error: officialError }, { data: events, error: eventError }] = await Promise.all([
     s.from("competitions").select("id,name").eq("is_active", true).order("name", { ascending: true }),
     s.from("official_player_statistics").select("id,player_id,season_id,team_id,matches_played,goals,assists,yellow_cards,red_cards,minutes_played,player:players(id,full_name,position,photo_url),team:teams(id,name,short_name),season:seasons(id,competition:competitions(id,name))").order("goals", { ascending: false }).limit(1000),
-    s.from("match_events").select("match_id,event_type,player_id,secondary_player_id,team_id,player:players!match_events_player_id_fkey(id,full_name,position,photo_url),team:teams(id,name,short_name),match:matches!match_events_match_id_fkey(status,season_id,season:seasons(id,competition:competitions(id,name)))").in("event_type", ["goal", "own_goal", "yellow_card", "red_card"]),
+    s.from("match_events").select("match_id,event_type,player_id,secondary_player_id,team_id,player:players!match_events_player_id_fkey(id,full_name,position,photo_url),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,position,photo_url),team:teams(id,name,short_name),match:matches!match_events_match_id_fkey(status,season_id,season:seasons(id,competition:competitions(id,name)))").in("event_type", ["goal", "own_goal", "yellow_card", "red_card"]),
   ]);
 
   const selectedCompetition = competitions?.some(c => c.id === requestedCompetition)
@@ -63,7 +63,7 @@ export default async function StatisticsPage({ searchParams }) {
         if (row && e.event_type === "red_card") row.red++;
       }
       if (e.event_type === "goal" && e.secondary_player_id) {
-        const row = ensure(e.secondary_player_id, null, e.team);
+        const row = ensure(e.secondary_player_id, e.secondary_player, e.team);
         if (row) row.assists++;
       }
     }
