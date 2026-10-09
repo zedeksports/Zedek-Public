@@ -1597,3 +1597,20 @@ html[data-zedek-theme="night"] .mc-calendar input {
 html[data-zedek-theme="night"] .mc-calendar input {
   color-scheme: dark;
 }
+
+
+/* FLOW audit: fix remaining legacy date and notification controls in night mode. */
+html[data-zedek-theme="night"] .hub-day,
+html[data-zedek-theme="night"] .hub-calendar,
+html[data-zedek-theme="night"] .hub-filter,
+html[data-zedek-theme="night"] .hub-notification {
+  background: var(--z-surface, var(--cream-2)) !important;
+  color: var(--z-text, var(--ink)) !important;
+  border-color: var(--z-line, var(--line)) !important;
+}
+html[data-zedek-theme="night"] .hub-day small,
+html[data-zedek-theme="night"] .hub-calendar small,
+html[data-zedek-theme="night"] .hub-notification small,
+html[data-zedek-theme="night"] .hub-notification p {
+  color: var(--z-muted, var(--muted)) !important;
+}
