@@ -1485,3 +1485,15 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 
 /* Bronze batch: two-sided, team-mapped live event timeline with player thumbnails. */
 .match-centre-page .live-event.home{grid-template-columns:minmax(0,1fr) 32px 42px;text-align:left}.match-centre-page .live-event.away{grid-template-columns:42px 32px minmax(0,1fr);text-align:right}.match-centre-page .live-event.neutral{grid-template-columns:42px 32px minmax(0,1fr)}.match-centre-page .live-event-person{min-width:0;display:flex;align-items:center;gap:8px}.match-centre-page .live-event.home .live-event-person{justify-content:flex-start}.match-centre-page .live-event.away .live-event-person{justify-content:flex-end;flex-direction:row-reverse}.match-centre-page .live-event-person>img,.match-centre-page .live-event-person>span{width:34px;height:34px;flex:0 0 34px;border-radius:50%;object-fit:cover;background:#f0ece2;display:grid;place-items:center;font-size:12px;font-weight:900}.match-centre-page .live-event-person>div{display:grid;gap:3px;min-width:0}.match-centre-page .live-event-person strong,.match-centre-page .live-event-person small{overflow-wrap:anywhere}.match-centre-page .live-event-side{font-size:8px;font-weight:950;letter-spacing:.1em;color:var(--gold)}.match-centre-page .live-event.home>b{text-align:right}.match-centre-page .live-event.away .live-event-person>div{text-align:right}.match-centre-page .live-event-icon{display:grid;place-items:center}.match-centre-page .zedek-player-events i{white-space:nowrap}
+
+/* FLOW: portraits are contained inside their circular event frame so heads are not clipped by the white mask. */
+.match-centre-page .live-event-person>img.live-event-portrait{object-fit:contain;object-position:center center;padding:1px;overflow:hidden;border-radius:50%;background:#f0ece2;}
+.match-centre-page .live-event-person>img.live-event-portrait.coach{object-fit:contain;object-position:center center;padding:1px;}
+.match-centre-page .live-event-person>.live-event-portrait-fallback{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;background:#f0ece2;font-size:12px;font-weight:900;}
+.zedek-lineup-coach-card{grid-template-columns:42px minmax(0,1fr);align-items:center;column-gap:9px;}
+.zedek-lineup-coach-card>span:not(.zedek-lineup-coach-portrait-fallback),.zedek-lineup-coach-card>strong,.zedek-lineup-coach-card>small{grid-column:2;}
+.zedek-lineup-coach-portrait,.zedek-lineup-coach-portrait-fallback{grid-column:1;grid-row:1 / span 3;width:42px;height:42px;flex:0 0 42px;border-radius:50%;object-fit:contain;object-position:center center;background:#f0ece2;overflow:hidden;}
+.zedek-lineup-coach-portrait-fallback{display:grid;place-items:center;font-weight:900;color:var(--ink);}
+.zedek-lineup-coach-card.away{text-align:right;}
+.zedek-lineup-coach-card.home{text-align:left;}
+@media(max-width:520px){.zedek-lineup-coach-card{grid-template-columns:34px minmax(0,1fr);padding:8px;column-gap:7px}.zedek-lineup-coach-portrait,.zedek-lineup-coach-portrait-fallback{width:34px;height:34px;}}
