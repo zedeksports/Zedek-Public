@@ -264,12 +264,28 @@ function formationSlots(lineup,away=false){
   return coordinates.map(([x,localY,slotRole])=>{
     const item=pick(slotRole);
     if(!item)return null;
+
+    // Keep the full player card inside its own half. Raw formation maps place
+    // some forwards at or below the halfway line, so normalize each positional
+    // line into a dedicated band before mirroring the away team.
+    let homeY;
+    if(slotRole==="GK"){
+      homeY=92;
+    }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
+      homeY=83+(localY-78)*0.65;
+    }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
+      homeY=72+(localY-59)*0.5;
+    }else{
+      homeY=60+(localY-44)*0.5;
+    }
+    homeY=Math.max(58,Math.min(92,homeY));
+
     return {
       item,
       slotRole,
       group:roleGroup(item.position||item.player?.position||item.role),
       x,
-      y:away?100-localY:localY
+      y:away?100-homeY:homeY
     };
   }).filter(Boolean);
 }
