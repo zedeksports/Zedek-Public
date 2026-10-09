@@ -1519,3 +1519,60 @@ html[data-zedek-theme="night"] input,html[data-zedek-theme="night"] select,html[
 html[data-zedek-theme="night"] .settings-hub-content input,html[data-zedek-theme="night"] .settings-hub-content select,html[data-zedek-theme="night"] .settings-hub-content textarea,html[data-zedek-theme="night"] .transfer-profile-page input,html[data-zedek-theme="night"] .transfer-profile-page select{background:var(--z-surface-2,var(--cream));color:var(--z-text,var(--ink));}
 html[data-zedek-theme="night"] .live-event-icon,html[data-zedek-theme="night"] .zedek-lineup-coach-portrait-fallback{color:var(--z-text,var(--ink));}
 html[data-zedek-theme="night"] .live-event-person>img,html[data-zedek-theme="night"] .live-event-person>span,html[data-zedek-theme="night"] .zedek-lineup-coach-portrait,html[data-zedek-theme="night"] .zedek-lineup-coach-portrait-fallback{background:var(--z-surface-2,var(--cream));}
+
+
+/* FLOW theme audit follow-up: bring legacy page panels and nested settings controls into the shared day/night palette. */
+html[data-zedek-theme="night"] .page-hero,
+html[data-zedek-theme="night"] .competition-hero,
+html[data-zedek-theme="night"] .competition-detail,
+html[data-zedek-theme="night"] .detail-section,
+html[data-zedek-theme="night"] .team-panel,
+html[data-zedek-theme="night"] .team-profile-card,
+html[data-zedek-theme="night"] .player-profile-card,
+html[data-zedek-theme="night"] .coach-profile-card,
+html[data-zedek-theme="night"] .intelligence-metrics>div,
+html[data-zedek-theme="night"] .metric-list,
+html[data-zedek-theme="night"] .competition-overview-stats>div,
+html[data-zedek-theme="night"] .competition-season-bar,
+html[data-zedek-theme="night"] .competition-quick-links button,
+html[data-zedek-theme="night"] .embedded-note,
+html[data-zedek-theme="night"] .embedded-stat-list,
+html[data-zedek-theme="night"] .embedded-player-table,
+html[data-zedek-theme="night"] .form-table,
+html[data-zedek-theme="night"] .team-transfer-logo,
+html[data-zedek-theme="night"] .transfer-detail-team,
+html[data-zedek-theme="night"] .transfer-detail-player,
+html[data-zedek-theme="night"] .transfer-detail-info>div,
+html[data-zedek-theme="night"] .transfer-detail-notes,
+html[data-zedek-theme="night"] .hub-toggle,
+html[data-zedek-theme="night"] .hub-form-grid label,
+html[data-zedek-theme="night"] .hub-alert-tools,
+html[data-zedek-theme="night"] .hub-save {
+  background:var(--z-surface,var(--cream-2))!important;
+  color:var(--z-text,var(--ink))!important;
+  border-color:var(--z-line,var(--line))!important;
+}
+html[data-zedek-theme="night"] .page-hero p,
+html[data-zedek-theme="night"] .competition-hero p,
+html[data-zedek-theme="night"] .team-panel p,
+html[data-zedek-theme="night"] .embedded-note,
+html[data-zedek-theme="night"] .transfer-detail-info span,
+html[data-zedek-theme="night"] .transfer-detail-notes p,
+html[data-zedek-theme="night"] .hub-toggle small,
+html[data-zedek-theme="night"] .hub-card-heading small,
+html[data-zedek-theme="night"] .hub-card-heading p {
+  color:var(--z-muted,var(--muted))!important;
+}
+html[data-zedek-theme="night"] .competition-match,
+html[data-zedek-theme="night"] .embedded-stat-row,
+html[data-zedek-theme="night"] .embedded-player-table>a,
+html[data-zedek-theme="night"] .form-table>div,
+html[data-zedek-theme="night"] .transfer-detail-info>div,
+html[data-zedek-theme="night"] .hub-toggle {
+  border-color:var(--z-line,var(--line))!important;
+}
+html[data-zedek-theme="night"] .competition-quick-links button,
+html[data-zedek-theme="night"] .hub-save {
+  background:var(--ink)!important;
+  color:var(--cream-2)!important;
+}
