@@ -344,7 +344,8 @@ function formationSlots(lineup,away=false){
     homeY=Math.max(57,Math.min(93,homeY));
     // Give neighbouring cards more horizontal breathing room. Clamp the
     // outer slots so player cards stay inside the touch-screen pitch edges.
-    const spacedX=Math.max(10,Math.min(90,50+(x-50)*1.12));
+    const horizontalSpread=["DM","CM","AM","RM","LM","MID"].includes(slotRole)?1.32:1.12;
+    const spacedX=Math.max(8,Math.min(92,50+(x-50)*horizontalSpread));
 
     return {
       item,
