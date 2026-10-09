@@ -561,7 +561,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         <span className="zedek-player-avatar">
           <b className="zedek-player-number">{shirtNumber}</b>
           {player.photo_url?<img src={player.photo_url} alt={playerName}/>:<span aria-hidden="true">{playerName.slice(0,1).toUpperCase()}</span>}
-          <b className="zedek-player-rating">{rating.toFixed(1)}</b>
+          <b className={"zedek-player-rating "+(rating>=9?"rating-exceptional":rating>=8?"rating-high":rating>=7?"rating-good":rating>=6?"rating-average":"rating-low")}>{rating.toFixed(1)}</b>
           {captain?<b className="zedek-player-captain" title="Team captain">C</b>:null}
           {cautioned?<b className="zedek-player-card yellow" title="Yellow card">YC</b>:null}
           {sentOff?<b className="zedek-player-card red" title="Sent off">RED</b>:null}
@@ -602,8 +602,8 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         const isHome=e.team_id===match?.home_team?.id;
         const isAway=e.team_id===match?.away_team?.id;
         const side=isHome?"home":isAway?"away":"neutral";
-        const icon=e.event_type==="goal"?"⚽":e.event_type==="own_goal"?"⚽ OG":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":e.event_type==="substitution"?"🔁":e.event_type==="injury"?"🩹":e.event_type==="player_rating"?"⭐":"•";
-        const title=e.event_type==="goal"?"Goal":e.event_type==="own_goal"?"Own goal":e.event_type==="substitution"?"Substitution":e.event_type==="injury"?"Injury":e.event_type==="player_rating"?"Player rating":eventLabel(e.event_type);
+        const icon=e.event_type==="goal"?"⚽":e.event_type==="own_goal"?"⚽ OG":e.event_type==="goal_disallowed"?"🚫":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":e.event_type==="substitution"?"🔁":e.event_type==="injury"?"🩹":e.event_type==="player_rating"?"⭐":"•";
+        const title=e.event_type==="goal"?"Goal":e.event_type==="own_goal"?"Own goal":e.event_type==="goal_disallowed"?"Goal disallowed":e.event_type==="substitution"?"Substitution":e.event_type==="injury"?"Injury":e.event_type==="player_rating"?"Player rating":eventLabel(e.event_type);
         const person=e.coach||e.player||e.secondary_player;
         const details=e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.coach?.full_name?e.coach.full_name+" · "+(e.coach.role||"Coach"):e.player?.full_name||e.team?.name||"";
         const card=<><div className="live-event-person">{person?.photo_url?<img className={e.coach?"live-event-portrait coach":"live-event-portrait player"} src={person.photo_url} alt="" loading="lazy" decoding="async"/>:<span className={e.coach?"live-event-portrait-fallback coach":"live-event-portrait-fallback player"} aria-hidden="true">{person?.full_name?.slice(0,1)||"⚽"}</span>}<div><small className="live-event-side">{isHome?"HOME":isAway?"AWAY":"MATCH"}</small><strong>{title}{e.event_type==="goal"?": "+(e.player?.full_name||"Unknown scorer"):e.event_type==="own_goal"?": "+(e.player?.full_name||"Unknown player"):""}</strong><small>{details}{e.details?" — "+e.details:""}</small></div></div></>;
