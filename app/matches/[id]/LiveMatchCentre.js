@@ -365,6 +365,8 @@ function ratingForPlayer(item,events,match,teamId,stats){
  if(!item)return 0;
  if(!match||(!LIVE_STATUSES.has(match.status)&&!OFFICIAL_STATUSES.has(match.status)))return 0;
  let rating=6.0; const pid=item.player_id||item.player?.id;
+ const manual=events.filter(e=>e.event_type==="player_rating"&&e.player_id===pid).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0)).at(-1);
+ if(manual){const matchRating=String(manual.details||"").match(/rating\s*:\s*(\d+(?:\.\d+)?)/i);if(matchRating){const value=Number(matchRating[1]);if(Number.isFinite(value))return Math.max(0,Math.min(10,Number(value.toFixed(1))));}}
  const own=events.filter(e=>e.player_id===pid), secondary=events.filter(e=>e.secondary_player_id===pid);
  own.forEach(e=>{const t=String(e.event_type||"").toLowerCase();if(t==="goal")rating+=1.0;else if(t==="yellow_card")rating-=.4;else if(t==="red_card")rating-=1.2;else if(t==="penalty_missed")rating-=.7;else if(t==="own_goal")rating-=1.0;});
  secondary.forEach(e=>{if(String(e.event_type||"").toLowerCase()==="goal")rating+=.5});
@@ -391,7 +393,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       const s=createSupabaseBrowserClient();
       const [m,e,st,hc,l,pv,ch,sa]=await Promise.all([
         s.from("matches").select("id,scheduled_at,rescheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,interruption_reason,interruption_minute,outcome_note,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
-        s.from("match_events").select("id,event_type,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(id,full_name,shirt_number),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number),coach:coaches!match_events_coach_id_fkey(id,full_name,role),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
+        s.from("match_events").select("id,event_type,team_id,player_id,secondary_player_id,coach_id,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(id,full_name,shirt_number,photo_url),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number,photo_url),coach:coaches!match_events_coach_id_fkey(id,full_name,role,photo_url),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
         s.from("match_statistics").select("*").eq("match_id",initialMatch.id).maybeSingle(),
         s.from("team_coaches").select("team_id,coach_id,role,coach:coaches(id,full_name,role,photo_url)").eq("is_current",true).eq("role","Head Coach"),
         s.from("match_lineups").select("id,team_id,coach_id,formation,captain_player_id,submitted_at,team:teams(id,name,short_name,logo_url),coach:coaches(id,full_name,role,photo_url),lineup_players:match_lineup_players(id,player_id,role,shirt_number,position,player:players(id,full_name,shirt_number,position,photo_url))").eq("match_id",initialMatch.id),
@@ -540,7 +542,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
     const playerEvents=events.filter(e=>e.player_id===playerId||e.secondary_player_id===playerId);
     const goals=playerEvents.filter(e=>e.event_type==="goal"&&e.player_id===playerId).length;
+    const ownGoals=playerEvents.filter(e=>e.event_type==="own_goal"&&e.player_id===playerId).length;
     const assists=playerEvents.filter(e=>e.event_type==="goal"&&e.secondary_player_id===playerId).length;
+    const injury=playerEvents.some(e=>e.event_type==="injury"&&e.player_id===playerId);
     const cardEvents=playerEvents.filter(e=>e.player_id===playerId);
     const yellows=cardEvents.filter(e=>e.event_type==="yellow_card"||e.event_type==="second_yellow").length;
     const reds=cardEvents.filter(e=>e.event_type==="red_card"||e.event_type==="second_yellow").length;
@@ -565,8 +569,10 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           {subIn?<b className="zedek-player-card substitution-in-badge" title={"Substituted on"+(subInMinute!=null?" · "+subInMinute+"'":"")}>ON{subInMinute!=null?" "+subInMinute+"'":""}</b>:null}
         </span>
         <span className="zedek-player-identity"><strong>{lineupPlayerName}</strong><small>{position}</small></span>
-        {(goals||assists||yellows||reds||subOut||subIn)?<span className="zedek-player-events" aria-label="Player match events">
+        {(goals||ownGoals||assists||yellows||reds||subOut||subIn||injury)?<span className="zedek-player-events" aria-label="Player match events">
           {goals>0?<i title="Goals">⚽{goals>1?goals:""}</i>:null}
+          {ownGoals>0?<i title="Own goals">⚽ OG{ownGoals>1?ownGoals:""}</i>:null}
+          {injury?<i title="Injury">🩹</i>:null}
           {assists>0?<i title="Assists">A{assists>1?assists:""}</i>:null}
           {yellows>0?<i title="Yellow cards">🟨{yellows>1?yellows:""}</i>:null}
           {reds>0?<i title="Red cards">🟥</i>:null}
@@ -592,7 +598,18 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     });
     const visible=eventsExpanded?ordered:ordered.slice(0,5);
     return <div className="live-event-feed">
-      <div className="live-event-list">{visible.map(e=><div className="live-event" key={e.id}><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b><span className={"live-event-icon "+e.event_type}>{e.event_type==="goal"?"⚽":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":"•"}</span><div><strong>{e.event_type==="goal"?"Goal: "+(e.player?.full_name||"Unknown scorer"):e.event_type==="substitution"?"Substitution":eventLabel(e.event_type)}</strong><small>{e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.coach?.full_name?e.coach.full_name+" · "+(e.coach.role||"Coach"):e.player?.full_name||e.team?.name||""}{e.details?" — "+e.details:""}</small></div></div>)}</div>
+      <div className="live-event-list">{visible.map(e=>{
+        const isHome=e.team_id===match?.home_team?.id;
+        const isAway=e.team_id===match?.away_team?.id;
+        const side=isHome?"home":isAway?"away":"neutral";
+        const icon=e.event_type==="goal"?"⚽":e.event_type==="own_goal"?"⚽ OG":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":e.event_type==="substitution"?"🔁":e.event_type==="injury"?"🩹":e.event_type==="player_rating"?"⭐":"•";
+        const title=e.event_type==="goal"?"Goal":e.event_type==="own_goal"?"Own goal":e.event_type==="substitution"?"Substitution":e.event_type==="injury"?"Injury":e.event_type==="player_rating"?"Player rating":eventLabel(e.event_type);
+        const person=e.player||e.secondary_player;
+        const details=e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.coach?.full_name?e.coach.full_name+" · "+(e.coach.role||"Coach"):e.player?.full_name||e.team?.name||"";
+        const card=<><div className="live-event-person">{person?.photo_url?<img src={person.photo_url} alt="" loading="lazy"/>:<span aria-hidden="true">{person?.full_name?.slice(0,1)||"⚽"}</span>}<div><small className="live-event-side">{isHome?"HOME":isAway?"AWAY":"MATCH"}</small><strong>{title}{e.event_type==="goal"?": "+(e.player?.full_name||"Unknown scorer"):e.event_type==="own_goal"?": "+(e.player?.full_name||"Unknown player"):""}</strong><small>{details}{e.details?" — "+e.details:""}</small></div></div></>;
+        if(side==="home")return <div className="live-event home" key={e.id}>{card}<span className={"live-event-icon "+e.event_type}>{icon}</span><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b></div>;
+        return <div className={"live-event "+side} key={e.id}><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b><span className={"live-event-icon "+e.event_type}>{icon}</span>{card}</div>;
+      })}</div>
       {events.length>5?<button type="button" className="live-events-toggle" onClick={()=>setEventsExpanded(value=>!value)} aria-expanded={eventsExpanded}>
         <span>{eventsExpanded?"Show latest updates":"Show all updates"}</span><b>{eventsExpanded?"↑":"↓"}</b>
       </button>:null}
