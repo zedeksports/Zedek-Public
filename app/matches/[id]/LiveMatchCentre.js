@@ -199,10 +199,9 @@ function formationSlots(lineup,away=false){
   if(starters.length===0)return [];
 
   const formation=String(lineup?.formation||"").replace(/\s+/g,"");
-  const coordinates=FORMATION_COORDINATES[formation];
-  if(!coordinates||coordinates.length!==11){
-    return [];
-  }
+  // Keep the pitch populated even when Control Room submits a valid but
+  // not-yet-mapped formation. The fallback still uses 11 fixed slots.
+  const coordinates=FORMATION_COORDINATES[formation]||FALLBACK_FORMATION_COORDINATES;
 
   const remaining=starters.map((player,index)=>({player,index}));
 
@@ -611,7 +610,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
           <div><span>STREAMING</span><strong>{streamingAd}</strong>{streamingUrl?<a href={streamingUrl} target="_blank" rel="noreferrer">View streaming information</a>:null}</div>
         </div>
       </CollapsibleSection>
-      <CollapsibleSection title="LINEUPS" eyebrow="TEAM SHEETS">
+      <CollapsibleSection title="LINEUPS" eyebrow="TEAM SHEETS" defaultOpen={lineups.length > 0}>
         {renderLineups()}
       </CollapsibleSection>
       <CollapsibleSection title="MATCH STATISTICS" eyebrow="MATCH INTELLIGENCE">
