@@ -6,6 +6,14 @@ import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 function playAlertSound() {
   if (typeof window === "undefined") return;
   try {
+    const customSound = localStorage.getItem("zedek-custom-alert-sound");
+    if (customSound) {
+      const audio = new Audio(customSound);
+      audio.play().catch(() => {});
+      return;
+    }
+  } catch {}
+  try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
