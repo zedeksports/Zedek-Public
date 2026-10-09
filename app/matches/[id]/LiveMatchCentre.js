@@ -604,9 +604,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         const side=isHome?"home":isAway?"away":"neutral";
         const icon=e.event_type==="goal"?"⚽":e.event_type==="own_goal"?"⚽ OG":e.event_type==="yellow_card"?"🟨":e.event_type==="red_card"?"🟥":e.event_type==="substitution"?"🔁":e.event_type==="injury"?"🩹":e.event_type==="player_rating"?"⭐":"•";
         const title=e.event_type==="goal"?"Goal":e.event_type==="own_goal"?"Own goal":e.event_type==="substitution"?"Substitution":e.event_type==="injury"?"Injury":e.event_type==="player_rating"?"Player rating":eventLabel(e.event_type);
-        const person=e.player||e.secondary_player;
+        const person=e.coach||e.player||e.secondary_player;
         const details=e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.coach?.full_name?e.coach.full_name+" · "+(e.coach.role||"Coach"):e.player?.full_name||e.team?.name||"";
-        const card=<><div className="live-event-person">{person?.photo_url?<img src={person.photo_url} alt="" loading="lazy"/>:<span aria-hidden="true">{person?.full_name?.slice(0,1)||"⚽"}</span>}<div><small className="live-event-side">{isHome?"HOME":isAway?"AWAY":"MATCH"}</small><strong>{title}{e.event_type==="goal"?": "+(e.player?.full_name||"Unknown scorer"):e.event_type==="own_goal"?": "+(e.player?.full_name||"Unknown player"):""}</strong><small>{details}{e.details?" — "+e.details:""}</small></div></div></>;
+        const card=<><div className="live-event-person">{person?.photo_url?<img className={e.coach?"live-event-portrait coach":"live-event-portrait player"} src={person.photo_url} alt="" loading="lazy" decoding="async"/>:<span className={e.coach?"live-event-portrait-fallback coach":"live-event-portrait-fallback player"} aria-hidden="true">{person?.full_name?.slice(0,1)||"⚽"}</span>}<div><small className="live-event-side">{isHome?"HOME":isAway?"AWAY":"MATCH"}</small><strong>{title}{e.event_type==="goal"?": "+(e.player?.full_name||"Unknown scorer"):e.event_type==="own_goal"?": "+(e.player?.full_name||"Unknown player"):""}</strong><small>{details}{e.details?" — "+e.details:""}</small></div></div></>;
         if(side==="home")return <div className="live-event home" key={e.id}>{card}<span className={"live-event-icon "+e.event_type}>{icon}</span><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b></div>;
         return <div className={"live-event "+side} key={e.id}><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b><span className={"live-event-icon "+e.event_type}>{icon}</span>{card}</div>;
       })}</div>
@@ -627,9 +627,11 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
     <div className="zedek-lineup-coaches" aria-label="Head coaches">
       <div className="zedek-lineup-coach-card away">
+        {awayHeadCoach?.photo_url?<img className="zedek-lineup-coach-portrait" src={awayHeadCoach.photo_url} alt="" loading="lazy" decoding="async"/>:<span className="zedek-lineup-coach-portrait-fallback" aria-hidden="true">{(awayHeadCoach?.full_name||"C").slice(0,1)}</span>}
         <span>HEAD COACH</span><strong>{awayHeadCoach?.full_name||"Head coach TBC"}</strong><small>{awayHeadCoach?.role||"Head Coach"}</small>
       </div>
       <div className="zedek-lineup-coach-card home">
+        {homeHeadCoach?.photo_url?<img className="zedek-lineup-coach-portrait" src={homeHeadCoach.photo_url} alt="" loading="lazy" decoding="async"/>:<span className="zedek-lineup-coach-portrait-fallback" aria-hidden="true">{(homeHeadCoach?.full_name||"C").slice(0,1)}</span>}
         <span>HEAD COACH</span><strong>{homeHeadCoach?.full_name||"Head coach TBC"}</strong><small>{homeHeadCoach?.role||"Head Coach"}</small>
       </div>
     </div>
