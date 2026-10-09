@@ -278,13 +278,27 @@ function formationSlots(lineup,away=false){
     }else{
       homeY=60+(localY-44)*0.5;
     }
-    homeY=Math.max(58,Math.min(92,homeY));
+    // Open up the vertical bands so the lines read as a formation rather
+    // than a tight cluster, while keeping both teams on their own half.
+    if(slotRole==="GK"){
+      homeY=93;
+    }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
+      homeY=83+(localY-78)*0.7;
+    }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
+      homeY=70+(localY-59)*0.75;
+    }else{
+      homeY=58+(localY-44)*0.7;
+    }
+    homeY=Math.max(57,Math.min(93,homeY));
+    // Give neighbouring cards more horizontal breathing room. Clamp the
+    // outer slots so player cards stay inside the touch-screen pitch edges.
+    const spacedX=Math.max(10,Math.min(90,50+(x-50)*1.12));
 
     return {
       item,
       slotRole,
       group:roleGroup(item.position||item.player?.position||item.role),
-      x,
+      x:spacedX,
       y:away?100-homeY:homeY
     };
   }).filter(Boolean);
