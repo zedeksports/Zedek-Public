@@ -1581,3 +1581,19 @@ html[data-zedek-theme="night"] .hub-save {
 .match-centre-page .live-event-person>img.live-event-portrait{width:38px;height:38px;min-width:38px;flex:0 0 38px;object-fit:contain!important;object-position:center center!important;padding:0!important;display:block;align-self:center;overflow:hidden;border-radius:50%;}
 .match-centre-page .live-event-person>.live-event-portrait-fallback{width:38px;height:38px;min-width:38px;flex:0 0 38px;align-self:center;}
 html[data-zedek-theme="night"] .match-centre-page .live-event-person>img.live-event-portrait,html[data-zedek-theme="night"] .match-centre-page .live-event-person>.live-event-portrait-fallback{background:var(--z-surface-2,var(--cream));}
+
+
+/* FLOW audit: keep the match-date strip readable in night mode. */
+html[data-zedek-theme="night"] .mc-day:not(.active),
+html[data-zedek-theme="night"] .mc-calendar {
+  color: var(--ink);
+  background: var(--white);
+  border-color: var(--line);
+}
+html[data-zedek-theme="night"] .mc-day:not(.active) span,
+html[data-zedek-theme="night"] .mc-calendar input {
+  color: var(--muted);
+}
+html[data-zedek-theme="night"] .mc-calendar input {
+  color-scheme: dark;
+}
