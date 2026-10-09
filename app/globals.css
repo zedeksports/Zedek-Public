@@ -1614,3 +1614,10 @@ html[data-zedek-theme="night"] .hub-notification small,
 html[data-zedek-theme="night"] .hub-notification p {
   color: var(--z-muted, var(--muted)) !important;
 }
+
+
+/* Public lineup player ratings: make the score band immediately visible. */
+.match-centre-page .zedek-player-rating.poor{background:#b42318;color:#fff;border:1px solid rgba(255,255,255,.9)}
+.match-centre-page .zedek-player-rating.average{background:#b86e00;color:#fff;border:1px solid rgba(255,255,255,.9)}
+.match-centre-page .zedek-player-rating.good{background:#16834b;color:#fff;border:1px solid rgba(255,255,255,.9)}
+.match-centre-page .zedek-player-rating.excellent{background:#175cd3;color:#fff;border:1px solid rgba(255,255,255,.9)}
