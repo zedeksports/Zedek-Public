@@ -1614,3 +1614,10 @@ html[data-zedek-theme="night"] .hub-notification small,
 html[data-zedek-theme="night"] .hub-notification p {
   color: var(--z-muted, var(--muted)) !important;
 }
+
+/* URGER: clear player rating bands */
+.zedek-player-rating.rating-exceptional{background:#6d28d9;color:#fff}
+.zedek-player-rating.rating-high{background:#16834b;color:#fff}
+.zedek-player-rating.rating-good{background:#0f766e;color:#fff}
+.zedek-player-rating.rating-average{background:#c58a16;color:#101b2b}
+.zedek-player-rating.rating-low{background:#c62828;color:#fff}
