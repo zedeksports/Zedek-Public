@@ -988,3 +988,16 @@ html[data-zedek-theme="night"] .oti-home-identity{background:#f3f0ea!important}
 html[data-zedek-theme="night"] .oti-home-identity h1{color:#0b1a2b!important}
 html[data-zedek-theme="night"] .oti-date.active{background:#d6ad4f!important;border-color:#d6ad4f!important;color:#0b1a2b!important}
 html[data-zedek-theme="night"] .oti-date.active span{color:rgba(11,26,43,.72)!important}
+
+/* Narrow fix: keep homepage team crests and their reserved layout width consistent,
+   so the two sides sit evenly around the central score at every breakpoint. */
+.oti-home-match-column .score-side{
+  min-width:0;
+  align-items:center!important;
+}
+.oti-home-match-column .score-team-crest{
+  flex:0 0 38px!important;
+  width:38px!important;
+  height:38px!important;
+  box-sizing:border-box;
+}
