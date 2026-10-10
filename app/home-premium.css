@@ -393,8 +393,8 @@ html[data-zedek-theme="night"]{
 .drawer-note{padding:12px!important;border-radius:11px!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.08)!important;color:#aab8c7!important}
 .zedek-drawer-backdrop{z-index:120!important;background:rgba(1,8,14,.50)!important;backdrop-filter:blur(3px)}
 
-/* Hero: atmospheric, .oti-home-shell no illustration */
-.score-hero{
+/* Hero: atmospheric, no illustration */
+.oti-home-shell .score-hero{
   min-height:390px!important;display:flex;align-items:center;position:relative;isolation:isolate;
   border:0!important;background:
     radial-gradient(circle at 78% 25%,rgba(28,126,255,.17),transparent 25%),
