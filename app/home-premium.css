@@ -1155,3 +1155,53 @@ html[data-zedek-theme="night"] .oti-date.active span{color:rgba(11,26,43,.72)!im
   }
   .oti-home-match-column .score-numbers{height:38px!important;min-height:38px!important}
 }
+
+
+/* Final scoreboard alignment repair: anchor the crests and score to the same
+   top-aligned 38px visual row. Team-name wrapping must not move either crest. */
+.oti-home-match-column .score-match-body{
+  align-items:start!important;
+}
+.oti-home-match-column .score-side,
+.oti-home-match-column .score-side.away{
+  align-self:start!important;
+  align-items:start!important;
+}
+.oti-home-match-column .score-side .score-team-crest,
+.oti-home-match-column .score-side.away .score-team-crest{
+  align-self:start!important;
+  justify-self:start!important;
+  margin:0!important;
+}
+.oti-home-match-column .score-centre{
+  align-self:start!important;
+  justify-self:center!important;
+}
+.oti-home-match-column .score-numbers{
+  align-self:start!important;
+  justify-self:center!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:38px!important;
+  min-height:38px!important;
+  margin:0!important;
+  padding:0!important;
+}
+@media(max-width:600px){
+  .oti-home-match-column .score-side,
+  .oti-home-match-column .score-side.away{
+    align-self:start!important;
+    align-items:center!important;
+  }
+  .oti-home-match-column .score-side .score-team-crest,
+  .oti-home-match-column .score-side.away .score-team-crest{
+    align-self:center!important;
+    justify-self:center!important;
+  }
+  .oti-home-match-column .score-centre,
+  .oti-home-match-column .score-numbers{
+    align-self:start!important;
+  }
+}
