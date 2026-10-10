@@ -989,15 +989,98 @@ html[data-zedek-theme="night"] .oti-home-identity h1{color:#0b1a2b!important}
 html[data-zedek-theme="night"] .oti-date.active{background:#d6ad4f!important;border-color:#d6ad4f!important;color:#0b1a2b!important}
 html[data-zedek-theme="night"] .oti-date.active span{color:rgba(11,26,43,.72)!important}
 
-/* Narrow fix: keep homepage team crests and their reserved layout width consistent,
-   so the two sides sit evenly around the central score at every breakpoint. */
-.oti-home-match-column .score-side{
-  min-width:0;
+/* Homepage scoreboard alignment — use mirrored, explicit team grids on wider screens.
+   Team names face the central score; crests keep a fixed column at the outside edge. */
+.oti-home-match-column .score-match-body{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(76px,100px) minmax(0,1fr)!important;
   align-items:center!important;
+  gap:8px!important;
+}
+.oti-home-match-column .score-side{
+  display:grid!important;
+  grid-template-columns:38px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:7px!important;
+  width:100%;
+  min-width:0!important;
+}
+.oti-home-match-column .score-side strong{
+  display:block;
+  min-width:0!important;
+  max-width:none!important;
+  width:100%;
+  overflow-wrap:anywhere;
+  text-align:right!important;
+  line-height:1.2!important;
+}
+.oti-home-match-column .score-side.away{
+  grid-template-columns:minmax(0,1fr) 38px!important;
+}
+.oti-home-match-column .score-side.away strong{
+  text-align:left!important;
 }
 .oti-home-match-column .score-team-crest{
-  flex:0 0 38px!important;
+  display:grid;
+  place-items:center;
+  flex:none!important;
   width:38px!important;
+  min-width:38px!important;
   height:38px!important;
   box-sizing:border-box;
+  margin:0!important;
+}
+.oti-home-match-column .score-team-crest img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+/* At phone widths, stack each side consistently and preserve a dedicated score column. */
+@media(max-width:600px){
+  .oti-home-match-column .score-match-body{
+    grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr)!important;
+    gap:4px!important;
+    padding:11px 2px!important;
+  }
+  .oti-home-match-column .score-side,
+  .oti-home-match-column .score-side.away{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:7px!important;
+    width:100%;
+    min-width:0!important;
+  }
+  .oti-home-match-column .score-side strong,
+  .oti-home-match-column .score-side.away strong{
+    order:2;
+    display:block;
+    width:100%;
+    max-width:100%!important;
+    text-align:center!important;
+    font-size:10px!important;
+    line-height:1.2!important;
+    overflow-wrap:anywhere;
+  }
+  .oti-home-match-column .score-side .score-team-crest,
+  .oti-home-match-column .score-side.away .score-team-crest{
+    order:1;
+    flex:none!important;
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+  }
+  .oti-home-match-column .score-numbers b{font-size:20px!important}
+}
+@media(max-width:390px){
+  .oti-home-match-column .score-match-body{
+    grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr)!important;
+    gap:3px!important;
+  }
+  .oti-home-match-column .score-side strong,
+  .oti-home-match-column .score-side.away strong{font-size:9px!important}
+  .oti-home-match-column .score-numbers b{font-size:18px!important}
 }
