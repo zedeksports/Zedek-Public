@@ -1084,3 +1084,74 @@ html[data-zedek-theme="night"] .oti-date.active span{color:rgba(11,26,43,.72)!im
   .oti-home-match-column .score-side.away strong{font-size:9px!important}
   .oti-home-match-column .score-numbers b{font-size:18px!important}
 }
+
+
+/* Scoreboard middle-row optical alignment correction.
+   Keep both crest frames and the score on the same vertical center line,
+   independent of team-name wrapping or the logo asset's intrinsic dimensions. */
+.oti-home-match-column .score-match-body{
+  align-items:center!important;
+}
+.oti-home-match-column .score-side,
+.oti-home-match-column .score-side.away{
+  align-self:center!important;
+  align-items:center!important;
+}
+.oti-home-match-column .score-side .score-team-crest,
+.oti-home-match-column .score-side.away .score-team-crest{
+  align-self:center!important;
+  justify-self:center!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  height:38px!important;
+  min-height:38px!important;
+  max-height:38px!important;
+  padding:0!important;
+  position:relative!important;
+  top:0!important;
+  transform:none!important;
+  overflow:hidden;
+}
+.oti-home-match-column .score-side .score-team-crest img,
+.oti-home-match-column .score-side.away .score-team-crest img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+}
+.oti-home-match-column .score-numbers{
+  align-self:center!important;
+  justify-self:center!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:38px!important;
+  height:38px!important;
+  margin:0!important;
+  padding:0!important;
+  line-height:1!important;
+  transform:none!important;
+}
+.oti-home-match-column .score-numbers b{
+  display:block!important;
+  margin:0!important;
+  padding:0!important;
+  line-height:1!important;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:600px){
+  .oti-home-match-column .score-side .score-team-crest,
+  .oti-home-match-column .score-side.away .score-team-crest{
+    height:38px!important;
+    min-height:38px!important;
+    max-height:38px!important;
+  }
+  .oti-home-match-column .score-numbers{height:38px!important;min-height:38px!important}
+}
