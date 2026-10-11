@@ -1621,3 +1621,120 @@ html[data-zedek-theme="night"] .hub-notification p {
 .match-centre-page .zedek-player-rating.average{background:#b86e00;color:#fff;border:1px solid rgba(255,255,255,.9)}
 .match-centre-page .zedek-player-rating.good{background:#16834b;color:#fff;border:1px solid rgba(255,255,255,.9)}
 .match-centre-page .zedek-player-rating.excellent{background:#175cd3;color:#fff;border:1px solid rgba(255,255,255,.9)}
+
+
+/* Focused responsive scoreboard alignment — public Match Details only. */
+@media (max-width: 760px) {
+  .match-centre-page .live-centre-hero {
+    padding: 18px 12px 20px;
+  }
+  .match-centre-page .live-centre-score {
+    width: 100%;
+    max-width: 560px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(64px, 18vw, 84px) minmax(0, 1fr);
+    align-items: start;
+    column-gap: clamp(4px, 2vw, 12px);
+    row-gap: 0;
+    margin: 16px auto 0;
+  }
+  .match-centre-page .live-centre-team {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: center;
+  }
+  .match-centre-page .live-centre-crest {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    flex: 0 0 58px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .match-centre-page .live-centre-crest img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  .match-centre-page .live-centre-team strong {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  .match-centre-page .live-centre-middle {
+    min-width: 0;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  .match-centre-page .live-centre-middle strong {
+    display: block;
+    width: 100%;
+    margin: 10px 0 0;
+    font-size: clamp(24px, 7vw, 30px);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .match-centre-page .live-centre-middle span {
+    white-space: normal;
+    text-align: center;
+  }
+  .match-centre-page .live-centre-switcher {
+    position: relative;
+    margin-top: 12px;
+    clear: both;
+  }
+}
+@media (max-width: 430px) {
+  .match-centre-page .live-centre-score {
+    grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
+    column-gap: 4px;
+    margin-top: 14px;
+  }
+  .match-centre-page .live-centre-crest {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    flex-basis: 52px;
+  }
+  .match-centre-page .live-centre-team {
+    gap: 7px;
+  }
+  .match-centre-page .live-centre-team strong {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .match-centre-page .live-centre-middle strong {
+    margin-top: 8px;
+    font-size: 23px;
+  }
+  .match-centre-page .live-centre-switcher {
+    margin-top: 10px;
+  }
+}
