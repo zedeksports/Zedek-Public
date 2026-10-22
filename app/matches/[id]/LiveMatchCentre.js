@@ -469,9 +469,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       if(!sa.error)setStreamAds(sa.data||[]);
       }finally{
         refreshInFlight=false;
-        if(refreshAgain&&!cancelled&&document.visibilityState==="visible"){
+        if(refreshAgain){
           refreshAgain=false;
-          void refresh();
+          if(!cancelled&&document.visibilityState==="visible")void refresh();
         }
       }
     }
