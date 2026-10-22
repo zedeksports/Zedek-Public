@@ -25,7 +25,39 @@ export default function PlayerDetail(){
     s.from("player_movements").select("id,movement_type,from_team_id,to_team_id,start_date,end_date,status,notes,from_team:teams!player_movements_from_team_id_fkey(id,name,short_name,logo_url),to_team:teams!player_movements_to_team_id_fkey(id,name,short_name,logo_url)").eq("player_id",id).order("start_date",{ascending:false})
    ]);
    const e=st.error||m.error||v.error||mv.error;if(e)throw e;
-   setPlayer(p.data);setStats(st.data||[]);setMatches(m.data||[]);setMovements(mv.data||[]);setOfficial(new Set((v.data||[]).map(x=>x.match_id)));
+   // Never trust stored appearance counters alone: they can outlive deleted test matches.
+   // Rebuild this player's appearances from actual participation in verified official matches.
+   const verifiedIds=[...new Set((v.data||[]).map(x=>x.match_id))];
+   const appearanceIdsBySeasonTeam=new Map(), startIdsBySeasonTeam=new Map();
+   if(verifiedIds.length){
+    const [officialMatches,lineups,events]=await Promise.all([
+     s.from("matches").select("id,season_id").in("id",verifiedIds).eq("status","verified"),
+     s.from("match_lineup_players").select("player_id,role,lineup:match_lineups!inner(match_id,team_id)").eq("player_id",id).in("lineup.match_id",verifiedIds),
+     s.from("match_events").select("match_id,team_id,event_type,player_id,secondary_player_id").in("match_id",verifiedIds).or("player_id.eq."+id+",secondary_player_id.eq."+id)
+    ]);
+    const participationError=officialMatches.error||lineups.error||events.error;if(participationError)throw participationError;
+    const seasonByMatch=new Map((officialMatches.data||[]).map(x=>[x.id,x.season_id]));
+    const addAppearance=(matchId,teamId,role=null)=>{
+     const seasonId=seasonByMatch.get(matchId);if(!seasonId||!teamId)return;
+     const key=seasonId+":"+teamId;
+     if(!appearanceIdsBySeasonTeam.has(key))appearanceIdsBySeasonTeam.set(key,new Set());
+     appearanceIdsBySeasonTeam.get(key).add(matchId);
+     if(role==="starter"){
+      if(!startIdsBySeasonTeam.has(key))startIdsBySeasonTeam.set(key,new Set());
+      startIdsBySeasonTeam.get(key).add(matchId);
+     }
+    };
+    for(const row of lineups.data||[])if(row.lineup)addAppearance(row.lineup.match_id,row.lineup.team_id,row.role);
+    for(const event of events.data||[]){
+     if(event.player_id===id&&["goal","own_goal","yellow_card","red_card"].includes(event.event_type))addAppearance(event.match_id,event.team_id);
+     if(event.secondary_player_id===id&&event.event_type==="goal")addAppearance(event.match_id,event.team_id);
+    }
+   }
+   const currentStats=(st.data||[]).map(row=>{
+    const key=row.season_id+":"+row.team_id;
+    return {...row,matches_played:appearanceIdsBySeasonTeam.get(key)?.size||0,starts:startIdsBySeasonTeam.get(key)?.size||0};
+   }).filter(row=>row.matches_played>0);
+   setPlayer(p.data);setStats(currentStats);setMatches(m.data||[]);setMovements(mv.data||[]);setOfficial(new Set(verifiedIds));
   }catch(e){setError(e?.message||"Player data could not be loaded")}finally{setLoading(false)}
  }load()},[id]);
  const totals=useMemo(()=>stats.reduce((a,x)=>{a.apps+=x.matches_played||0;a.starts+=x.starts||0;a.goals+=x.goals||0;a.assists+=x.assists||0;a.yc+=x.yellow_cards||0;a.rc+=x.red_cards||0;a.minutes+=x.minutes_played||0;return a},{apps:0,starts:0,goals:0,assists:0,yc:0,rc:0,minutes:0}),[stats]);
