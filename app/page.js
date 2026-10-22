@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "../lib/supabase/server";
 import HomeScoreClient from "./HomeScoreClient";
 
@@ -55,6 +56,14 @@ const getHomeData = async () => {
   };
 };
 
+// Homepage data is public and identical for every visitor. Cache the shared
+// Supabase result briefly so a traffic spike does not make every page view run
+// six database queries. Live-match pages use their own Realtime updates.
+const getCachedHomeData = unstable_cache(getHomeData, ["zedek-public-home-data-v1"], {
+  revalidate: 15,
+  tags: ["public-home-data"],
+});
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -72,7 +81,7 @@ export default async function HomePage() {
   };
 
   try {
-    initialData = await getHomeData();
+    initialData = await getCachedHomeData();
   } catch (error) {
     initialData.error = error?.message || "Football data could not be loaded.";
   }
