@@ -2,6 +2,7 @@
 
 import {useEffect,useMemo,useState} from "react";
 import {createSupabaseBrowserClient} from "../../lib/supabase/browser";
+import {usePersistentQueryState} from "../../lib/usePersistentQueryState";
 import {ExplorePage,ExploreHeader,EmptyState} from "../ExploreChrome";
 
 const LIVE=["live","in_progress","halftime","paused"];
@@ -12,8 +13,7 @@ function dayLabel(v){return new Intl.DateTimeFormat("en-GH",{weekday:"short",day
 function Team({team}){return <div className="hub-match-team"><div className="hub-team-logo">{team?.logo_url?<img src={team.logo_url} alt=""/>:<span>{(team?.short_name||team?.name||"?").slice(0,2).toUpperCase()}</span>}</div><strong>{team?.short_name||team?.name||"Team TBC"}</strong></div>;}
 
 export default function MatchesPage(){
- const [matches,setMatches]=useState([]),[official,setOfficial]=useState(new Set()),[loading,setLoading]=useState(true),[error,setError]=useState(""),[selectedDate,setSelectedDate]=useState(dateKey(new Date())),[filter,setFilter]=useState("all");
- useEffect(()=>{const requested=new URLSearchParams(window.location.search).get("filter");if(["all","upcoming","live","results"].includes(requested))setFilter(requested);},[]);
+ const [matches,setMatches]=useState([]),[official,setOfficial]=useState(new Set()),[loading,setLoading]=useState(true),[error,setError]=useState(""),[selectedDate,setSelectedDate]=usePersistentQueryState("date",dateKey(new Date())),[filter,setFilter]=usePersistentQueryState("filter","all","all|upcoming|live|results");
  useEffect(()=>{let cancelled=false;async function load(){try{const s=createSupabaseBrowserClient();const {data:ms,error:me}=await s.from("matches").select("id,scheduled_at,status,home_score,away_score,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons(id,name,competition:competitions(id,name))").order("scheduled_at",{ascending:true}).limit(500);if(me)throw me;if(cancelled)return;const matchRows=ms||[];const {data:vs,error:ve}=matchRows.length?await s.from("match_verifications").select("match_id").eq("official_result",true).in("match_id",matchRows.map(m=>m.id)):{data:[],error:null};if(ve)throw ve;if(cancelled)return;setMatches(matchRows);setOfficial(new Set((vs||[]).map(x=>x.match_id)));}catch(e){if(!cancelled)setError(e?.message||"Matches could not be loaded.");}finally{if(!cancelled)setLoading(false);}}load();return()=>{cancelled=true};},[]);
  const days=useMemo(()=>{const out=[];const start=new Date();for(let i=0;i<8;i++){const d=new Date(start);d.setDate(start.getDate()+i);out.push({key:dateKey(d),date:d});}return out;},[]);
  const visible=useMemo(()=>{const now=Date.now(),byDate=m=>m.scheduled_at&&dateKey(m.scheduled_at)===selectedDate;return matches.filter(m=>{const live=LIVE.includes(m.status),finished=FINISHED.includes(m.status),isOfficial=official.has(m.id);if(filter==="live")return live;if(filter==="results")return finished&&isOfficial;if(filter==="upcoming")return !finished&&!live&&m.scheduled_at&&new Date(m.scheduled_at).getTime()>=now;return live||(byDate(m)&&!finished&&!live)||(byDate(m)&&finished&&isOfficial);}).filter(m=>filter==="results"||filter==="live"||byDate(m));},[matches,official,selectedDate,filter]);

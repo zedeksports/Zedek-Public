@@ -2,6 +2,7 @@
 
 import {useEffect,useMemo,useState} from "react";
 import {useParams} from "next/navigation";
+import {usePersistentQueryState} from "../../../lib/usePersistentQueryState";
 import {createSupabaseBrowserClient} from "../../../lib/supabase/browser";
 
 function date(v){return v?new Intl.DateTimeFormat("en-GH",{day:"numeric",month:"short",year:"numeric"}).format(new Date(v)):"Not recorded"}
@@ -11,7 +12,7 @@ function pct(value,max){return max?Math.min(100,Math.round((value/max)*100)):0}
 
 export default function PlayerDetail(){
  const {id}=useParams();
- const [player,setPlayer]=useState(null),[stats,setStats]=useState([]),[matches,setMatches]=useState([]),[movements,setMovements]=useState([]),[official,setOfficial]=useState(new Set()),[loading,setLoading]=useState(true),[error,setError]=useState(""),[tab,setTab]=useState("Profile"),[followed,setFollowed]=useState(false);
+ const [player,setPlayer]=useState(null),[stats,setStats]=useState([]),[matches,setMatches]=useState([]),[movements,setMovements]=useState([]),[official,setOfficial]=useState(new Set()),[loading,setLoading]=useState(true),[error,setError]=useState(""),[tab,setTab]=usePersistentQueryState("tab","Profile","Profile|Matches|Stats|Career"),[followed,setFollowed]=useState(false);
  useEffect(()=>{if(!id)return;setFollowed(localStorage.getItem("zedek_follow_player_"+id)==="1");async function load(){
   try{
    const s=createSupabaseBrowserClient();

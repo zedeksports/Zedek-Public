@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 import { CollapsibleSection, FormSection, H2HPreview, MatchSummaryCard } from "./MatchCentreSections";
+import { usePersistentQueryState } from "../../../lib/usePersistentQueryState";
 
 const LIVE_STATUSES = new Set(["live","in_progress","halftime","paused"]);
 const OFFICIAL_STATUSES = new Set(["finished","verified"]);
@@ -392,7 +393,7 @@ function eventLabel(type) {
 }
 
 export default function LiveMatchCentre({ initialMatch, initialEvents, initialStats, initialLineups, initialHeadCoaches, initialH2H, initialForm, initialPreview, initialChannels, initialStreamAds }) {
-  const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[headCoaches,setHeadCoaches]=useState(initialHeadCoaches||[]),[h2h]=useState(initialH2H||[]),[preview,setPreview]=useState(initialPreview||null),[channels,setChannels]=useState(initialChannels||[]),[streamAds,setStreamAds]=useState(initialStreamAds||[]),[tab,setTab]=useState("events"),[now,setNow]=useState(Date.now());
+  const [match,setMatch]=useState(initialMatch),[events,setEvents]=useState(initialEvents||[]),[stats,setStats]=useState(initialStats||null),[lineups,setLineups]=useState(initialLineups||[]),[headCoaches,setHeadCoaches]=useState(initialHeadCoaches||[]),[h2h]=useState(initialH2H||[]),[preview,setPreview]=useState(initialPreview||null),[channels,setChannels]=useState(initialChannels||[]),[streamAds,setStreamAds]=useState(initialStreamAds||[]),[tab,setTab]=usePersistentQueryState("tab","events","events|lineups|stats|h2h"),[now,setNow]=useState(Date.now());
   const matchRef=useRef(initialMatch),eventsRef=useRef(initialEvents||[]);
   matchRef.current=match; eventsRef.current=events;
   const pendingMatchRef=useRef(null),pendingEventsRef=useRef(new Map()),initialCutoffRef=useRef(Date.now()-5000),goalTimerRef=useRef(null);
