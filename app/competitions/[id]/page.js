@@ -50,7 +50,7 @@ export default function CompetitionPage() {
   return ()=>{cancelled=true};
  },[id,seasonId]);
 
- useEffect(()=>{if(!id||!seasonId||!(tab==="scorers"||tab==="players"))return;const supabase=createSupabaseBrowserClient();let cancelled=false;
+ useEffect(()=>{if(!id||!seasonId||tab==="matches"||tab==="standings")return;const supabase=createSupabaseBrowserClient();let cancelled=false;
   async function loadSeasonStats(){
    const st=await supabase.from("official_player_statistics").select("id,season_id,player_id,team_id,matches_played,starts,goals,assists,yellow_cards,red_cards,minutes_played,player:players(id,full_name,shirt_number,position,photo_url),team:teams(id,name,short_name,logo_url)").eq("season_id",seasonId).order("goals",{ascending:false}).order("assists",{ascending:false});
    if(cancelled)return;
