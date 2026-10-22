@@ -1,5 +1,52 @@
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { ExplorePage, ExploreHeader, EmptyState } from "../ExploreChrome";
-export const dynamic="force-dynamic";
-function Table({rows}){return <div className="explore-table-wrap"><table className="explore-table"><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>{rows.map((r,i)=><tr key={r.id}><td>{i+1}</td><td>{r.name}</td><td>{r.p}</td><td>{r.w}</td><td>{r.d}</td><td>{r.l}</td><td>{r.gf-r.ga}</td><td><b>{r.pts}</b></td></tr>)}</tbody></table></div>}
-export default async function StandingsPage({searchParams}){const sp=await searchParams;const competitionId=sp?.competition||"";const seasonId=sp?.season||"";const s=createSupabaseServerClient();const [{data:competitions,error:cE},{data:seasons,error:sE},{data:matches,error:mE}]=await Promise.all([s.from("competitions").select("id,name").eq("is_active",true).order("name"),s.from("seasons").select("id,name,year,competition_id").order("year",{ascending:false}),s.from("matches").select("id,season_id,home_team_id,away_team_id,home_score,away_score,status,home_team:teams!matches_home_team_id_fkey(id,name),away_team:teams!matches_away_team_id_fkey(id,name)").in("status",["finished","verified"])]);const error=cE||sE||mE;const seasonCandidates=(seasons||[]).filter(x=>!competitionId||x.competition_id===competitionId);const season=seasonCandidates.find(x=>x.id===seasonId)||seasonCandidates[0];const comp=competitions?.find(x=>x.id===season?.competition_id);const relevant=(matches||[]).filter(m=>m.season_id===season?.id&&m.home_score!=null&&m.away_score!=null);const map=new Map();const add=(id,name,gf,ga,w,d,l)=>{if(!map.has(id))map.set(id,{id,name,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});const r=map.get(id);r.p++;r.gf+=gf;r.ga+=ga;r.w+=w;r.d+=d;r.l+=l;r.pts+=w*3+d};for(const m of relevant){const h=m.home_score,a=m.away_score;add(m.home_team_id,m.home_team?.name||"Home",h,a,h>a?1:0,h===a?1:0,h<a?1:0);add(m.away_team_id,m.away_team?.name||"Away",a,h,a>h?1:0,h===a?1:0,a<h?1:0)}const rows=[...map.values()].sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf||a.name.localeCompare(b.name));return <ExplorePage><ExploreHeader title="Standings" eyebrow="Tables" description="Competition tables calculated from recorded finished results."/><section className="explore-feed">{error?<EmptyState>{error.message}</EmptyState>:!season?<EmptyState>No competition season is available yet.</EmptyState>:<><form className="explore-filter" method="get"><select name="competition" defaultValue={competitionId}><option value="">All competitions</option>{(competitions||[]).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select><select name="season" defaultValue={season.id}>{seasonCandidates.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><button type="submit">Apply</button></form><section className="explore-section"><span className="explore-section-kicker">{comp?.name||"Competition"}</span><h2>{season.name}</h2>{rows.length?<Table rows={rows}/>:<EmptyState>No finished results have been recorded for this season yet.</EmptyState>}</section></>}</section></ExplorePage>}
+
+export const dynamic = "force-dynamic";
+
+function Table({ rows }) {
+  return <div className="explore-table-wrap"><table className="explore-table"><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>{rows.map((r, i) => <tr key={r.id}><td>{i + 1}</td><td>{r.name}</td><td>{r.p}</td><td>{r.w}</td><td>{r.d}</td><td>{r.l}</td><td>{r.gf - r.ga}</td><td><b>{r.pts}</b></td></tr>)}</tbody></table></div>;
+}
+
+export default async function StandingsPage({ searchParams }) {
+  const sp = await searchParams;
+  const competitionId = sp?.competition || "";
+  const seasonId = sp?.season || "";
+  const s = createSupabaseServerClient();
+
+  // Fetch the small selector datasets first so the results query can be
+  // restricted to the selected season instead of every finished match.
+  const [{ data: competitions, error: cE }, { data: seasons, error: sE }] = await Promise.all([
+    s.from("competitions").select("id,name").eq("is_active", true).order("name"),
+    s.from("seasons").select("id,name,year,competition_id").order("year", { ascending: false })
+  ]);
+  const seasonCandidates = (seasons || []).filter(x => !competitionId || x.competition_id === competitionId);
+  const season = seasonCandidates.find(x => x.id === seasonId) || seasonCandidates[0];
+  let matches = [];
+  let mE = null;
+  if (season) {
+    const result = await s.from("matches")
+      .select("id,season_id,home_team_id,away_team_id,home_score,away_score,status,home_team:teams!matches_home_team_id_fkey(id,name),away_team:teams!matches_away_team_id_fkey(id,name)")
+      .eq("season_id", season.id)
+      .in("status", ["finished", "verified"]);
+    matches = result.data || [];
+    mE = result.error;
+  }
+
+  const error = cE || sE || mE;
+  const comp = (competitions || []).find(x => x.id === season?.competition_id);
+  const relevant = matches.filter(m => m.home_score != null && m.away_score != null);
+  const map = new Map();
+  const add = (id, name, gf, ga, w, d, l) => {
+    if (!map.has(id)) map.set(id, { id, name, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 });
+    const r = map.get(id);
+    r.p++; r.gf += gf; r.ga += ga; r.w += w; r.d += d; r.l += l; r.pts += w * 3 + d;
+  };
+  for (const m of relevant) {
+    const h = m.home_score, a = m.away_score;
+    add(m.home_team_id, m.home_team?.name || "Home", h, a, h > a ? 1 : 0, h === a ? 1 : 0, h < a ? 1 : 0);
+    add(m.away_team_id, m.away_team?.name || "Away", a, h, a > h ? 1 : 0, h === a ? 1 : 0, a < h ? 1 : 0);
+  }
+  const rows = [...map.values()].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf || a.name.localeCompare(b.name));
+
+  return <ExplorePage><ExploreHeader title="Standings" eyebrow="Tables" description="Competition tables calculated from recorded finished results."/><section className="explore-feed">{error ? <EmptyState>{error.message}</EmptyState> : !season ? <EmptyState>No competition season is available yet.</EmptyState> : <><form className="explore-filter" method="get"><select name="competition" defaultValue={competitionId}><option value="">All competitions</option>{(competitions || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select><select name="season" defaultValue={season.id}>{seasonCandidates.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select><button type="submit">Apply</button></form><section className="explore-section"><span className="explore-section-kicker">{comp?.name || "Competition"}</span><h2>{season.name}</h2>{rows.length ? <Table rows={rows}/> : <EmptyState>No finished results have been recorded for this season yet.</EmptyState>}</section></>}</section></ExplorePage>;
+}
