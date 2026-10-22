@@ -230,7 +230,15 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
 
   useEffect(() => {
     let cancelled = false;
+    let loadInFlight = false;
+    let loadAgain = false;
     async function load() {
+      if (cancelled || document.visibilityState === "hidden") return;
+      if (loadInFlight) {
+        loadAgain = true;
+        return;
+      }
+      loadInFlight = true;
       try {
         const supabase = createSupabaseBrowserClient();
         const { data: incoming, error: matchesError } = await supabase
@@ -282,14 +290,29 @@ export default function HomeLiveData({ selectedDay, filter = "ALL", initialData 
         }
       } catch (error) {
         if (!cancelled) setState((x) => ({ ...x, loading: false, error: error?.message || "Football data could not be loaded." }));
+      } finally {
+        loadInFlight = false;
+        if (loadAgain) {
+          loadAgain = false;
+          if (!cancelled && document.visibilityState === "visible") void load();
+        }
       }
     }
     load();
-    const refreshDelay = initialMatches.some((match) => LIVE_STATUSES.has(match.status)) ? 5000 : 15000;
-    const refreshTimer = setInterval(load, refreshDelay);
+    // Match centres provide second-by-second live details. The homepage uses a
+    // lighter 15-second fallback to avoid one database query per visitor every
+    // five seconds during busy live fixtures.
+    const refreshTimer = setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, 15000);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       cancelled = true;
       clearInterval(refreshTimer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       pendingGoalsRef.current.forEach((timer) => clearTimeout(timer));
       pendingGoalsRef.current.clear();
     };
