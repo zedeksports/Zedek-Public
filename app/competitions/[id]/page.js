@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { usePersistentQueryState } from "../../../lib/usePersistentQueryState";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 
 function MatchRow({m,official}) {
@@ -19,8 +20,8 @@ function MatchRow({m,official}) {
 export default function CompetitionPage() {
  const {id}=useParams();
  const [data,setData]=useState({competition:null,seasons:[],matches:[],stats:[],official:new Set(),loading:true,error:""});
- const [seasonId,setSeasonId]=useState("");
- const [tab,setTab]=useState("overview");
+ const [seasonId,setSeasonId]=usePersistentQueryState("season","");
+ const [tab,setTab]=usePersistentQueryState("tab","overview","overview|matches|standings|scorers|players");
 
  useEffect(()=>{if(!id)return;const supabase=createSupabaseBrowserClient();let cancelled=false;
   async function load(){
