@@ -22,21 +22,42 @@ export default function CompetitionPage() {
  const [seasonId,setSeasonId]=useState("");
  const [tab,setTab]=useState("overview");
 
- useEffect(()=>{if(!id)return;const supabase=createSupabaseBrowserClient();
+ useEffect(()=>{if(!id)return;const supabase=createSupabaseBrowserClient();let cancelled=false;
   async function load(){
-   const [c,s,m,v,st]=await Promise.all([
+   const [c,s]=await Promise.all([
     supabase.from("competitions").select("id,name,code,description,location,format,is_active,logo_url").eq("id",id).single(),
-    supabase.from("seasons").select("id,name,year,start_date,end_date,is_active").eq("competition_id",id).order("year",{ascending:false}),
-    supabase.from("matches").select("id,season_id,scheduled_at,status,home_score,away_score,venue,round_name,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url),season:seasons!inner(id,name,competition_id)").eq("season.competition_id",id).order("scheduled_at",{ascending:true}).limit(200),
-    supabase.from("match_verifications").select("match_id").eq("official_result",true),
-    supabase.from("official_player_statistics").select("id,season_id,player_id,team_id,matches_played,starts,goals,assists,yellow_cards,red_cards,minutes_played,player:players(id,full_name,shirt_number,position,photo_url),team:teams(id,name,short_name,logo_url)").order("goals",{ascending:false}).order("assists",{ascending:false})
+    supabase.from("seasons").select("id,name,year,start_date,end_date,is_active").eq("competition_id",id).order("year",{ascending:false})
    ]);
+   if(cancelled)return;
    if(c.error){setData(x=>({...x,loading:false,error:c.error.message}));return}
    const seasons=s.data||[];
-   setSeasonId(seasons[0]?.id||"");
-   setData({competition:c.data,seasons,matches:m.data||[],stats:st.data||[],official:new Set((v.data||[]).map(x=>x.match_id)),loading:false,error:m.error||st.error?"Some competition data could not be loaded.":""});
+   const selectedSeason=seasons[0]?.id||"";
+   setSeasonId(selectedSeason);
+   setData({competition:c.data,seasons,matches:[],stats:[],official:new Set(),loading:false,error:s.error?"Some competition data could not be loaded.":""});
   } load();
+  return ()=>{cancelled=true};
  },[id]);
+
+ useEffect(()=>{if(!id||!seasonId)return;const supabase=createSupabaseBrowserClient();let cancelled=false;
+  async function loadSeasonMatches(){
+   const m=await supabase.from("matches").select("id,season_id,scheduled_at,status,home_score,away_score,venue,round_name,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url)").eq("season_id",seasonId).order("scheduled_at",{ascending:true}).limit(200);
+   if(cancelled)return;
+   const matchRows=m.data||[];
+   const v=matchRows.length?await supabase.from("match_verifications").select("match_id").eq("official_result",true).in("match_id",matchRows.map(x=>x.id)):{data:[],error:null};
+   if(cancelled)return;
+   setData(x=>({...x,matches:matchRows,official:new Set((v.data||[]).map(x=>x.match_id)),error:m.error||v.error?"Some competition data could not be loaded.":x.error}));
+  } loadSeasonMatches();
+  return ()=>{cancelled=true};
+ },[id,seasonId]);
+
+ useEffect(()=>{if(!id||!seasonId||!(tab==="scorers"||tab==="players"))return;const supabase=createSupabaseBrowserClient();let cancelled=false;
+  async function loadSeasonStats(){
+   const st=await supabase.from("official_player_statistics").select("id,season_id,player_id,team_id,matches_played,starts,goals,assists,yellow_cards,red_cards,minutes_played,player:players(id,full_name,shirt_number,position,photo_url),team:teams(id,name,short_name,logo_url)").eq("season_id",seasonId).order("goals",{ascending:false}).order("assists",{ascending:false});
+   if(cancelled)return;
+   setData(x=>({...x,stats:st.data||[],error:st.error?"Some competition data could not be loaded.":x.error}));
+  } loadSeasonStats();
+  return ()=>{cancelled=true};
+ },[id,seasonId,tab]);
 
  const currentSeason=useMemo(()=>data.seasons.find(s=>s.id===seasonId)||data.seasons[0],[data.seasons,seasonId]);
  const seasonMatches=useMemo(()=>data.matches.filter(m=>m.season_id===currentSeason?.id),[data.matches,currentSeason]);
