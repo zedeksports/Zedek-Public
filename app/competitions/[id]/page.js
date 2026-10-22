@@ -32,7 +32,10 @@ export default function CompetitionPage() {
    if(cancelled)return;
    if(c.error){setData(x=>({...x,loading:false,error:c.error.message}));return}
    const seasons=s.data||[];
-   const selectedSeason=seasons[0]?.id||"";
+   const requestedSeason = typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("season") : null;
+   const selectedSeason = requestedSeason && seasons.some((season) => season.id === requestedSeason)
+    ? requestedSeason
+    : seasons[0]?.id || "";
    setSeasonId(selectedSeason);
    setData({competition:c.data,seasons,matches:[],stats:[],official:new Set(),loading:false,error:s.error?"Some competition data could not be loaded.":""});
   } load();
