@@ -402,8 +402,15 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   useEffect(()=>{
     let cancelled=false;
+    let refreshInFlight=false;
+    let refreshAgain=false;
+    let refreshQueueTimer=null;
     const client=createSupabaseBrowserClient();
     async function refresh(){
+      if(cancelled||document.visibilityState==="hidden")return;
+      if(refreshInFlight){refreshAgain=true;return;}
+      refreshInFlight=true;
+      try{
       const s=client;
       const [m,e,st,hc,l,pv,ch,sa]=await Promise.all([
         s.from("matches").select("id,scheduled_at,rescheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,interruption_reason,interruption_minute,outcome_note,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
@@ -460,6 +467,13 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       if(!pv.error)setPreview(pv.data||null);
       if(!ch.error)setChannels(ch.data||[]);
       if(!sa.error)setStreamAds(sa.data||[]);
+      }finally{
+        refreshInFlight=false;
+        if(refreshAgain&&!cancelled&&document.visibilityState==="visible"){
+          refreshAgain=false;
+          void refresh();
+        }
+      }
     }
     refresh();
     // Keep polling as a resilient fallback, but also refresh immediately when the
@@ -467,13 +481,15 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     // Realtime delivers match-specific changes immediately. A 15-second polling
     // fallback recovers gracefully if a browser loses its Realtime connection,
     // without issuing eight Supabase reads every two seconds for every viewer.
-    const timer=setInterval(()=>{void refresh();},15000);
+    const timer=setInterval(()=>{if(document.visibilityState==="visible")void refresh();},15000);
     let refreshQueued=false;
     const queueRefresh=()=>{
       if(refreshQueued)return;
       refreshQueued=true;
-      window.setTimeout(()=>{refreshQueued=false;void refresh();},300);
+      refreshQueueTimer=window.setTimeout(()=>{refreshQueued=false;refreshQueueTimer=null;void refresh();},300);
     };
+    const onVisibilityChange=()=>{if(document.visibilityState==="visible")void refresh();};
+    document.addEventListener("visibilitychange",onVisibilityChange);
     const channel=client
       .channel("public-match-centre-"+initialMatch.id)
       .on("postgres_changes",{event:"*",schema:"public",table:"matches",filter:"id=eq."+initialMatch.id},queueRefresh)
@@ -484,7 +500,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       // that would refresh every open match centre for unrelated line-up edits;
       // the polling fallback will pick up those changes within 15 seconds.
       .subscribe();
-    return()=>{cancelled=true;clearInterval(timer);client.removeChannel(channel);if(goalTimerRef.current)window.clearTimeout(goalTimerRef.current)};
+    return()=>{cancelled=true;clearInterval(timer);document.removeEventListener("visibilitychange",onVisibilityChange);if(refreshQueueTimer)window.clearTimeout(refreshQueueTimer);client.removeChannel(channel);if(goalTimerRef.current)window.clearTimeout(goalTimerRef.current)};
   },[initialMatch.id]);
 
   const live=LIVE_STATUSES.has(match?.status);
