@@ -464,16 +464,25 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
     refresh();
     // Keep polling as a resilient fallback, but also refresh immediately when the
     // match, events, statistics, line-ups or persisted ratings change in Supabase.
-    const timer=setInterval(refresh,2000);
+    // Realtime delivers match-specific changes immediately. A 15-second polling
+    // fallback recovers gracefully if a browser loses its Realtime connection,
+    // without issuing eight Supabase reads every two seconds for every viewer.
+    const timer=setInterval(()=>{void refresh();},15000);
+    let refreshQueued=false;
+    const queueRefresh=()=>{
+      if(refreshQueued)return;
+      refreshQueued=true;
+      window.setTimeout(()=>{refreshQueued=false;void refresh();},300);
+    };
     const channel=client
       .channel("public-match-centre-"+initialMatch.id)
-      .on("postgres_changes",{event:"*",schema:"public",table:"matches",filter:"id=eq."+initialMatch.id},()=>{void refresh();})
-      .on("postgres_changes",{event:"*",schema:"public",table:"match_events",filter:"match_id=eq."+initialMatch.id},()=>{void refresh();})
-      .on("postgres_changes",{event:"*",schema:"public",table:"match_statistics",filter:"match_id=eq."+initialMatch.id},()=>{void refresh();})
-      .on("postgres_changes",{event:"*",schema:"public",table:"match_lineups",filter:"match_id=eq."+initialMatch.id},()=>{void refresh();})
-      // match_lineup_players is linked through lineup_id rather than match_id;
-      // the public query/RLS still scopes the actual rows rendered for this match.
-      .on("postgres_changes",{event:"*",schema:"public",table:"match_lineup_players"},()=>{void refresh();})
+      .on("postgres_changes",{event:"*",schema:"public",table:"matches",filter:"id=eq."+initialMatch.id},queueRefresh)
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_events",filter:"match_id=eq."+initialMatch.id},queueRefresh)
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_statistics",filter:"match_id=eq."+initialMatch.id},queueRefresh)
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_lineups",filter:"match_id=eq."+initialMatch.id},queueRefresh)
+      // Line-up player rows have no match_id filter. Avoid a global subscription
+      // that would refresh every open match centre for unrelated line-up edits;
+      // the polling fallback will pick up those changes within 15 seconds.
       .subscribe();
     return()=>{cancelled=true;clearInterval(timer);client.removeChannel(channel);if(goalTimerRef.current)window.clearTimeout(goalTimerRef.current)};
   },[initialMatch.id]);
