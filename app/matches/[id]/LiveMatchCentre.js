@@ -402,8 +402,9 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
 
   useEffect(()=>{
     let cancelled=false;
+    const client=createSupabaseBrowserClient();
     async function refresh(){
-      const s=createSupabaseBrowserClient();
+      const s=client;
       const [m,e,st,hc,l,pv,ch,sa]=await Promise.all([
         s.from("matches").select("id,scheduled_at,rescheduled_at,kickoff_at,halftime_at,second_half_at,status,home_score,away_score,venue,referee,match_preview,media_channel,streaming_url,streaming_ad_text,interruption_reason,interruption_minute,outcome_note,home_team:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,home_venue),away_team:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,home_venue),season:seasons(id,name,competition:competitions(id,name))").eq("id",initialMatch.id).maybeSingle(),
         s.from("match_events").select("id,event_type,team_id,player_id,secondary_player_id,coach_id,minute,extra_minute,details,created_at,player:players!match_events_player_id_fkey(id,full_name,shirt_number,photo_url),secondary_player:players!match_events_secondary_player_id_fkey(id,full_name,shirt_number,photo_url),coach:coaches!match_events_coach_id_fkey(id,full_name,role,photo_url),team:teams(id,name,short_name)").eq("match_id",initialMatch.id).order("minute",{ascending:true}).order("created_at",{ascending:true}),
@@ -461,8 +462,20 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
       if(!sa.error)setStreamAds(sa.data||[]);
     }
     refresh();
+    // Keep polling as a resilient fallback, but also refresh immediately when the
+    // match, events, statistics, line-ups or persisted ratings change in Supabase.
     const timer=setInterval(refresh,2000);
-    return()=>{cancelled=true;clearInterval(timer);if(goalTimerRef.current)window.clearTimeout(goalTimerRef.current)};
+    const channel=client
+      .channel("public-match-centre-"+initialMatch.id)
+      .on("postgres_changes",{event:"*",schema:"public",table:"matches",filter:"id=eq."+initialMatch.id},()=>{void refresh();})
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_events",filter:"match_id=eq."+initialMatch.id},()=>{void refresh();})
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_statistics",filter:"match_id=eq."+initialMatch.id},()=>{void refresh();})
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_lineups",filter:"match_id=eq."+initialMatch.id},()=>{void refresh();})
+      // match_lineup_players is linked through lineup_id rather than match_id;
+      // the public query/RLS still scopes the actual rows rendered for this match.
+      .on("postgres_changes",{event:"*",schema:"public",table:"match_lineup_players"},()=>{void refresh();})
+      .subscribe();
+    return()=>{cancelled=true;clearInterval(timer);client.removeChannel(channel);if(goalTimerRef.current)window.clearTimeout(goalTimerRef.current)};
   },[initialMatch.id]);
 
   const live=LIVE_STATUSES.has(match?.status);
