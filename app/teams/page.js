@@ -1,12 +1,18 @@
+import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { ExplorePage, ExploreHeader, EmptyState } from "../ExploreChrome";
 
 export const dynamic = "force-dynamic";
 
+const getCachedTeams = unstable_cache(async () => {
+  const { data, error } = await getCachedTeams();
+  return { data: data || [], error: error ? { message: error.message } : null };
+}, ["zedek-public-active-teams-v1"], { revalidate: 30 });
+
 function Logo({ team }) {
   return (
     <div className="explore-logo">
-      {team?.logo_url ? <img src={team.logo_url} alt="" loading="lazy" /> : <span>{(team?.short_name || team?.name || "T").slice(0, 3).toUpperCase()}</span>}
+      {team?.logo_url ? <img src={team.logo_url} alt="" loading="lazy" decoding="async" /> : <span>{(team?.short_name || team?.name || "T").slice(0, 3).toUpperCase()}</span>}
     </div>
   );
 }
