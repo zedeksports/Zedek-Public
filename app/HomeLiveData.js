@@ -85,7 +85,7 @@ function TeamCrest({ team, fallback }) {
   return (
     <span className="score-team-crest" aria-hidden="true">
       {hasLogo ? (
-        <img src={team.logo_url} alt="" loading="eager" decoding="async" fetchPriority="high" onError={() => setBroken(true)} />
+        <img src={team.logo_url} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} />
       ) : (
         <span>{initials(team, fallback)}</span>
       )}
