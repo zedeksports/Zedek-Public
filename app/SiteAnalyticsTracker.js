@@ -48,6 +48,7 @@ export default function SiteAnalyticsTracker() {
   const visitorRef = useRef(null);
   const sessionRef = useRef(null);
   const supabaseRef = useRef(null);
+  const lastTrackedPathRef = useRef(null);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -57,7 +58,8 @@ export default function SiteAnalyticsTracker() {
 
     const send = async (eventType, path) => {
       if (!visitorRef.current || !sessionRef.current?.id) return;
-      await supabase.from("site_analytics_events").insert({
+      const eventKey = eventType === "page_view" ? makeId() : null;
+      const { error } = await supabase.from("site_analytics_events").insert({
         visitor_id: visitorRef.current,
         session_id: sessionRef.current.id,
         event_type: eventType,
@@ -66,12 +68,14 @@ export default function SiteAnalyticsTracker() {
         page_title: document.title || null,
         referrer: document.referrer || null,
         device_type: deviceType(),
-        event_key: eventType === "page_view" ? (path || window.location.pathname || "/") : null
+        event_key: eventKey
       });
+      if (error && process.env.NODE_ENV !== "production") {
+        console.warn("ZEDEK site analytics event could not be recorded:", error.message);
+      }
     };
 
     if (sessionRef.current.isNew) send("session_start", window.location.pathname || "/");
-    send("page_view", window.location.pathname || "/");
 
     const heartbeat = window.setInterval(() => {
       sessionRef.current = getSession();
@@ -83,6 +87,12 @@ export default function SiteAnalyticsTracker() {
 
   useEffect(() => {
     if (!supabaseRef.current || !visitorRef.current || !pathname) return;
+    // The pathname effect is the single source of page_view events. This guard
+    // also prevents React Strict Mode's repeated mount effect from counting the
+    // same initial route twice.
+    if (lastTrackedPathRef.current === pathname) return;
+    lastTrackedPathRef.current = pathname;
+
     const session = getSession();
     sessionRef.current = session;
     supabaseRef.current.from("site_analytics_events").insert({
@@ -94,7 +104,13 @@ export default function SiteAnalyticsTracker() {
       page_title: document.title || null,
       referrer: document.referrer || null,
       device_type: deviceType(),
-      event_key: pathname
+      // event_key is globally unique; using only pathname caused collisions
+      // whenever different visitors opened the same route.
+      event_key: makeId()
+    }).then(({ error }) => {
+      if (error && process.env.NODE_ENV !== "production") {
+        console.warn("ZEDEK page-view analytics could not be recorded:", error.message);
+      }
     });
   }, [pathname]);
 
