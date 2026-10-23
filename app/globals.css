@@ -1585,9 +1585,12 @@ html[data-zedek-theme="night"] .hub-save {
 html[data-zedek-theme="night"] .match-centre-page .live-event-person>img.live-event-portrait,html[data-zedek-theme="night"] .match-centre-page .live-event-person>.live-event-portrait-fallback{background:var(--z-surface-2,var(--cream));}
 
 
-/* Targeted portrait fill fix: player event photos and lineup coach photos must fill their circular frames. */
+/* Targeted portrait fill and head framing for the reported event cards. */
 .match-centre-page .live-event-person>img.live-event-portrait.player{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
-.match-centre-page .zedek-lineup-coach-card>img.zedek-lineup-coach-portrait{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
+.match-centre-page .live-event-person>img.live-event-portrait.portrait-head-adjust{object-fit:cover!important;object-position:center 18%!important;padding:0!important;background:transparent;}
+.match-centre-page .live-event-person>img.live-event-portrait.portrait-center-fit{object-fit:contain!important;object-position:center center!important;padding:0!important;background:transparent;}
+.match-centre-page .live-event-person>img.live-event-portrait.coach{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
+.match-centre-page .zedek-lineup-coach-card>img.zedek-lineup-coach-portrait{object-fit:cover!important;object-position:center 18%!important;padding:0!important;background:transparent;}
 
 /* FLOW audit: keep the match-date strip readable in night mode. */
 html[data-zedek-theme="night"] .mc-day:not(.active),
@@ -1744,3 +1747,7 @@ html[data-zedek-theme="night"] .hub-notification p {
     margin-top: 10px;
   }
 }
+
+
+/* Azeko event-card override: this must outrank the generic coach portrait rule. */
+.match-centre-page .live-event-person>img.live-event-portrait.coach.portrait-center-fit{object-fit:contain!important;object-position:center center!important;padding:0!important;background:transparent;}
