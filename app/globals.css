@@ -1587,7 +1587,7 @@ html[data-zedek-theme="night"] .match-centre-page .live-event-person>img.live-ev
 
 /* Targeted portrait fill fix: player event photos and lineup coach photos must fill their circular frames. */
 .match-centre-page .live-event-person>img.live-event-portrait.player{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
-.match-centre-page .zedek-lineup-coach-card>img.zedek-lineup-coach-portrait{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
+.match-centre-page .zedek-lineup-coach-card>img.zedek-lineup-coach-portrait{object-fit:cover!important;object-position:center 18%!important;padding:0!important;background:transparent;}
 
 /* FLOW audit: keep the match-date strip readable in night mode. */
 html[data-zedek-theme="night"] .mc-day:not(.active),
