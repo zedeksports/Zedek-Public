@@ -1590,7 +1590,7 @@ html[data-zedek-theme="night"] .match-centre-page .live-event-person>img.live-ev
 .match-centre-page .live-event-person>img.live-event-portrait.portrait-head-adjust{object-fit:cover!important;object-position:center 18%!important;padding:0!important;background:transparent;}
 .match-centre-page .live-event-person>img.live-event-portrait.portrait-center-fit{object-fit:contain!important;object-position:center center!important;padding:0!important;background:transparent;}
 .match-centre-page .live-event-person>img.live-event-portrait.coach{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
-.match-centre-page .zedek-lineup-coach-card>img.zedek-lineup-coach-portrait{object-fit:cover!important;object-position:center 18%!important;padding:0!important;background:transparent;}
+.match-centre-page .zedek-lineup-coach-card>img.zedek-lineup-coach-portrait{object-fit:cover!important;object-position:center center!important;padding:0!important;background:transparent;}
 
 /* FLOW audit: keep the match-date strip readable in night mode. */
 html[data-zedek-theme="night"] .mc-day:not(.active),
