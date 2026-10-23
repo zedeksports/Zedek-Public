@@ -1488,6 +1488,8 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 
 /* FLOW: portraits are contained inside their circular event frame so heads are not clipped by the white mask. */
 .match-centre-page .live-event-person>img.live-event-portrait{object-fit:contain;object-position:center center;padding:1px;overflow:hidden;border-radius:50%;background:#f0ece2;}
+/* Only live-match event player portraits: fill the circular frame cleanly without changing coach portraits or other cards. */
+.match-centre-page .live-event-person>img.live-event-portrait.player{object-fit:cover;object-position:center center;padding:0;}
 .match-centre-page .live-event-person>img.live-event-portrait.coach{object-fit:contain;object-position:center center;padding:1px;}
 .match-centre-page .live-event-person>.live-event-portrait-fallback{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;background:#f0ece2;font-size:12px;font-weight:900;}
 .zedek-lineup-coach-card{grid-template-columns:42px minmax(0,1fr);align-items:center;column-gap:9px;}
