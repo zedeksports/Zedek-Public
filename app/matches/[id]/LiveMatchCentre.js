@@ -319,35 +319,11 @@ function formationSlots(lineup,away=false){
     // Keep the full player card inside its own half. Raw formation maps place
     // some forwards at or below the halfway line, so normalize each positional
     // line into a dedicated band before mirroring the away team.
-    let homeY;
-    if(slotRole==="GK"){
-      homeY=92;
-    }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
-      homeY=83+(localY-78)*0.65;
-    }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
-      homeY=72+(localY-59)*0.5;
-    }else{
-      homeY=60+(localY-44)*0.5;
-    }
-    // Open up the vertical bands so the lines read as a formation rather
-    // than a tight cluster, while keeping both teams on their own half.
-    if(slotRole==="GK"){
-      // Anchor the goalkeeper deeper inside the six-yard-box area for a more natural FotMob-style formation.
-      homeY=98;
-    }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
-      homeY=83+(localY-78)*0.7;
-    }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
-      // Lift midfield slightly closer to the attacking half while retaining
-      // a clear gap from the defensive line across every formation.
-      homeY=66.5+(localY-59)*0.7;
-    }else{
-      homeY=58+(localY-44)*0.7;
-      // Push the striker a little closer to the halfway line for a more
-      // natural attacking position without disturbing the other forwards.
-      if(slotRole==="ST")homeY-=2.5;
-    }
-    // Goalkeeper is the one exception to the outfield cap: keep the GK marker deep in the six-yard area near the goal line.
-    homeY=slotRole==="GK"?94:Math.max(54.5,Math.min(93,homeY));
+    // Align all players in the same positional line to a consistent height.
+    // Horizontal coordinates still come from the selected formation, so 4-4-2,
+    // 4-3-3, 3-5-2 and generated formations retain their own width/shape.
+    const broadLine=roleGroup(slotRole);
+    const homeY=slotRole==="GK"?94:broadLine==="DEF"?84:broadLine==="MID"?71:broadLine==="FWD"?58:71;
     // Give neighbouring cards more horizontal breathing room. Clamp the
     // outer slots so player cards stay inside the touch-screen pitch edges.
     const horizontalSpread=["DM","CM","AM","RM","LM","MID"].includes(slotRole)?1.32:slotRole==="CB"?1.38:1.12;
@@ -658,7 +634,7 @@ export default function LiveMatchCentre({ initialMatch, initialEvents, initialSt
         const title=e.event_type==="goal"?"Goal":(["penalty_scored","penalty_goal"].includes(e.event_type)?"Penalty scored":e.event_type==="own_goal"?"Own goal":e.event_type==="penalty_missed"?"Penalty missed":e.event_type==="substitution"?"Substitution":e.event_type==="injury"?"Injury":e.event_type==="player_rating"?"Player rating":e.event_type==="note"?"Reporter note":eventLabel(e.event_type));
         const person=e.coach||e.player||e.secondary_player;
         const details=e.event_type==="goal"&&e.secondary_player?.full_name?"Assist: "+e.secondary_player.full_name:e.event_type==="substitution"?"Outgoing: "+(e.player?.full_name||"Unknown player")+(e.secondary_player?.full_name?" · Incoming: "+e.secondary_player.full_name:" · Incoming player not recorded"):e.coach?.full_name?e.coach.full_name+" · "+(e.coach.role||"Coach"):e.player?.full_name||e.team?.name||"";
-        const card=<><div className="live-event-person">{person?.photo_url?<img className={e.coach?"live-event-portrait coach":"live-event-portrait player"} style={{objectPosition:person?.full_name?.toLowerCase().includes("nagbija")?"center 18%":e.coach?"center 18%":"center center"}} src={person.photo_url} alt="" loading="lazy" decoding="async"/>:<span className={e.coach?"live-event-portrait-fallback coach":"live-event-portrait-fallback player"} aria-hidden="true">{person?.full_name?.slice(0,1)||(e.event_type==="note"?"📝":"⚽")}</span>}<div><small className="live-event-side">{isHome?"HOME":isAway?"AWAY":"MATCH"}</small><strong>{title}{e.event_type==="goal"?": "+(e.player?.full_name||"Unknown scorer"):e.event_type==="own_goal"?": "+(e.player?.full_name||"Unknown player"):""}</strong><small>{details}{e.details?" — "+e.details:""}</small></div></div></>;
+        const card=<><div className="live-event-person">{person?.photo_url?<img className={"live-event-portrait "+(e.coach?"coach":"player")+(person?.full_name?.toLowerCase().includes("nagbija")?" portrait-head-adjust":e.coach&&person?.full_name?.toLowerCase().includes("azeko melchizedek")?" portrait-head-adjust":"")} src={person.photo_url} alt="" loading="lazy" decoding="async"/>:<span className={e.coach?"live-event-portrait-fallback coach":"live-event-portrait-fallback player"} aria-hidden="true">{person?.full_name?.slice(0,1)||(e.event_type==="note"?"📝":"⚽")}</span>}<div><small className="live-event-side">{isHome?"HOME":isAway?"AWAY":"MATCH"}</small><strong>{title}{e.event_type==="goal"?": "+(e.player?.full_name||"Unknown scorer"):e.event_type==="own_goal"?": "+(e.player?.full_name||"Unknown player"):""}</strong><small>{details}{e.details?" — "+e.details:""}</small></div></div></>;
         if(side==="home")return <div className="live-event home" key={e.id}>{card}<span className={"live-event-icon "+e.event_type}>{icon}</span><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b></div>;
         return <div className={"live-event "+side} key={e.id}><b>{e.minute}'{e.extra_minute?"+"+e.extra_minute:""}</b><span className={"live-event-icon "+e.event_type}>{icon}</span>{card}</div>;
       })}</div>
