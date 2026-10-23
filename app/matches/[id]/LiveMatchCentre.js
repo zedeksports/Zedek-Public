@@ -322,8 +322,9 @@ function formationSlots(lineup,away=false){
     // Align all players in the same positional line to a consistent height.
     // Horizontal coordinates still come from the selected formation, so 4-4-2,
     // 4-3-3, 3-5-2 and generated formations retain their own width/shape.
-    const broadLine=roleGroup(slotRole);
-    const homeY=slotRole==="GK"?94:broadLine==="DEF"?84:broadLine==="MID"?71:broadLine==="FWD"?58:71;
+    const actualPosition=item.position||item.player?.position||item.role||slotRole;
+    const broadLine=roleGroup(actualPosition);
+    const homeY=broadLine==="GK"?94:broadLine==="DEF"?84:broadLine==="MID"?71:broadLine==="FWD"?58:71;
     // Give neighbouring cards more horizontal breathing room. Clamp the
     // outer slots so player cards stay inside the touch-screen pitch edges.
     const horizontalSpread=["DM","CM","AM","RM","LM","MID"].includes(slotRole)?1.32:slotRole==="CB"?1.38:1.12;
