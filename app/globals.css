@@ -1747,3 +1747,7 @@ html[data-zedek-theme="night"] .hub-notification p {
     margin-top: 10px;
   }
 }
+
+
+/* Azeko event-card override: this must outrank the generic coach portrait rule. */
+.match-centre-page .live-event-person>img.live-event-portrait.coach.portrait-center-fit{object-fit:contain!important;object-position:center center!important;padding:0!important;background:transparent;}
