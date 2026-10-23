@@ -319,12 +319,27 @@ function formationSlots(lineup,away=false){
     // Keep the full player card inside its own half. Raw formation maps place
     // some forwards at or below the halfway line, so normalize each positional
     // line into a dedicated band before mirroring the away team.
-    // Align all players in the same positional line to a consistent height.
-    // Horizontal coordinates still come from the selected formation, so 4-4-2,
-    // 4-3-3, 3-5-2 and generated formations retain their own width/shape.
-    const actualPosition=item.position||item.player?.position||item.role||slotRole;
-    const broadLine=roleGroup(actualPosition);
-    const homeY=broadLine==="GK"?94:broadLine==="DEF"?84:broadLine==="MID"?71:broadLine==="FWD"?58:71;
+    let homeY;
+    if(slotRole==="GK"){
+      homeY=92;
+    }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
+      homeY=83+(localY-78)*0.65;
+    }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
+      homeY=72+(localY-59)*0.5;
+    }else{
+      homeY=60+(localY-44)*0.5;
+    }
+    if(slotRole==="GK"){
+      homeY=98;
+    }else if(["RB","LB","CB","RWB","LWB","DEF"].includes(slotRole)){
+      homeY=83+(localY-78)*0.7;
+    }else if(["DM","CM","AM","RM","LM","MID"].includes(slotRole)){
+      homeY=66.5+(localY-59)*0.7;
+    }else{
+      homeY=58+(localY-44)*0.7;
+      if(slotRole==="ST")homeY-=2.5;
+    }
+    homeY=slotRole==="GK"?94:Math.max(54.5,Math.min(93,homeY));
     // Give neighbouring cards more horizontal breathing room. Clamp the
     // outer slots so player cards stay inside the touch-screen pitch edges.
     const horizontalSpread=["DM","CM","AM","RM","LM","MID"].includes(slotRole)?1.32:slotRole==="CB"?1.38:1.12;
